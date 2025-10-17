@@ -8,23 +8,13 @@ A modular mini e-commerce project built with:
 
 This project demonstrates full-stack development, modular architecture, and cross-platform Kotlin capabilities.
 
----
 
 ## 📸 Screenshots / Demo
 
----
 
 ## 🧱 Project Structure
 
-├── backend-maven/ → Spring Boot backend (Maven)
-└── frontend-gradle/ → Frontend and shared KMP module
-    ├── androidApp/ → Android application (Jetpack Compose)
-    ├── desktopApp/ → Desktop application (Compose Desktop)
-    ├── webApp/ → Web application (Compose Web)
-    └── shared/ → Shared Kotlin Multiplatform module (logic & API client)
     
----
-
 ## 🚀 Features
 
 - User authentication with JWT  
@@ -34,7 +24,6 @@ This project demonstrates full-stack development, modular architecture, and cros
 - Modular and clean architecture  
 - Cross-platform shared logic (KMP)  
 
----
 
 ## 📦 Technology Stack
 
@@ -44,7 +33,6 @@ This project demonstrates full-stack development, modular architecture, and cros
 - **Web:** Compose for Web  
 - **Backend:** Spring Boot, Spring Security (JWT), MongoDB/MySQL, Swagger UI  
 
----
 
 ## 🏁 How to Run
 
@@ -68,7 +56,6 @@ The backend will run at `http://localhost:8080`
 
 Make sure the backend is running before launching any frontend applications.
 
----
 
 🧩 Notes
 
@@ -78,7 +65,6 @@ Make sure the backend is running before launching any frontend applications.
 
 - Designed with clean architecture principles (Repository → UseCase → ViewModel → UI).
 
----
 
 🎯 Future Improvements
 
