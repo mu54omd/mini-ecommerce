@@ -1,4 +1,4 @@
-package com.mu54omd.mini_ecommerce.backend_maven.model;
+package com.mu54omd.mini_ecommerce.backend_maven.entity;
 
 import jakarta.persistence.*;
 

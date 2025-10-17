@@ -1,4 +1,4 @@
-package com.mu54omd.mini_ecommerce.backend_maven.model;
+package com.mu54omd.mini_ecommerce.backend_maven.entity;
 
 import jakarta.persistence.*;
 
@@ -20,7 +20,7 @@ public class User {
     private String password;
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false, length = 20)
-    private Role role;
+    private Role role = Role.USER;
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 

@@ -1,7 +1,6 @@
-package com.mu54omd.mini_ecommerce.backend_maven;
+package com.mu54omd.mini_ecommerce.backend_maven.repository;
 
 import com.mu54omd.mini_ecommerce.backend_maven.entity.Product;
-import com.mu54omd.mini_ecommerce.backend_maven.repository.ProductRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
