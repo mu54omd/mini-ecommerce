@@ -1,0 +1,26 @@
+# =========================
+# Normalize line endings for text files
+# =========================
+* text=auto
+
+# Force LF for shell scripts (Linux/macOS)
+*.sh text eol=lf
+/mvnw text eol=lf
+
+# Force CRLF for Windows command scripts
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# =========================
+# Binary files (do not merge/diff)
+# =========================
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.jar binary
+*.war binary
+*.apk binary
+*.aab binary

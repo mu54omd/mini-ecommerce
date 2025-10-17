@@ -1,7 +1,54 @@
-# IntelliJ / Android Studio
-.idea/
+# =========================
+# Maven / Gradle Build outputs
+# =========================
+/backend-maven/target/
+frontend-gradle/**/build/
 .gradle/
-build/
-out/
-target/
+
+# =========================
+# IntelliJ IDEA
+# =========================
+.idea/
 *.iml
+*.iws
+*.ipr
+
+# =========================
+# Android Studio
+# =========================
+local.properties
+captures/
+*.apk
+*.aab
+
+# =========================
+# Eclipse / STS / NetBeans
+# =========================
+.classpath
+.project
+.settings/
+.apt_generated
+.factorypath
+.springBeans
+.nbproject/private/
+nbbuild/
+dist/
+.nbdist/
+.nb-gradle/
+
+# =========================
+# VS Code
+# =========================
+.vscode/
+
+# =========================
+# OS specific
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Logs / temporary files
+# =========================
+*.log
+out/
