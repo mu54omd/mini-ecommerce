@@ -1,0 +1,7 @@
+# IntelliJ / Android Studio
+.idea/
+.gradle/
+build/
+out/
+target/
+*.iml
