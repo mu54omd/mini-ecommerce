@@ -30,20 +30,19 @@ public class Product {
 
     public Product() {}
 
-    public Product(long id, String name, String description, Double price, Integer stock, LocalDateTime createdAt) {
+    public Product(Long id, String name, String description, Double price, Integer stock) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.price = price;
         this.stock = stock;
-        this.createdAt = createdAt;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

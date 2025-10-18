@@ -37,13 +37,12 @@ public class Order {
 
     public Order() {}
 
-    public Order(Long id, User user, List<OrderItem> items, Double totalPrice, Status status, LocalDateTime createdAt) {
+    public Order(Long id, User user, List<OrderItem> items, Double totalPrice, Status status) {
         this.id = id;
         this.user = user;
         this.items = items;
         this.totalPrice = totalPrice;
         this.status = status;
-        this.createdAt = createdAt;
     }
 
     public Long getId() {
