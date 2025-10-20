@@ -13,14 +13,23 @@ public class DataLoader {
     @Bean
     CommandLineRunner initDatabase(UserRepository userRepository, PasswordEncoder encoder) {
         return args -> {
-            if (userRepository.findByUsername("testuser").isEmpty()) {
+            if (userRepository.findByUsername("user").isEmpty()) {
                 User user = new User();
-                user.setUsername("testuser");
-                user.setEmail("testuser@test.com");
-                user.setPassword(encoder.encode("123456"));
+                user.setUsername("user");
+                user.setEmail("user@user.com");
+                user.setPassword(encoder.encode("user"));
                 user.setRole(User.Role.USER);
                 userRepository.save(user);
-                System.out.println("✅ Default user created: testuser / 123456");
+                System.out.println("✅ Default user created: user / user");
+            }
+            if (userRepository.findByUsername("admin").isEmpty()) {
+                User user = new User();
+                user.setUsername("admin");
+                user.setEmail("admin@admin.com");
+                user.setPassword(encoder.encode("admin"));
+                user.setRole(User.Role.ADMIN);
+                userRepository.save(user);
+                System.out.println("✅ Default user created: admin / admin");
             }
         };
     }

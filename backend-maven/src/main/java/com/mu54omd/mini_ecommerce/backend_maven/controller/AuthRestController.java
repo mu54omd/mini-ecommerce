@@ -33,7 +33,7 @@ public class AuthRestController {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
             final UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
-            final String token = jwtUtil.generateToken(userDetails.getUsername());
+            final String token = jwtUtil.generateToken(userDetails.getUsername(), userDetails.getAuthorities().toString());
             return ResponseEntity.ok(new JwtResponse(token));
         }catch (Exception e){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");

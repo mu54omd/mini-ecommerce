@@ -17,10 +17,11 @@ public class JwtUtil {
     private final SecretKey secretKey = Keys.hmacShaKeyFor(Base64.getDecoder().decode("a3NkZmpzaWZoaWVmaDM4MzdmZGhudmpza2RoZjgzZmhzZmpmc2pmI0Aj"));
     private final long EXPIRATION_MS = 1L * 60L * 60L * 1000L;  // 1 hr * 60 minutes * 60 seconds * 1000 milliseconds
 
-    public String generateToken(String username){
+    public String generateToken(String username, String role){
         return Jwts.builder()
                 .subject(username)
                 .issuedAt(new Date())
+                .claim("role", role)
                 .expiration(new Date(System.currentTimeMillis() + EXPIRATION_MS))
                 .signWith(secretKey, Jwts.SIG.HS256)
                 .compact();
