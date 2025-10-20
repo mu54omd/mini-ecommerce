@@ -5,6 +5,8 @@ import com.mu54omd.mini_ecommerce.backend_maven.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/users")
 public class UserRestController {

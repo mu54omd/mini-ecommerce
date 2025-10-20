@@ -2,6 +2,8 @@ package com.mu54omd.mini_ecommerce.backend_maven.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mu54omd.mini_ecommerce.backend_maven.entity.Product;
+import com.mu54omd.mini_ecommerce.backend_maven.security.JwtFilter;
+import com.mu54omd.mini_ecommerce.backend_maven.security.JwtUtil;
 import com.mu54omd.mini_ecommerce.backend_maven.service.ProductService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @AutoConfigureMockMvc(addFilters = false)
 @WebMvcTest(ProductRestController.class)
-public class ProductRestControllerTest {
+class ProductRestControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
@@ -30,6 +32,9 @@ public class ProductRestControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @MockitoBean
+    private JwtUtil jwtUtil;
 
     @Test
     void testGetAllProductsShouldReturnList() throws Exception {

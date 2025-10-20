@@ -2,12 +2,13 @@ package com.mu54omd.mini_ecommerce.backend_maven.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mu54omd.mini_ecommerce.backend_maven.entity.User;
+import com.mu54omd.mini_ecommerce.backend_maven.security.JwtFilter;
+import com.mu54omd.mini_ecommerce.backend_maven.security.JwtUtil;
 import com.mu54omd.mini_ecommerce.backend_maven.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -32,6 +33,10 @@ class UserRestControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @MockitoBean
+    private JwtUtil jwtUtil;
+
 
     @Test
     void testGetUserByUsernameShouldReturnUser() throws Exception {

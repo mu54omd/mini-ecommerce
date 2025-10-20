@@ -3,6 +3,8 @@ package com.mu54omd.mini_ecommerce.backend_maven.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mu54omd.mini_ecommerce.backend_maven.entity.Order;
 import com.mu54omd.mini_ecommerce.backend_maven.entity.User;
+import com.mu54omd.mini_ecommerce.backend_maven.security.JwtFilter;
+import com.mu54omd.mini_ecommerce.backend_maven.security.JwtUtil;
 import com.mu54omd.mini_ecommerce.backend_maven.service.OrderService;
 import com.mu54omd.mini_ecommerce.backend_maven.service.UserService;
 import org.junit.jupiter.api.Test;
@@ -22,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @AutoConfigureMockMvc(addFilters = false)
 @WebMvcTest(OrderRestController.class)
-public class OrderRestControllerTest {
+class OrderRestControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
@@ -32,11 +34,14 @@ public class OrderRestControllerTest {
     @MockitoBean
     private UserService userService;
 
+    @MockitoBean
+    private JwtUtil jwtUtil;
+
     @Autowired
     private ObjectMapper objectMapper;
 
     @Test
-    void getOrdersByUser_shouldReturnList() throws Exception {
+    void testGetOrdersByUserShouldReturnList() throws Exception {
         User user = new User(1L, "sara", "sara@example.com", "1234", null);
         when(userService.findByUsername("sara")).thenReturn(Optional.of(user));
 
