@@ -1,6 +1,8 @@
 package com.mu54omd.mini_ecommerce.backend_maven.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 
@@ -30,12 +32,11 @@ public class User {
 
     public User() {}
 
-    public User(Long id, String username, String email, String password, Role role) {
+    public User(Long id, String username, String email, String password) {
         this.id = id;
         this.username = username;
         this.email = email;
         this.password = password;
-        this.role = role;
     }
 
     public Long getId() {

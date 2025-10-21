@@ -33,7 +33,7 @@ class ProductServiceTest {
 
         Product saved = productService.addProduct(product);
 
-        List<Product> products = productService.getAllProducts();
+        List<Product> products = productService.getAllProductsList();
         assertThat(products).hasSize(1);
         assertThat(products.get(0).getName()).isEqualTo("Laptop");
     }

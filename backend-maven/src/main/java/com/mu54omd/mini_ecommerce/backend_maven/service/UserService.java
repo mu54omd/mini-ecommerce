@@ -5,6 +5,7 @@ import com.mu54omd.mini_ecommerce.backend_maven.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -25,6 +26,14 @@ public class UserService {
             throw new RuntimeException("Email already exists");
         }
         return userRepository.save(user);
+    }
+
+    public List<User> getAllUsers(){
+        return userRepository.findAll();
+    }
+
+    public void deleteUser(Long id){
+        userRepository.deleteById(id);
     }
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);

@@ -40,7 +40,7 @@ class UserRestControllerTest {
 
     @Test
     void testGetUserByUsernameShouldReturnUser() throws Exception {
-        User user = new User(1L, "sara", "sara@example.com", "1234", null);
+        User user = new User(1L, "sara", "sara@example.com", "1234");
         when(userService.findByUsername("sara")).thenReturn(Optional.of(user));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/users/by-username?username=sara"))
@@ -50,7 +50,7 @@ class UserRestControllerTest {
 
     @Test
     void testCreateUserShouldReturnCreatedUser() throws Exception {
-        User user = new User(null, "ali", "ali@example.com", "4321", null);
+        User user = new User(null, "ali", "ali@example.com", "4321");
         when(userService.createUser(any(User.class))).thenReturn(user);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/users")

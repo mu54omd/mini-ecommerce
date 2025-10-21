@@ -3,6 +3,8 @@ package com.mu54omd.mini_ecommerce.backend_maven.service;
 import com.mu54omd.mini_ecommerce.backend_maven.entity.Product;
 import com.mu54omd.mini_ecommerce.backend_maven.repository.ProductRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,7 +23,11 @@ public class ProductService {
         return productRepository.save(product);
     }
 
-    public List<Product> getAllProducts() {
+    public Page<Product> getAllProducts(Pageable pageable) {
+        return productRepository.findAll(pageable);
+    }
+
+    public List<Product> getAllProductsList(){
         return productRepository.findAll();
     }
 

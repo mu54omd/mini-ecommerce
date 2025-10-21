@@ -40,12 +40,12 @@ class AuthRestControllerTest {
     @BeforeEach
     void setUp() throws Exception {
         AuthRequest request = new AuthRequest();
-        request.setUsername("testuser");
-        request.setPassword("123456");
+        request.setUsername("user");
+        request.setPassword("user");
 
 
-        User user = new User(1L, "sara", "sara@example.com", "1234", null);
-        when(userService.findByUsername("sara")).thenReturn(Optional.of(user));
+        User user = new User(1L, "user", "user@user.com", "user");
+        when(userService.findByUsername("user")).thenReturn(Optional.of(user));
 
         String response = mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -62,8 +62,8 @@ class AuthRestControllerTest {
     @Test
     void testLoginShouldReturnJwtTokenWhenCredentialsAreValid() throws Exception {
         AuthRequest request = new AuthRequest();
-        request.setUsername("testuser");
-        request.setPassword("123456");
+        request.setUsername("user");
+        request.setPassword("user");
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -75,7 +75,7 @@ class AuthRestControllerTest {
     @Test
     void testLoginShouldFailWhenPasswordIsInvalid() throws Exception {
         AuthRequest request = new AuthRequest();
-        request.setUsername("testuser");
+        request.setUsername("user");
         request.setPassword("wrongpassword");
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/login")
@@ -86,20 +86,20 @@ class AuthRestControllerTest {
 
     @Test
     void testAccessProtectedEndpointShouldFailWhenNoTokenProvided() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/users/by-username?username=sara"))
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/cart"))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     void testAccessProtectedEndpointShouldFailWhenInvalidTokenProvided() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/users")
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/cart")
                         .header("Authorization", "Bearer invalid.token.value"))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     void testAccessProtectedEndpointShouldSucceedWhenValidTokenProvided() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/users/by-username?username=sara")
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/cart")
                         .header("Authorization", "Bearer " + validToken))
                 .andExpect(status().isOk());
     }

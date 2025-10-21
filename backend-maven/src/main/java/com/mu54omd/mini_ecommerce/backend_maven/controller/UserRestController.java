@@ -22,6 +22,17 @@ public class UserRestController {
         return ResponseEntity.ok(userService.createUser(user));
     }
 
+    @GetMapping
+    public ResponseEntity<List<User>> getAllUsers(){
+        return ResponseEntity.ok(userService.getAllUsers());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable Long id){
+        userService.deleteUser(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/by-username")
     public ResponseEntity<User> getUserByUsername(@RequestParam String username) {
         return userService.findByUsername(username)

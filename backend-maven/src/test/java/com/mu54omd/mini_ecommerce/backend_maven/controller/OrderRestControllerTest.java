@@ -2,6 +2,8 @@ package com.mu54omd.mini_ecommerce.backend_maven.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mu54omd.mini_ecommerce.backend_maven.entity.Order;
+import com.mu54omd.mini_ecommerce.backend_maven.entity.OrderItem;
+import com.mu54omd.mini_ecommerce.backend_maven.entity.Product;
 import com.mu54omd.mini_ecommerce.backend_maven.entity.User;
 import com.mu54omd.mini_ecommerce.backend_maven.security.JwtFilter;
 import com.mu54omd.mini_ecommerce.backend_maven.security.JwtUtil;
@@ -42,11 +44,22 @@ class OrderRestControllerTest {
 
     @Test
     void testGetOrdersByUserShouldReturnList() throws Exception {
-        User user = new User(1L, "sara", "sara@example.com", "1234", null);
-        when(userService.findByUsername("sara")).thenReturn(Optional.of(user));
-
+        User user = new User(1L, "sara", "sara@example.com", "1234");
+        Product product = new Product(1L, "Laptop", "Computer", 2000.0, 3);
+        OrderItem orderItem = new OrderItem();
         Order order = new Order();
         order.setId(1L);
+        orderItem.setOrder(order);
+        orderItem.setProduct(product);
+        orderItem.setQuantity(2);
+        orderItem.setPrice(product.getPrice());
+        order.setItems(List.of(orderItem));
+        order.setUser(user);
+        order.setTotalPrice(orderItem.getPrice() * orderItem.getQuantity());
+
+        when(userService.findByUsername("sara")).thenReturn(Optional.of(user));
+
+
         when(orderService.getOrdersByUser(user)).thenReturn(List.of(order));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/orders/user/sara"))
