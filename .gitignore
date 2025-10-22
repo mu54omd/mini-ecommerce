@@ -4,7 +4,8 @@
 /backend-maven/target/
 frontend-gradle/**/build/
 .gradle/
-
+node_modules/
+!src/**/build/
 # =========================
 # IntelliJ IDEA
 # =========================
@@ -12,6 +13,8 @@ frontend-gradle/**/build/
 *.iml
 *.iws
 *.ipr
+.kotlin
+.externalNativeBuild
 
 # =========================
 # Android Studio
@@ -40,13 +43,19 @@ dist/
 # VS Code
 # =========================
 .vscode/
-
 # =========================
 # OS specific
 # =========================
 .DS_Store
 Thumbs.db
-
+.cxx
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+!*.xcodeproj/project.xcworkspace/
+!*.xcworkspace/contents.xcworkspacedata
+**/xcshareddata/WorkspaceSettings.xcsettings
+xcuserdata
 # =========================
 # Logs / temporary files
 # =========================
