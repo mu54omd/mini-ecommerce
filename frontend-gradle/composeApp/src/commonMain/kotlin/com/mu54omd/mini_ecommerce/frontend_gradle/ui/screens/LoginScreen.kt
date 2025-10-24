@@ -21,27 +21,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import com.mu54omd.mini_ecommerce.frontend_gradle.api.AuthClient
-import com.mu54omd.mini_ecommerce.frontend_gradle.api.createHttpClient
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.cio.CIO
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.serialization.kotlinx.json.json
+import com.mu54omd.mini_ecommerce.frontend_gradle.api.ApiClient
+import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.AuthViewModel
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun LoginScreen(
-    onLoginSuccess: (String) -> Unit
+    onLoginSuccess: (String) -> Unit,
+    authViewModel: AuthViewModel = koinViewModel<AuthViewModel>()
 ) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
-
-    val client = remember { createHttpClient() }
-    val authClient = remember { AuthClient(client, "http://localhost:5050") }
 
     Box(
         contentAlignment = Alignment.Center,
@@ -75,7 +69,7 @@ fun LoginScreen(
                     scope.launch {
                         try {
                             loading = true
-                            val jwt = authClient.login(username, password)
+                            val jwt = authViewModel.login(username, password)
                             onLoginSuccess(jwt.token)
                         } catch (e: Exception) {
                             error = e.message

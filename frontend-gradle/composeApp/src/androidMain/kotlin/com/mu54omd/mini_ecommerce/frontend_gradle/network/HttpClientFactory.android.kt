@@ -1,8 +1,8 @@
-package com.mu54omd.mini_ecommerce.frontend_gradle.api
+package com.mu54omd.mini_ecommerce.frontend_gradle.network
 
-import com.mu54omd.mini_ecommerce.frontend_gradle.storage.getTokenStorage
+import com.mu54omd.mini_ecommerce.frontend_gradle.storage.getSessionManager
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.cio.CIO
+import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.header
@@ -10,12 +10,12 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 
-actual fun createHttpClient(): HttpClient = HttpClient(CIO) {
+actual fun createHttpClient(): HttpClient = HttpClient(OkHttp) {
     install(ContentNegotiation) {
         json(Json { ignoreUnknownKeys = true })
     }
     install(DefaultRequest) {
-        val storage = getTokenStorage()
+        val storage = getSessionManager()
         val token = runBlocking { storage.getToken() }
         if (!token.isNullOrBlank()) {
             header("Authorization", "Bearer $token")

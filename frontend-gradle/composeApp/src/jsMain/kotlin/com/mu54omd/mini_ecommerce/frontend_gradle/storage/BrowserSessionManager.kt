@@ -3,7 +3,7 @@ package com.mu54omd.mini_ecommerce.frontend_gradle.storage
 import kotlinx.browser.localStorage
 import org.w3c.dom.get
 
-class BrowserTokenStorage: TokenStorage {
+class BrowserSessionManager: SessionManager {
     override suspend fun saveToken(token: String) {
         localStorage.setItem("jwt", token);
     }

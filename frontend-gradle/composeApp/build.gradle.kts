@@ -38,6 +38,8 @@ kotlin {
             implementation(libs.kotlinx.coroutines.android)
             implementation(libs.ktor.client.okhttp)
             implementation(libs.ktor.client.android)
+            implementation(libs.koin.android)
+
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -54,6 +56,10 @@ kotlin {
             implementation(libs.ktor.client.auth)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.ktor.serialization.kotlinx.json)
+            implementation(project.dependencies.platform(libs.koin.bom))
+            implementation(libs.koin.core)
+            implementation(libs.koin.compose)
+            implementation(libs.koin.compose.viewmodel)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

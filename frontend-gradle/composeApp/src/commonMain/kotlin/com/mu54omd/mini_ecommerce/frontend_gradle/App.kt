@@ -1,35 +1,36 @@
 package com.mu54omd.mini_ecommerce.frontend_gradle
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.safeContentPadding
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.mu54omd.mini_ecommerce.frontend_gradle.storage.getSessionManager
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.CartScreen
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.HomeScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.LoginScreen
-import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
-import frontend_gradle.composeapp.generated.resources.Res
-import frontend_gradle.composeapp.generated.resources.compose_multiplatform
-
+@OptIn(DelicateCoroutinesApi::class)
 @Composable
-@Preview
 fun App() {
-    var token by remember { mutableStateOf<String?>(null) }
-
     MaterialTheme {
-        if (token == null) {
-            LoginScreen(onLoginSuccess = { jwt -> token = jwt })
-        } else {
-            Text("✅ Logged in! Token: $token")
+        var screen by remember { mutableStateOf("login") }
+        when (screen) {
+            "login" -> LoginScreen(onLoginSuccess = { screen = "home" })
+            "home" -> HomeScreen(
+                onCartClick = {screen = "cart"},
+                onLogoutClick = {
+                        GlobalScope.launch {
+                            getSessionManager().clearToken()
+                            screen = "login"
+                        }
+                    }
+                )
+            "cart" -> CartScreen() { screen = "home" }
         }
     }
 }
