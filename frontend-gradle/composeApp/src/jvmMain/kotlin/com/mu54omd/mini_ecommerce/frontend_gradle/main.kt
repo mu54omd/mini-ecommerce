@@ -8,6 +8,7 @@ fun main() = application {
     Window(
         onCloseRequest = ::exitApplication,
         title = "Mini E-Commerce",
+
     ) {
         initKoin()
         App()

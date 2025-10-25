@@ -11,49 +11,79 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.CartResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.CartViewModel
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.EmptyPage
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun CartScreen(cartViewModel: CartViewModel = koinViewModel<CartViewModel>(), onBack: () -> Unit) {
-    val cartState by cartViewModel.cartState
-    val loading by cartViewModel.loading
+fun CartScreen(
+    cartViewModel: CartViewModel = koinViewModel<CartViewModel>(),
+    onBack: () -> Unit,
+    onCheckoutClick: () -> Unit,
+) {
+    val cartState = cartViewModel.cartState.collectAsState().value
 
     LaunchedEffect(Unit) { cartViewModel.refresh() }
 
     Column(Modifier.fillMaxSize().padding(12.dp)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("Cart", style = MaterialTheme.typography.titleLarge)
+            Text("Cart", fontSize = 24.sp, fontWeight = FontWeight.Bold)
             Button(onClick = onBack) { Text("Back") }
         }
         Spacer(Modifier.height(8.dp))
-        if (loading) {
-            CircularProgressIndicator()
-        } else {
-            val items = cartState?.items ?: emptyList()
-            if (items.isEmpty()) {
-                Text("Cart is empty")
-            } else {
-                items.forEach { item ->
-                    Row(Modifier.fillMaxWidth().padding(8.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text(item.product.name)
-                        Text("x${item.quantity}")
+        when(cartState){
+            UiState.Loading -> {
+                CircularProgressIndicator()
+            }
+            is UiState.Error -> {
+                EmptyPage(title = "ERROR", message = "Something went wrong: ${cartState.message}")
+            }
+            is UiState.LoggedOut -> { onBack.invoke() }
+            is UiState.Unauthorized -> { onBack.invoke() }
+            is UiState.Success<CartResponse> -> {
+                val items = cartState.data.items
+                if (items.isEmpty()) {
+                    EmptyPage(title = "Oops!", message = "Your cart is empty")
+                } else {
+                    Column(
+                        modifier = Modifier.weight(0.8f)
+                    ) {
+                        items.forEach { item ->
+                            Row(
+                                Modifier.fillMaxWidth().padding(8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(item.product.name)
+                                Text("x${item.quantity}")
+                            }
+                        }
+                    }
+                    Spacer(Modifier.height(12.dp))
+                    Row(
+                        verticalAlignment = Alignment.Bottom,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth().weight(0.2f)
+                    ) {
+                        Button(onClick = { cartViewModel.clear() }) { Text("Clear Cart") }
+                        Spacer(Modifier.width(8.dp))
+                        Button(onClick = onCheckoutClick ) { Text("Checkout") }
                     }
                 }
-                Spacer(Modifier.height(12.dp))
-                Row {
-                    Button(onClick = { cartViewModel.clear() }) { Text("Clear Cart") }
-                    Spacer(Modifier.width(8.dp))
-                    Button(onClick = { /* checkout */ }) { Text("Checkout") }
-                }
+
             }
+
+            UiState.Idle -> {}
         }
     }
 }

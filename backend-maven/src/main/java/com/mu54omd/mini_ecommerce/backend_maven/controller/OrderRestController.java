@@ -9,6 +9,8 @@ import com.mu54omd.mini_ecommerce.backend_maven.service.OrderService;
 import com.mu54omd.mini_ecommerce.backend_maven.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -41,6 +43,16 @@ public class OrderRestController {
         List<Order> orders = orderService.getOrdersByUser(user);
         return ResponseEntity.ok(OrderMapper.toDtoList(orders));
     }
+
+    @GetMapping()
+    public ResponseEntity<List<OrderResponse>> getOrders(@AuthenticationPrincipal UserDetails userDetails) {
+        User user = userService.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        List<Order> orders = orderService.getOrdersByUser(user);
+        return ResponseEntity.ok(OrderMapper.toDtoList(orders));
+    }
+
+
 
     @GetMapping("/status/{status}")
     public ResponseEntity<List<OrderResponse>> getOrdersByStatus(@PathVariable String status) {
