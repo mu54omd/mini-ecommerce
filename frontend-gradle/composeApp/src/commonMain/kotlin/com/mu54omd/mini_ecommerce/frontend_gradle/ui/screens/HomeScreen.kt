@@ -32,28 +32,19 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun HomeScreen(
-    productViewModel: ProductViewModel = koinViewModel<ProductViewModel>(),
-    cartViewModel: CartViewModel = koinViewModel<CartViewModel>(),
+    productViewModel: ProductViewModel,
+    cartViewModel: CartViewModel,
     onCartClick: () -> Unit,
     onOrderClick: () -> Unit,
-    onLogoutClick: () -> Unit
+    onLogoutClick: () -> Unit,
+    onExit: (UiState<*>) -> Unit,
 ) {
     val productState = productViewModel.products.collectAsState().value
     LaunchedEffect(Unit) { productViewModel.loadProducts() }
 
     when(productState){
+        is UiState.Idle -> {}
         is UiState.Loading -> LoadingView()
-
-        is UiState.Error -> Column(Modifier.fillMaxSize().padding(16.dp)) {
-            Text("Error: ${productState.message}", color = Color.Red)
-            Button(onClick = onLogoutClick) { Text("Logout") }
-        }
-
-        is UiState.Unauthorized -> Column(Modifier.fillMaxSize().padding(16.dp)) {
-            Text("Session expired. Please login again.", color = Color.Red)
-            Button(onClick = onLogoutClick) { Text("Go to Login") }
-        }
-
         is UiState.Success -> {
             Column(Modifier.fillMaxSize().padding(16.dp)) {
                 Text("Products", fontSize = 24.sp, fontWeight = FontWeight.Bold)
@@ -88,9 +79,6 @@ fun HomeScreen(
                 }
             }
         }
-        UiState.LoggedOut -> {
-            onLogoutClick.invoke()
-        }
-        UiState.Idle -> {}
+        else -> onExit(productState)
     }
 }

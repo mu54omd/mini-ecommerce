@@ -28,8 +28,9 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun CartScreen(
-    cartViewModel: CartViewModel = koinViewModel<CartViewModel>(),
+    cartViewModel: CartViewModel,
     onBack: () -> Unit,
+    onExit: (UiState<*>) -> Unit,
     onCheckoutClick: () -> Unit,
 ) {
     val cartState = cartViewModel.cartState.collectAsState().value
@@ -43,14 +44,8 @@ fun CartScreen(
         }
         Spacer(Modifier.height(8.dp))
         when(cartState){
-            UiState.Loading -> {
-                CircularProgressIndicator()
-            }
-            is UiState.Error -> {
-                EmptyPage(title = "ERROR", message = "Something went wrong: ${cartState.message}")
-            }
-            is UiState.LoggedOut -> { onBack.invoke() }
-            is UiState.Unauthorized -> { onBack.invoke() }
+            is UiState.Idle -> {}
+            is UiState.Loading -> { CircularProgressIndicator() }
             is UiState.Success<CartResponse> -> {
                 val items = cartState.data.items
                 if (items.isEmpty()) {
@@ -80,10 +75,8 @@ fun CartScreen(
                         Button(onClick = onCheckoutClick ) { Text("Checkout") }
                     }
                 }
-
             }
-
-            UiState.Idle -> {}
+            else -> onExit(cartState)
         }
     }
 }

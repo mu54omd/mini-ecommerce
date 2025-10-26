@@ -17,7 +17,7 @@ class AuthRepository(
         var result = api.post<AuthRequest, JwtResponse>("/auth/login", AuthRequest(username, password))
             .map(
                 onSuccess = { it.token },
-                onAfterSuccess = { sessionManager.saveToken(it)}
+                onAfterSuccess = { sessionManager.saveToken(it) }
             )
         if(result !is ApiResult.Success){
             sessionManager.clearToken()

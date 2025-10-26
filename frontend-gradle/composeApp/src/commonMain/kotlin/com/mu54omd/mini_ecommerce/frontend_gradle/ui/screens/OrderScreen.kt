@@ -28,8 +28,9 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun OrdersScreen(
-    orderViewModel: OrderViewModel = koinViewModel<OrderViewModel>(),
-    onBack: () -> Unit
+    orderViewModel: OrderViewModel,
+    onBack: () -> Unit,
+    onExit: (UiState<*>) -> Unit
 ) {
     val ordersState = orderViewModel.ordersState.collectAsState().value
 
@@ -43,15 +44,10 @@ fun OrdersScreen(
             Button(onClick = onBack) { Text("Back") }
         }
         when(ordersState){
-            is UiState.Error -> {
-                EmptyPage(title = "ERROR", message = "Something went wrong: ${ordersState.message}")
-            }
             UiState.Idle -> {}
             UiState.Loading -> {
                 CircularProgressIndicator(modifier = Modifier.padding(24.dp))
             }
-            UiState.LoggedOut -> {}
-            UiState.Unauthorized -> { onBack.invoke() }
             is UiState.Success<List<OrderResponse>> -> {
                 LazyColumn {
                     items(ordersState.data) { order ->
@@ -67,6 +63,7 @@ fun OrdersScreen(
                     }
                 }
             }
+            else -> onExit(ordersState)
         }
     }
 }

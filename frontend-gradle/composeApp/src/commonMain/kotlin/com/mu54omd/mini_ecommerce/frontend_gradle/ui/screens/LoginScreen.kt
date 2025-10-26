@@ -1,6 +1,7 @@
 package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,25 +27,29 @@ import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.AuthViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
 import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.component.getScopeName
 
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
-    authViewModel: AuthViewModel = koinViewModel<AuthViewModel>()
+    authViewModel: AuthViewModel
 ) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val loginState by authViewModel.loginState.collectAsState()
 
+    println("loginState: ${loginState.getScopeName()}")
 
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier.fillMaxSize()
     ) {
+
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.width(300.dp)
+            modifier = Modifier.width(300.dp).height(400.dp)
         ) {
+            Spacer(Modifier.height(32.dp))
             Text("Login", style = MaterialTheme.typography.headlineMedium)
             Spacer(Modifier.height(16.dp))
             OutlinedTextField(
@@ -65,6 +70,7 @@ fun LoginScreen(
             )
             Spacer(Modifier.height(16.dp))
             Button(
+                enabled = loginState !is UiState.Loading,
                 modifier = Modifier.fillMaxWidth(),
                         onClick = {
                     authViewModel.login(username, password)
@@ -72,16 +78,22 @@ fun LoginScreen(
             ) {
                 Text("Login")
             }
+            Spacer(Modifier.height(8.dp))
             when (loginState) {
+                is UiState.Idle -> {}
                 is UiState.LoggedOut -> {}
                 is UiState.Loading -> CircularProgressIndicator()
-                is UiState.Error -> Text("Error: ${(loginState as UiState.Error).message}", color = Color.Red)
+                is UiState.Error -> Text(
+                    "Error: ${(loginState as UiState.Error).message}",
+                    color = Color.Red
+                )
+
                 is UiState.Success -> {
                     Text("Welcome!")
                     onLoginSuccess()
                 }
+
                 is UiState.Unauthorized -> Text("Invalid credentials", color = Color.Red)
-                UiState.Idle -> {}
             }
         }
     }

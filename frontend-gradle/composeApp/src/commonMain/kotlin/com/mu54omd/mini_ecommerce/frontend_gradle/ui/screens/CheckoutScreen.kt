@@ -27,7 +27,7 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun CheckoutScreen(
-    cartViewModel: CartViewModel = koinViewModel<CartViewModel>(),
+    cartViewModel: CartViewModel,
     onBack: () -> Unit,
     onConfirmClick: () -> Unit,
 ) {

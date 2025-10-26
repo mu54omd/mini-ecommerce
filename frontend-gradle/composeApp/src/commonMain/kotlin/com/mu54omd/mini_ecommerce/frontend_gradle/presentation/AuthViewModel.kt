@@ -10,9 +10,11 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.ui.toUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.component.getScopeName
 
 class AuthViewModel(private val repo: AuthRepository): ViewModel() {
 
@@ -34,9 +36,9 @@ class AuthViewModel(private val repo: AuthRepository): ViewModel() {
             _loginState.update { result.toUiState() }
         }
     }
-    fun logout(){
+    fun logout(cause: UiState<*> = UiState.LoggedOut){
+        _loginState.update { cause as UiState<String> }
         viewModelScope.launch {
-            _loginState.update { UiState.LoggedOut }
             repo.logout()
         }
     }
