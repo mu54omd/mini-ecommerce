@@ -8,6 +8,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import com.mu54omd.mini_ecommerce.frontend_gradle.api.ApiResult
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.AuthViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.MainViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.storage.getSessionManager
@@ -25,10 +27,10 @@ import org.koin.compose.viewmodel.koinViewModel
 @OptIn(DelicateCoroutinesApi::class)
 @Composable
 fun App(
-    authViewModel: AuthViewModel = koinViewModel<AuthViewModel>()
+    authViewModel: AuthViewModel = koinViewModel<AuthViewModel>(),
 ) {
-
-    var screen by rememberSaveable { mutableStateOf("login") }
+    val loginState = authViewModel.loginState.collectAsState().value
+    var screen by rememberSaveable { mutableStateOf(if(loginState is UiState.Success) "home" else "login") }
     MaterialTheme {
         when (screen) {
             "login" -> LoginScreen(onLoginSuccess = { screen = "home" })

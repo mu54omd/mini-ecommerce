@@ -27,6 +27,7 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.AuthViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.CartViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.ProductViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.LoadingView
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -41,9 +42,7 @@ fun HomeScreen(
     LaunchedEffect(Unit) { productViewModel.loadProducts() }
 
     when(productState){
-        is UiState.Loading -> Column(Modifier.fillMaxSize().padding(16.dp)) {
-            CircularProgressIndicator(modifier = Modifier.padding(24.dp))
-        }
+        is UiState.Loading -> LoadingView()
 
         is UiState.Error -> Column(Modifier.fillMaxSize().padding(16.dp)) {
             Text("Error: ${productState.message}", color = Color.Red)

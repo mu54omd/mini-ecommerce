@@ -34,7 +34,7 @@ fun LoginScreen(
 ) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    val loginState by authViewModel.authState.collectAsState()
+    val loginState by authViewModel.loginState.collectAsState()
 
 
     Box(

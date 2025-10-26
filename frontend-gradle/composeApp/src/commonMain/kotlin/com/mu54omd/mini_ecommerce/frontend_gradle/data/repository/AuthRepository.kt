@@ -13,16 +13,29 @@ class AuthRepository(
     private val api: ApiClient,
     private val sessionManager: SessionManager
 ) {
-
     suspend fun login(username: String, password: String): ApiResult<String> {
-        return api.post<AuthRequest, JwtResponse>("/auth/login", AuthRequest(username, password))
+        var result = api.post<AuthRequest, JwtResponse>("/auth/login", AuthRequest(username, password))
             .map(
                 onSuccess = { it.token },
                 onAfterSuccess = { sessionManager.saveToken(it)}
             )
+        if(result !is ApiResult.Success){
+            sessionManager.clearToken()
+            result = api.post<AuthRequest, JwtResponse>("/auth/login", AuthRequest(username, password))
+                .map(
+                    onSuccess = { it.token },
+                    onAfterSuccess = { sessionManager.saveToken(it)}
+                )
+        }
+        return result
     }
 
     suspend fun logout(){
         sessionManager.clearToken()
+    }
+
+    suspend fun validToken(): String?{
+        val token = sessionManager.getToken() ?: ""
+        return if(sessionManager.isTokenValid(token)) token else  null
     }
 }
