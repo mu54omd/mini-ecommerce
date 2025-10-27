@@ -31,12 +31,9 @@ actual class SessionManager {
                 .replace('_', '/')
                 .let { it.padEnd((it.length + 3) / 4 * 4, '=') }
             val payload = payload(base64)
-            println("payload: $payload")
             val json = Json.parseToJsonElement(payload).jsonObject
             val exp = json["exp"]?.jsonPrimitive?.longOrNull ?: return false
-            println("exp: $exp")
             val now = now()
-            println("now: $now")
             exp > now.toLong()
         } catch (e: Exception) {
             println("Error decoding token: ${e.message}")

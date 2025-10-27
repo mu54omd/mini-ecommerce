@@ -20,14 +20,15 @@ class CartRepository(private val api: ApiClient) {
     }
 
     suspend fun removeFromCart(productId: Long) {
-        api.delete("/cart/remove?productId=$productId")
+        api.delete("/cart/remove/$productId")
     }
 
     suspend fun clearCart() {
         api.delete("/cart/clear")
     }
 
-    suspend fun checkout() {
-        api.post<String, String>("/cart/checkout", "")
+    suspend fun checkout(): ApiResult<String> {
+        return api.post<String, String>("/cart/checkout", "")
+            .map(onSuccess = {it})
     }
 }

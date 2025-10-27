@@ -24,6 +24,7 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.OrderResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.OrderViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.EmptyPage
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.LoadingView
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -34,20 +35,14 @@ fun OrdersScreen(
 ) {
     val ordersState = orderViewModel.ordersState.collectAsState().value
 
-    LaunchedEffect(Unit){
-        orderViewModel.load()
-    }
-
     Column(Modifier.fillMaxSize().padding(16.dp)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text("Orders", fontSize = 24.sp, fontWeight = FontWeight.Bold)
             Button(onClick = onBack) { Text("Back") }
         }
         when(ordersState){
-            UiState.Idle -> {}
-            UiState.Loading -> {
-                CircularProgressIndicator(modifier = Modifier.padding(24.dp))
-            }
+            is UiState.Idle -> {}
+            is UiState.Loading -> LoadingView()
             is UiState.Success<List<OrderResponse>> -> {
                 LazyColumn {
                     items(ordersState.data) { order ->

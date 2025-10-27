@@ -23,6 +23,9 @@ class OrderViewModel(private val repo: OrderRepository): ViewModel() {
             started = SharingStarted.WhileSubscribed(5000L),
             initialValue = UiState.Idle
         )
+    fun reset(){
+        _ordersState.update { UiState.Idle}
+    }
     fun load() {
         viewModelScope.launch {
             _ordersState.update { UiState.Loading }

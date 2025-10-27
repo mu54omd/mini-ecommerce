@@ -11,20 +11,27 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class CartViewModel(private val repo: CartRepository) : ViewModel() {
 
-    private val _cartState = MutableStateFlow<UiState<CartResponse>>(UiState.Loading)
+    private val _cartState = MutableStateFlow<UiState<CartResponse>>(UiState.Idle)
     val cartState = _cartState
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),
-            initialValue = UiState.Loading
+            initialValue = UiState.Idle
         )
 
+    private val _checkoutState = MutableStateFlow<UiState<String>>(UiState.Idle)
+    val checkoutState = _checkoutState.asStateFlow()
+
+    fun reset(){
+        _cartState.update { UiState.Idle }
+    }
     fun refresh() {
         viewModelScope.launch {
             _cartState.update { UiState.Loading }
@@ -35,12 +42,14 @@ class CartViewModel(private val repo: CartRepository) : ViewModel() {
 
     fun add(productId: Long, qty: Int = 1) {
         viewModelScope.launch {
-            try {
-                repo.addToCart(productId, qty)
-                refresh()
-            } catch (e: Exception) {
-                // handle
-            }
+            repo.addToCart(productId, qty)
+            refresh()
+        }
+    }
+    fun remove(productId: Long) {
+        viewModelScope.launch {
+            repo.removeFromCart(productId)
+            refresh()
         }
     }
     fun clear() {
@@ -52,7 +61,9 @@ class CartViewModel(private val repo: CartRepository) : ViewModel() {
 
     fun checkout() {
         viewModelScope.launch {
-            repo.checkout()
+            _checkoutState.update { UiState.Loading }
+            val result = repo.checkout()
+            _checkoutState.update { result.toUiState() }
         }
     }
 }

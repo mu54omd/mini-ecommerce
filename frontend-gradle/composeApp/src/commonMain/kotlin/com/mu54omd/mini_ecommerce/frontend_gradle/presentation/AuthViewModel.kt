@@ -18,16 +18,19 @@ import org.koin.core.component.getScopeName
 
 class AuthViewModel(private val repo: AuthRepository): ViewModel() {
 
-    private val _loginState: MutableStateFlow<UiState<String>> = MutableStateFlow(UiState.LoggedOut)
+    private val _loginState: MutableStateFlow<UiState<String>> = MutableStateFlow(UiState.Idle)
     val loginState: StateFlow<UiState<String>> =
         _loginState.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),
-            initialValue = UiState.LoggedOut
+            initialValue = UiState.Idle
         )
 
     init {
         validateStoredToken()
+    }
+    fun reset(){
+        _loginState.update { UiState.Idle}
     }
     fun login(username: String, password: String){
         viewModelScope.launch {
@@ -36,7 +39,7 @@ class AuthViewModel(private val repo: AuthRepository): ViewModel() {
             _loginState.update { result.toUiState() }
         }
     }
-    fun logout(cause: UiState<*> = UiState.LoggedOut){
+    fun logout(cause: UiState<*> = UiState.Idle){
         _loginState.update { cause as UiState<String> }
         viewModelScope.launch {
             repo.logout()

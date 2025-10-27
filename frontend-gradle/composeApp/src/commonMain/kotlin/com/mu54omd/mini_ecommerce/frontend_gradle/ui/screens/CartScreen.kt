@@ -24,6 +24,7 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.CartResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.CartViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.EmptyPage
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.LoadingView
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -35,9 +36,7 @@ fun CartScreen(
 ) {
     val cartState = cartViewModel.cartState.collectAsState().value
 
-    LaunchedEffect(Unit) { cartViewModel.refresh() }
-
-    Column(Modifier.fillMaxSize().padding(12.dp)) {
+    Column(Modifier.fillMaxSize().padding(16.dp)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text("Cart", fontSize = 24.sp, fontWeight = FontWeight.Bold)
             Button(onClick = onBack) { Text("Back") }
@@ -45,7 +44,7 @@ fun CartScreen(
         Spacer(Modifier.height(8.dp))
         when(cartState){
             is UiState.Idle -> {}
-            is UiState.Loading -> { CircularProgressIndicator() }
+            is UiState.Loading -> LoadingView()
             is UiState.Success<CartResponse> -> {
                 val items = cartState.data.items
                 if (items.isEmpty()) {

@@ -16,12 +16,16 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ProductViewModel(private val repo: ProductRepository) : ViewModel() {
-    private val _products = MutableStateFlow<UiState<List<Product>>>(UiState.Loading)
+    private val _products = MutableStateFlow<UiState<List<Product>>>(UiState.Idle)
     val products = _products.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000L),
-        initialValue = UiState.Loading
+        initialValue = UiState.Idle
     )
+
+    fun reset(){
+        _products.update { UiState.Idle}
+    }
 
     fun loadProducts() {
         viewModelScope.launch {

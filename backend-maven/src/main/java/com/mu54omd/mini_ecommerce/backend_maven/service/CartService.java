@@ -54,7 +54,19 @@ public class CartService {
     @Transactional
     public Cart removeProductFromCart(String username, Long productId) {
         Cart cart = getCartByUsername(username);
-        cart.getItems().removeIf(item -> item.getProduct().getId().equals(productId));
+
+        CartItem existingItem = cart.getItems().stream()
+                .filter(item -> item.getProduct().getId().equals(productId))
+                .findFirst()
+                .orElse(null);
+
+        if (existingItem != null) {
+            if(existingItem.getQuantity() > 1) {
+                existingItem.setQuantity(existingItem.getQuantity() - 1);
+            }else{
+                cart.getItems().removeIf(item -> item.getProduct().getId().equals(productId));
+            }
+        }
         cart.recalculateTotal();
         return cartRepository.save(cart);
     }

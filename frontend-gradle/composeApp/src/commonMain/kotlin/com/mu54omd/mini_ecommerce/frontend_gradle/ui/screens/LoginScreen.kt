@@ -38,8 +38,6 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
     val loginState by authViewModel.loginState.collectAsState()
 
-    println("loginState: ${loginState.getScopeName()}")
-
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier.fillMaxSize()
@@ -81,7 +79,6 @@ fun LoginScreen(
             Spacer(Modifier.height(8.dp))
             when (loginState) {
                 is UiState.Idle -> {}
-                is UiState.LoggedOut -> {}
                 is UiState.Loading -> CircularProgressIndicator()
                 is UiState.Error -> Text(
                     "Error: ${(loginState as UiState.Error).message}",

@@ -28,7 +28,9 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.CartViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.ProductViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.LoadingView
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.ProductList
 import org.koin.compose.viewmodel.koinViewModel
+import kotlin.collections.mapOf
 
 @Composable
 fun HomeScreen(
@@ -40,6 +42,8 @@ fun HomeScreen(
     onExit: (UiState<*>) -> Unit,
 ) {
     val productState = productViewModel.products.collectAsState().value
+    val cartState = cartViewModel.cartState.collectAsState().value
+    val cartItems: Map<Long, Int> = if (cartState is UiState.Success) cartState.data.items.associate { (_, product, quantity) -> product.id to quantity } else emptyMap()
     LaunchedEffect(Unit) { productViewModel.loadProducts() }
 
     when(productState){
@@ -49,23 +53,13 @@ fun HomeScreen(
             Column(Modifier.fillMaxSize().padding(16.dp)) {
                 Text("Products", fontSize = 24.sp, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(16.dp))
-                LazyColumn(
+                ProductList(
+                    products = productState.data,
+                    cartItems = cartItems,
+                    onAddClick = { cartViewModel.add(it)},
+                    onRemoveClick = { cartViewModel.remove(it)},
                     modifier = Modifier.weight(0.8f)
-                ) {
-                    items(productState.data) { product ->
-                        Card(
-                            modifier = Modifier.fillMaxWidth().padding(8.dp),
-                            onClick = { cartViewModel.add(product.id) },
-                            enabled = product.stock > 0
-                        ) {
-                            Column(Modifier.padding(16.dp)) {
-                                Text(product.name, fontWeight = FontWeight.Bold)
-                                Text("${product.price} $")
-                                Text("#${product.stock}")
-                            }
-                        }
-                    }
-                }
+                )
                 Row(
                     verticalAlignment = Alignment.Bottom,
                     horizontalArrangement = Arrangement.SpaceAround,
