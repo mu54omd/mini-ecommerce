@@ -31,6 +31,10 @@ public class ProductService {
         return productRepository.findAll();
     }
 
+    public void deleteProduct(Long productId){
+        productRepository.deleteById(productId);
+    }
+
     public List<Product> searchProducts(String keyword) {
         return productRepository.findByNameContainingIgnoreCase(keyword);
     }

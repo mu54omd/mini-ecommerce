@@ -36,9 +36,6 @@ import kotlin.collections.mapOf
 fun HomeScreen(
     productViewModel: ProductViewModel,
     cartViewModel: CartViewModel,
-    onCartClick: () -> Unit,
-    onOrderClick: () -> Unit,
-    onLogoutClick: () -> Unit,
     onExit: (UiState<*>) -> Unit,
 ) {
     val productState = productViewModel.products.collectAsState().value
@@ -51,26 +48,13 @@ fun HomeScreen(
         is UiState.Loading -> LoadingView()
         is UiState.Success -> {
             Column(Modifier.fillMaxSize().padding(16.dp)) {
-                Text("Products", fontSize = 24.sp, fontWeight = FontWeight.Bold)
-                Spacer(Modifier.height(16.dp))
                 ProductList(
                     products = productState.data,
                     cartItems = cartItems,
                     onAddClick = { cartViewModel.add(it)},
                     onRemoveClick = { cartViewModel.remove(it)},
-                    modifier = Modifier.weight(0.8f)
+                    modifier = Modifier.weight(0.9f)
                 )
-                Row(
-                    verticalAlignment = Alignment.Bottom,
-                    horizontalArrangement = Arrangement.SpaceAround,
-                    modifier = Modifier.fillMaxWidth().weight(0.2f)
-                ) {
-                    Button(onClick = onCartClick) { Text("Cart") }
-                    Button(onClick = onOrderClick) { Text("Order") }
-                    Button(
-                        onClick = onLogoutClick
-                    ) { Text("Logout") }
-                }
             }
         }
         else -> onExit(productState)

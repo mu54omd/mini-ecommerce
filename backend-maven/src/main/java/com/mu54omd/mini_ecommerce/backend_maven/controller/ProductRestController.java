@@ -41,4 +41,10 @@ public class ProductRestController {
     public ResponseEntity<Product> updateStock(@PathVariable Long id, @RequestParam int stock) {
         return ResponseEntity.ok(productService.updateStock(id, stock));
     }
+
+    @DeleteMapping
+    public ResponseEntity<?> deleteProduct(@RequestParam Long productId){
+        productService.deleteProduct(productId);
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -30,16 +30,13 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun OrdersScreen(
     orderViewModel: OrderViewModel,
-    onBack: () -> Unit,
     onExit: (UiState<*>) -> Unit
 ) {
     val ordersState = orderViewModel.ordersState.collectAsState().value
-
+    LaunchedEffect(Unit){
+        orderViewModel.load()
+    }
     Column(Modifier.fillMaxSize().padding(16.dp)) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("Orders", fontSize = 24.sp, fontWeight = FontWeight.Bold)
-            Button(onClick = onBack) { Text("Back") }
-        }
         when(ordersState){
             is UiState.Idle -> {}
             is UiState.Loading -> LoadingView()

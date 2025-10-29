@@ -64,6 +64,9 @@ class CartViewModel(private val repo: CartRepository) : ViewModel() {
             _checkoutState.update { UiState.Loading }
             val result = repo.checkout()
             _checkoutState.update { result.toUiState() }
+            if(_checkoutState.value is UiState.Success){
+                refresh()
+            }
         }
     }
 }

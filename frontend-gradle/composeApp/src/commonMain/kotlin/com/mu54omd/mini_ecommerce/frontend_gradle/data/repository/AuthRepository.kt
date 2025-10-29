@@ -6,6 +6,7 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.api.ApiResult.*
 import com.mu54omd.mini_ecommerce.frontend_gradle.api.map
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.AuthRequest
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.JwtResponse
+import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.User
 import com.mu54omd.mini_ecommerce.frontend_gradle.storage.SessionManager
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.toUiState
 
@@ -37,5 +38,10 @@ class AuthRepository(
     suspend fun validToken(): String?{
         val token = sessionManager.getToken() ?: ""
         return if(sessionManager.isTokenValid(token)) token else  null
+    }
+
+    suspend fun getUserInfo(): User {
+        val token = validToken()
+        return token?.let { sessionManager.getUserInfo(it) } ?: User()
     }
 }

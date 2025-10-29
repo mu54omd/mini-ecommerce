@@ -24,7 +24,7 @@ class ProductViewModel(private val repo: ProductRepository) : ViewModel() {
     )
 
     fun reset(){
-        _products.update { UiState.Idle}
+        _products.update { UiState.Idle }
     }
 
     fun loadProducts() {

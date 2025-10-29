@@ -1,7 +1,6 @@
 package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,8 +25,6 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.AuthViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
-import org.koin.compose.viewmodel.koinViewModel
-import org.koin.core.component.getScopeName
 
 @Composable
 fun LoginScreen(
@@ -36,7 +33,7 @@ fun LoginScreen(
 ) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    val loginState by authViewModel.loginState.collectAsState()
+    val loginState by authViewModel.tokenState.collectAsState()
 
     Box(
         contentAlignment = Alignment.Center,
