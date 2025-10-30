@@ -1,7 +1,12 @@
 package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.animate
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,37 +17,54 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
+import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.LoginResponse
+import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.RegisterResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.AuthViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun LoginScreen(
+    authViewModel: AuthViewModel,
     onLoginSuccess: () -> Unit,
-    authViewModel: AuthViewModel
+    onLoginAsGuest: () -> Unit,
 ) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
     val loginState by authViewModel.tokenState.collectAsState()
+    val registerState by authViewModel.registerState.collectAsState()
+    var haveAnAccount by remember { mutableStateOf(true)}
+    val scope = rememberCoroutineScope()
 
-    Box(
-        contentAlignment = Alignment.Center,
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
         modifier = Modifier.fillMaxSize()
     ) {
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.width(300.dp).height(400.dp)
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.width(300.dp).height(600.dp)
         ) {
             Spacer(Modifier.height(32.dp))
             Text("Login", style = MaterialTheme.typography.headlineMedium)
@@ -63,28 +85,84 @@ fun LoginScreen(
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
+            if(!haveAnAccount) {
+                Spacer(Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    label = { Text("Email") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
             Spacer(Modifier.height(16.dp))
-            Button(
-                enabled = loginState !is UiState.Loading,
-                modifier = Modifier.fillMaxWidth(),
-                        onClick = {
-                    authViewModel.login(username, password)
-                }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Login")
+                Button(
+                    enabled = loginState !is UiState.Loading,
+                    onClick = {
+                        authViewModel.reset()
+                        if(haveAnAccount) {
+                            authViewModel.login(username, password)
+                        }else {
+                            authViewModel.register(username, password, email)
+                        }
+                    }
+                ) {
+                    if(haveAnAccount) Text("Login") else Text("Register")
+                }
+                TextButton(
+                    onClick = { haveAnAccount = !haveAnAccount }
+                ) {
+                    if(!haveAnAccount) Text("I have an account!") else Text("Don't have an account!")
+                }
+            }
+            TextButton(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = onLoginAsGuest
+            ) {
+                Text("Login as guest!")
             }
             Spacer(Modifier.height(8.dp))
             when (loginState) {
                 is UiState.Idle -> {}
                 is UiState.Loading -> CircularProgressIndicator()
                 is UiState.Error -> Text(
-                    "Error: ${(loginState as UiState.Error).message}",
-                    color = Color.Red
+                    text = "Error: ${(loginState as UiState.Error).message}",
+                    color = Color.Red,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
 
                 is UiState.Success -> {
-                    Text("Welcome!")
-                    onLoginSuccess()
+                    Text(text = "Welcome!")
+                    scope.launch {
+                        delay(500)
+                        onLoginSuccess()
+                    }
+                }
+
+                is UiState.Unauthorized -> Text("Invalid credentials", color = Color.Red)
+            }
+            when (registerState) {
+                is UiState.Idle -> {}
+                is UiState.Loading -> CircularProgressIndicator()
+                is UiState.Error -> {
+                    Text(
+                        text = "Error: ${(registerState as UiState.Error).message}",
+                        color = Color.Red,
+//                    maxLines = 1,
+//                    overflow = TextOverflow.Ellipsis
+                    )
+                    println("Error: ${(registerState as UiState.Error).message}")
+                }
+
+                is UiState.Success -> {
+                    Text(text = (registerState as UiState.Success<RegisterResponse>).data.message)
+                    haveAnAccount = true
                 }
 
                 is UiState.Unauthorized -> Text("Invalid credentials", color = Color.Red)

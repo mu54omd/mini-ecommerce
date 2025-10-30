@@ -1,8 +1,11 @@
 package com.mu54omd.mini_ecommerce.backend_maven.service;
 
+import com.mu54omd.mini_ecommerce.backend_maven.entity.Cart;
 import com.mu54omd.mini_ecommerce.backend_maven.entity.User;
+import com.mu54omd.mini_ecommerce.backend_maven.repository.CartRepository;
 import com.mu54omd.mini_ecommerce.backend_maven.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,9 +16,12 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
-
-    public UserService(UserRepository userRepository){
+    private final PasswordEncoder passwordEncoder;
+    private final CartRepository cartRepository;
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, CartRepository cartRepository){
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.cartRepository = cartRepository;
     }
 
     public User createUser(User user){
@@ -25,7 +31,10 @@ public class UserService {
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new RuntimeException("Email already exists");
         }
-        return userRepository.save(user);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        User newUser = userRepository.save(user);
+        cartRepository.save(new Cart(user));
+        return newUser;
     }
 
     public List<User> getAllUsers(){

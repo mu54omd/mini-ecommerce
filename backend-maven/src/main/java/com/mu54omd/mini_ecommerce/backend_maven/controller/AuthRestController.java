@@ -1,7 +1,8 @@
 package com.mu54omd.mini_ecommerce.backend_maven.controller;
 
 import com.mu54omd.mini_ecommerce.backend_maven.dto.AuthRequest;
-import com.mu54omd.mini_ecommerce.backend_maven.dto.JwtResponse;
+import com.mu54omd.mini_ecommerce.backend_maven.dto.LoginResponse;
+import com.mu54omd.mini_ecommerce.backend_maven.dto.RegisterResponse;
 import com.mu54omd.mini_ecommerce.backend_maven.entity.User;
 import com.mu54omd.mini_ecommerce.backend_maven.service.CustomUserDetailsService;
 import com.mu54omd.mini_ecommerce.backend_maven.security.JwtUtil;
@@ -39,9 +40,9 @@ public class AuthRestController {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
             final UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
             final String token = jwtUtil.generateToken(userDetails.getUsername(), userDetails.getAuthorities().toString());
-            return ResponseEntity.ok(new JwtResponse(token));
+            return ResponseEntity.ok(new LoginResponse(token));
         }catch (Exception e){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginResponse("Invalid username or password"));
         }
     }
 
@@ -50,9 +51,9 @@ public class AuthRestController {
         try {
             user.setRole(User.Role.USER);
             userService.createUser(user);
-            return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully");
+            return ResponseEntity.status(HttpStatus.CREATED).body(new RegisterResponse("User registered successfully"));
         }catch (Exception e){
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new RegisterResponse(e.getMessage()));
         }
     }
 }

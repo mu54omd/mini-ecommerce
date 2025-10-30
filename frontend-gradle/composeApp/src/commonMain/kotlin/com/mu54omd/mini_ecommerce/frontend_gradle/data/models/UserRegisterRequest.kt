@@ -1,0 +1,10 @@
+package com.mu54omd.mini_ecommerce.frontend_gradle.data.models
+
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class UserRegisterRequest(
+    val username: String,
+    val password: String,
+    val email: String,
+)

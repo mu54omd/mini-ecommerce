@@ -2,33 +2,38 @@ package com.mu54omd.mini_ecommerce.frontend_gradle.data.repository
 
 import com.mu54omd.mini_ecommerce.frontend_gradle.api.ApiClient
 import com.mu54omd.mini_ecommerce.frontend_gradle.api.ApiResult
-import com.mu54omd.mini_ecommerce.frontend_gradle.api.ApiResult.*
 import com.mu54omd.mini_ecommerce.frontend_gradle.api.map
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.AuthRequest
-import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.JwtResponse
+import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.LoginResponse
+import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.RegisterResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.User
+import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.UserRegisterRequest
 import com.mu54omd.mini_ecommerce.frontend_gradle.storage.SessionManager
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.toUiState
 
 class AuthRepository(
     private val api: ApiClient,
     private val sessionManager: SessionManager
 ) {
-    suspend fun login(username: String, password: String): ApiResult<String> {
-        var result = api.post<AuthRequest, JwtResponse>("/auth/login", AuthRequest(username, password))
+    suspend fun login(username: String, password: String): ApiResult<LoginResponse> {
+        var result = api.post<AuthRequest, LoginResponse>("/auth/login", AuthRequest(username, password))
             .map(
-                onSuccess = { it.token },
-                onAfterSuccess = { sessionManager.saveToken(it) }
+                onSuccess = { it },
+                onAfterSuccess = { sessionManager.saveToken(it.response) }
             )
         if(result !is ApiResult.Success){
             sessionManager.clearToken()
-            result = api.post<AuthRequest, JwtResponse>("/auth/login", AuthRequest(username, password))
+            result = api.post<AuthRequest, LoginResponse>("/auth/login", AuthRequest(username, password))
                 .map(
-                    onSuccess = { it.token },
-                    onAfterSuccess = { sessionManager.saveToken(it)}
+                    onSuccess = { it },
+                    onAfterSuccess = { sessionManager.saveToken(it.response)}
                 )
         }
         return result
+    }
+
+    suspend fun register(username: String, password: String, email: String): ApiResult<RegisterResponse>{
+        return api.post<UserRegisterRequest, RegisterResponse>("/auth/register", UserRegisterRequest(username, password, email))
+            .map(onSuccess = { it })
     }
 
     suspend fun logout(){
@@ -37,7 +42,7 @@ class AuthRepository(
 
     suspend fun validToken(): String?{
         val token = sessionManager.getToken() ?: ""
-        return if(sessionManager.isTokenValid(token)) token else  null
+        return if(sessionManager.isTokenValid(token)) token else null
     }
 
     suspend fun getUserInfo(): User {

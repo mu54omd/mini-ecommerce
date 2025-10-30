@@ -2,6 +2,8 @@ package com.mu54omd.mini_ecommerce.frontend_gradle.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.LoginResponse
+import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.RegisterResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.User
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.repository.AuthRepository
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
@@ -16,8 +18,8 @@ import kotlinx.coroutines.launch
 
 class AuthViewModel(private val repo: AuthRepository): ViewModel() {
 
-    private val _tokenState: MutableStateFlow<UiState<String>> = MutableStateFlow(UiState.Idle)
-    val tokenState: StateFlow<UiState<String>> = _tokenState.stateIn(
+    private val _tokenState: MutableStateFlow<UiState<LoginResponse>> = MutableStateFlow(UiState.Idle)
+    val tokenState: StateFlow<UiState<LoginResponse>> = _tokenState.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),
             initialValue = UiState.Idle
@@ -26,6 +28,9 @@ class AuthViewModel(private val repo: AuthRepository): ViewModel() {
     private val _userState: MutableStateFlow<User> = MutableStateFlow(User())
     val userState: StateFlow<User> = _userState.asStateFlow()
 
+    private val _registerState: MutableStateFlow<UiState<RegisterResponse>> = MutableStateFlow(UiState.Idle)
+    val registerState = _registerState.asStateFlow()
+
     init {
         validateStoredToken()
         setUserInfo()
@@ -33,6 +38,7 @@ class AuthViewModel(private val repo: AuthRepository): ViewModel() {
     fun reset(){
         _tokenState.update { UiState.Idle }
         _userState.update { User() }
+        _registerState.update { UiState.Idle }
     }
     fun login(username: String, password: String){
         viewModelScope.launch {
@@ -42,8 +48,15 @@ class AuthViewModel(private val repo: AuthRepository): ViewModel() {
             setUserInfo()
         }
     }
+    fun register(username: String, password: String, email: String){
+        viewModelScope.launch {
+            _registerState.update { UiState.Loading }
+            val result = repo.register(username, password, email)
+            _registerState.update { result.toUiState() }
+        }
+    }
     fun logout(cause: UiState<*> = UiState.Idle){
-        _tokenState.update { cause as UiState<String> }
+        _tokenState.update { cause as UiState<LoginResponse> }
         viewModelScope.launch {
             repo.logout()
             setUserInfo()
@@ -52,7 +65,7 @@ class AuthViewModel(private val repo: AuthRepository): ViewModel() {
 
     fun validateStoredToken(){
         viewModelScope.launch {
-            repo.validToken()?.let { token -> _tokenState.update { UiState.Success(token) } }
+            repo.validToken()?.let { token -> _tokenState.update { UiState.Success(LoginResponse(response = token)) } }
         }
     }
 

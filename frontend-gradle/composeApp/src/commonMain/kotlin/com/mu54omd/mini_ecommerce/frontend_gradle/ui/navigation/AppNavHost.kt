@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.ShoppingCartCheckout
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -21,12 +23,15 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -47,6 +52,7 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.HomeScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.LoginScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.OrdersScreen
 import org.koin.compose.viewmodel.koinViewModel
+import kotlin.compareTo
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,11 +66,23 @@ fun AppNavHost(
     val navController = rememberNavController()
     val tokenState = authViewModel.tokenState.collectAsState().value
     val userState = authViewModel.userState.collectAsState().value
-    val bottomBarDestinations = if (userState.role == "ADMIN") {
-        listOf(Screen.Home, Screen.Cart, Screen.Orders, Screen.Admin)
-    } else {
-        listOf(Screen.Home, Screen.Cart, Screen.Orders)
+    val cartState = cartViewModel.cartState.collectAsState().value
+    val cartItemCount by remember(cartState) { derivedStateOf { if (cartState is UiState.Success) cartState.data.items.size else 0 } }
+
+    val bottomBarDestinations = when(userState.role) {
+        "ADMIN" -> listOf(Screen.Home, Screen.Cart, Screen.Orders, Screen.Admin)
+        "USER" -> listOf(Screen.Home, Screen.Cart, Screen.Orders)
+        else -> listOf(Screen.Home)
     }
+
+    fun getCartIcon(): ImageVector {
+        return if (cartItemCount > 0) {
+            Icons.Default.ShoppingCartCheckout
+        } else {
+            Icons.Default.ShoppingCart
+        }
+    }
+
     var selectedDestination by rememberSaveable { mutableIntStateOf(bottomBarDestinations.indices.first) }
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination?.route
     LaunchedEffect(tokenState) {
@@ -100,8 +118,9 @@ fun AppNavHost(
                                 )
                             },
                             icon = {
+                                val iconToShow = if (destination == Screen.Cart) getCartIcon() else destination.icon
                                 Icon(
-                                    imageVector = destination.icon,
+                                    imageVector = iconToShow,
                                     contentDescription = destination.contentDescription
                                 )
                             }
@@ -157,6 +176,11 @@ fun AppNavHost(
                         cartViewModel.reset()
                         orderViewModel.reset()
                         cartViewModel.refresh()
+                        navController.navigate(Screen.Home.route) {
+                            popUpTo(Screen.Login.route) { inclusive = true }
+                        }
+                    },
+                    onLoginAsGuest = {
                         navController.navigate(Screen.Home.route) {
                             popUpTo(Screen.Login.route) { inclusive = true }
                         }
