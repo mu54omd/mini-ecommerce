@@ -19,11 +19,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.CartResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.CartViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.CartList
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.CheckoutDialog
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.EmptyPage
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.LoadingView
@@ -37,37 +39,23 @@ fun CartScreen(
     val cartState = cartViewModel.cartState.collectAsState().value
     var checkoutDialogState by rememberSaveable { mutableStateOf(false) }
 
-    Column(Modifier.fillMaxSize().padding(16.dp)) {
+    Column(
+        modifier = Modifier.fillMaxSize().padding(16.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         when(cartState){
             is UiState.Idle -> {}
             is UiState.Loading -> LoadingView()
             is UiState.Success<CartResponse> -> {
-                val items = cartState.data.items
-                if (items.isEmpty()) {
+                if (cartState.data.items.isEmpty()) {
                     EmptyPage(title = "Oops!", message = "Your cart is empty")
                 } else {
-                    Column(
-                        modifier = Modifier.weight(0.8f)
-                    ) {
-                        items.forEach { item ->
-                            Row(
-                                Modifier.fillMaxWidth().padding(8.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text(item.product.name)
-                                Text("x${item.quantity}")
-                            }
-                        }
-                    }
-                    Spacer(Modifier.height(12.dp))
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier.fillMaxWidth().weight(0.2f)
-                    ) {
-                        Button(onClick = { cartViewModel.clear() }) { Text("Clear Cart") }
-                        Spacer(Modifier.width(8.dp))
-                        Button(onClick = {checkoutDialogState = true} ) { Text("Checkout") }
-                    }
+                    CartList(
+                        cartItems = cartState.data.items,
+                        onCheckoutClick = { checkoutDialogState = true },
+                        onClearCartClick = { cartViewModel.clear() }
+                    )
                 }
                 AnimatedVisibility(
                     visible = checkoutDialogState

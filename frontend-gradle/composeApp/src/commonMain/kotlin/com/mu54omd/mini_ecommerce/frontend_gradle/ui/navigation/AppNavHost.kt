@@ -3,8 +3,10 @@ package com.mu54omd.mini_ecommerce.frontend_gradle.ui.navigation
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -15,6 +17,7 @@ import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -119,18 +122,21 @@ fun AppNavHost(
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold
                     )
-                    IconButton(
+                    TextButton(
                         onClick = {
                             authViewModel.logout()
                             navController.navigate(Screen.Login.route) {
                                 popUpTo(0)
                             }
+                            selectedDestination = bottomBarDestinations.indices.first
                         }
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.Logout,
                             contentDescription = "Logout"
                         )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = "Logout")
                     }
                 }
             }

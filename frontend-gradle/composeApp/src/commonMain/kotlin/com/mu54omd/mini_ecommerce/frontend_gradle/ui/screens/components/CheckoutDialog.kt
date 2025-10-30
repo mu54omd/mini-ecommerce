@@ -25,6 +25,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -33,12 +34,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.CartItemResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.ProductResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.CartViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.helper.calculateTotalPrice
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -70,33 +73,38 @@ fun CheckoutDialog(
                 ) {
                     cartItems.forEach {
                         Row(
-                            modifier = Modifier.padding(2.dp).background(color = MaterialTheme.colorScheme.surfaceBright, shape = RoundedCornerShape(10)).fillMaxWidth().padding(2.dp),
+                            modifier = Modifier.fillMaxWidth().padding(2.dp),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(it.product.name)
                             Text("X${it.quantity}")
                         }
+                        HorizontalDivider()
                     }
                     Spacer(Modifier.height(12.dp))
                 }
-                HorizontalDivider(modifier = Modifier.padding(start = 24.dp, end = 24.dp))
+                HorizontalDivider(modifier = Modifier.padding(start = 24.dp, end = 24.dp), thickness = 3.dp)
                 Spacer(modifier = Modifier.height(16.dp))
-                Text(text = "Total: ${calculateTotalPrice(cartItems)}")
+                Text(text = "Total Price: ${cartItems.calculateTotalPrice()}$", fontWeight = FontWeight.Bold)
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceAround,
                 ) {
-                    Button(onClick = onConfirmClick) { Icon(imageVector = Icons.Default.CheckCircle, contentDescription = "Confirm Checkout") }
+                    TextButton(onClick = onConfirmClick) {
+                        Icon(imageVector = Icons.Default.CheckCircle, contentDescription = "Confirm Checkout")
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(text = "Confirm")
+                    }
                     Spacer(Modifier.width(8.dp))
-                    Button(onClick = onCancelClick) { Icon(imageVector = Icons.Default.Cancel, contentDescription = "Cancel Checkout") }
+                    TextButton(onClick = onCancelClick) {
+                        Icon(imageVector = Icons.Default.Cancel, contentDescription = "Cancel Checkout")
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(text = "Cancel")
+                    }
                 }
             }
         }
     }
-}
-
-private fun calculateTotalPrice(cartItems: List<CartItemResponse>): Double{
-    return cartItems.fold(0.0) { acc, item -> acc + item.quantity * item.product.price }
 }
 
 @Composable
