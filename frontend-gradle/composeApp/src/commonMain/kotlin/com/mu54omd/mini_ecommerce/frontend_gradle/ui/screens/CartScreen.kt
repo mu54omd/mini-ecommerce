@@ -49,7 +49,7 @@ fun CartScreen(
             is UiState.Loading -> LoadingView()
             is UiState.Success<CartResponse> -> {
                 if (cartState.data.items.isEmpty()) {
-                    EmptyPage(title = "Oops!", message = "Your cart is empty")
+                    EmptyPage(title = "Oops!", message = "Your cart is empty!")
                 } else {
                     CartList(
                         cartItems = cartState.data.items,

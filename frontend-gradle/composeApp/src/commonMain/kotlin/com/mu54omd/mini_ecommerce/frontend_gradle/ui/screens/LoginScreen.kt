@@ -130,13 +130,13 @@ fun LoginScreen(
             when (loginState) {
                 is UiState.Idle -> {}
                 is UiState.Loading -> CircularProgressIndicator()
-                is UiState.Error -> Text(
-                    text = "Error: ${(loginState as UiState.Error).message}",
-                    color = Color.Red,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-
+                is UiState.Error -> {
+                    Text(
+                        text = "Error: ${(loginState as UiState.Error).message}",
+                        color = Color.Red,
+                    )
+                    println("Error: ${(loginState as UiState.Error).message}")
+                }
                 is UiState.Success -> {
                     Text(text = "Welcome!")
                     scope.launch {
@@ -154,8 +154,6 @@ fun LoginScreen(
                     Text(
                         text = "Error: ${(registerState as UiState.Error).message}",
                         color = Color.Red,
-//                    maxLines = 1,
-//                    overflow = TextOverflow.Ellipsis
                     )
                     println("Error: ${(registerState as UiState.Error).message}")
                 }

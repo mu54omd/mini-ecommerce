@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -45,5 +46,13 @@ public class ProductService {
                 .orElseThrow(() -> new RuntimeException("Product not found"));
         product.setStock(newStock);
         return productRepository.save(product);
+    }
+
+    public Optional<Product> findById(Long productId){
+        return productRepository.findById(productId);
+    }
+
+    public Optional<Product> findByName(String name){
+        return productRepository.findByName(name);
     }
 }

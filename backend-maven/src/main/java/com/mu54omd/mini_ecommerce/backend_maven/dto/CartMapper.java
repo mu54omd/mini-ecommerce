@@ -30,7 +30,8 @@ public class CartMapper {
                 product.getId(),
                 product.getName(),
                 product.getDescription(),
-                product.getPrice()
+                product.getPrice(),
+                product.getImageUrl()
         );
     }
 }

@@ -49,4 +49,8 @@ class AuthRepository(
         val token = validToken()
         return token?.let { sessionManager.getUserInfo(it) } ?: User()
     }
+
+    suspend fun clearToken(){
+        sessionManager.clearToken()
+    }
 }

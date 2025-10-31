@@ -1,10 +1,20 @@
 package com.mu54omd.mini_ecommerce.frontend_gradle.ui.navigation
 
 import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.expandIn
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.animation.shrinkOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
@@ -14,10 +24,13 @@ import androidx.compose.material.icons.filled.ShoppingCartCheckout
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -31,6 +44,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusModifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -51,6 +66,7 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.CartScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.HomeScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.LoginScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.OrdersScreen
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.ProductSearchBar
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.compareTo
 
@@ -75,11 +91,12 @@ fun AppNavHost(
         else -> listOf(Screen.Home)
     }
 
-    fun getCartIcon(): ImageVector {
+    @Composable
+    fun getCartIcon(): Pair<ImageVector, Color> {
         return if (cartItemCount > 0) {
-            Icons.Default.ShoppingCartCheckout
+            Pair(Icons.Filled.ShoppingCartCheckout, MaterialTheme.colorScheme.error)
         } else {
-            Icons.Default.ShoppingCart
+            Pair(Icons.Filled.ShoppingCart, MaterialTheme.colorScheme.onSurface)
         }
     }
 
@@ -118,10 +135,12 @@ fun AppNavHost(
                                 )
                             },
                             icon = {
-                                val iconToShow = if (destination == Screen.Cart) getCartIcon() else destination.icon
+                                val iconToShow = if (destination == Screen.Cart) getCartIcon().first else destination.icon
+                                val iconColor = if (destination == Screen.Cart) getCartIcon().second else MaterialTheme.colorScheme.onSurface
                                 Icon(
                                     imageVector = iconToShow,
-                                    contentDescription = destination.contentDescription
+                                    contentDescription = destination.contentDescription,
+                                    tint = iconColor
                                 )
                             }
                         )
@@ -132,15 +151,29 @@ fun AppNavHost(
         topBar = {
             if(currentDestination != Screen.Login.route) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    modifier = Modifier.fillMaxWidth().padding(16.dp).height(64.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = currentDestination?.uppercase() ?: "",
                         fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(end = 4.dp)
                     )
+                    AnimatedVisibility(
+                        visible = currentDestination == Screen.Home.route,
+                        enter = scaleIn() + fadeIn(),
+                        exit = scaleOut() + fadeOut(),
+                        modifier = Modifier.weight(0.4f)
+                    ) {
+                        ProductSearchBar(
+                            onQuery = { query -> productViewModel.filterProducts(query) },
+                            onClearQuery = {
+                                productViewModel.loadProducts()
+                            }
+                        )
+                    }
                     TextButton(
                         onClick = {
                             authViewModel.logout()
@@ -148,7 +181,7 @@ fun AppNavHost(
                                 popUpTo(0)
                             }
                             selectedDestination = bottomBarDestinations.indices.first
-                        }
+                        },
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.Logout,
@@ -181,6 +214,7 @@ fun AppNavHost(
                         }
                     },
                     onLoginAsGuest = {
+                        authViewModel.clearToken()
                         navController.navigate(Screen.Home.route) {
                             popUpTo(Screen.Login.route) { inclusive = true }
                         }

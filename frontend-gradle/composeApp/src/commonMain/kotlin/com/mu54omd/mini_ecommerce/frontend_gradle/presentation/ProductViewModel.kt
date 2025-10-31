@@ -34,4 +34,13 @@ class ProductViewModel(private val repo: ProductRepository) : ViewModel() {
             _products.update { result.toUiState() }
         }
     }
+
+    fun filterProducts(query: String){
+        viewModelScope.launch {
+            if(!query.isBlank()) {
+                val result = repo.searchProduct(query)
+                _products.update { result.toUiState() }
+            }
+        }
+    }
 }

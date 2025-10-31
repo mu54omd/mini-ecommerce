@@ -69,6 +69,12 @@ class AuthViewModel(private val repo: AuthRepository): ViewModel() {
         }
     }
 
+    fun clearToken(){
+        viewModelScope.launch {
+            repo.clearToken()
+        }
+    }
+
     private fun setUserInfo(){
         viewModelScope.launch {
             val user = repo.getUserInfo()
@@ -76,4 +82,5 @@ class AuthViewModel(private val repo: AuthRepository): ViewModel() {
             println(userState.value)
         }
     }
+
 }

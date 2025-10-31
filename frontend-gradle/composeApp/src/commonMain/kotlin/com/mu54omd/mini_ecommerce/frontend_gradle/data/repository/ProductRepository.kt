@@ -6,6 +6,8 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.api.ApiResult.*
 import com.mu54omd.mini_ecommerce.frontend_gradle.api.map
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.PageResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.Product
+import io.ktor.http.URLBuilder
+import io.ktor.http.encodeURLParameter
 import kotlin.collections.emptyList
 
 class ProductRepository(private val api: ApiClient) {
@@ -13,6 +15,13 @@ class ProductRepository(private val api: ApiClient) {
         return api.get<PageResponse<Product>>("/products?page=$page&size=$size")
             .map(
                 onSuccess = {it.content}
+            )
+    }
+    suspend fun searchProduct(query: String): ApiResult<List<Product>> {
+        val encodedQuery = query.encodeURLParameter()
+        return api.get<List<Product>>("/products/search?q=$encodedQuery")
+            .map(
+                onSuccess = { it }
             )
     }
 }

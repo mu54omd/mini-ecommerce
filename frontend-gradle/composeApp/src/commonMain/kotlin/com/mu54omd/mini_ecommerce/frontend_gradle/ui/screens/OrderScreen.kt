@@ -41,14 +41,18 @@ fun OrdersScreen(
             is UiState.Idle -> {}
             is UiState.Loading -> LoadingView()
             is UiState.Success<List<OrderResponse>> -> {
-                LazyColumn {
-                    items(ordersState.data) { order ->
-                        Card(Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
-                            Column(Modifier.padding(12.dp)) {
-                                Text("Order #${order.id}")
-                                Text("Status: ${order.status}")
-                                order.items.forEach {
-                                    Text("- ${it.productName} x${it.quantity}")
+                if(ordersState.data.isEmpty()){
+                    EmptyPage("Oops!", "There is no order right now!")
+                }else {
+                    LazyColumn {
+                        items(ordersState.data) { order ->
+                            Card(Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
+                                Column(Modifier.padding(12.dp)) {
+                                    Text("Order #${order.id}")
+                                    Text("Status: ${order.status}")
+                                    order.items.forEach {
+                                        Text("- ${it.productName} x${it.quantity}")
+                                    }
                                 }
                             }
                         }

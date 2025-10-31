@@ -26,6 +26,12 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+//        String path = request.getRequestURI();
+//        if (path.startsWith("/uploads/")) {
+//            filterChain.doFilter(request, response);
+//            return;
+//        }
+
         final String authHeader = request.getHeader("Authorization");
         String username = null;
         String token = null;
