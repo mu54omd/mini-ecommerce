@@ -11,6 +11,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -63,5 +64,13 @@ public class OrderService {
 
     public List<Order> getOrdersByStatus(Order.Status status) {
         return orderRepository.findByStatus(status);
+    }
+
+    public Order updateOrderStatus(Long orderId, Order.Status newStatus){
+        Order order = orderRepository
+                .findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found."));
+        order.setStatus(newStatus);
+        return orderRepository.save(order);
     }
 }

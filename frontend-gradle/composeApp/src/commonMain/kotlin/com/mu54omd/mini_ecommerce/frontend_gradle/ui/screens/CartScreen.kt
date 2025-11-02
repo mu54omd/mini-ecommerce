@@ -39,6 +39,10 @@ fun CartScreen(
     val cartState = cartViewModel.cartState.collectAsState().value
     var checkoutDialogState by rememberSaveable { mutableStateOf(false) }
 
+    LaunchedEffect(Unit){
+        cartViewModel.refresh()
+    }
+
     Column(
         modifier = Modifier.fillMaxSize().padding(16.dp),
         verticalArrangement = Arrangement.Center,

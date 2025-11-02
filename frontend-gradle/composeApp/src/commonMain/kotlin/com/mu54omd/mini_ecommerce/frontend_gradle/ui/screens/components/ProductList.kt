@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -53,6 +54,7 @@ fun ProductList(
             Card(
                 modifier = Modifier.size(300.dp).padding(8.dp),
                 onClick = { },
+                elevation = CardDefaults.cardElevation(4.dp)
             ) {
                 var addedItem by rememberSaveable { mutableIntStateOf(cartItems[product.id] ?: 0) }
                 Box(

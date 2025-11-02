@@ -2,14 +2,10 @@ package com.mu54omd.mini_ecommerce.frontend_gradle.ui.navigation
 
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandHorizontally
-import androidx.compose.animation.expandIn
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.animation.shrinkHorizontally
-import androidx.compose.animation.shrinkOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -23,14 +19,11 @@ import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.ShoppingCartCheckout
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -44,9 +37,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.focusModifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -66,9 +56,9 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.CartScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.HomeScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.LoginScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.OrdersScreen
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.UsersScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.ProductSearchBar
 import org.koin.compose.viewmodel.koinViewModel
-import kotlin.compareTo
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -86,19 +76,24 @@ fun AppNavHost(
     val cartItemCount by remember(cartState) { derivedStateOf { if (cartState is UiState.Success) cartState.data.items.size else 0 } }
 
     val bottomBarDestinations = when(userState.role) {
-        "ADMIN" -> listOf(Screen.Home, Screen.Cart, Screen.Orders, Screen.Admin)
+        "ADMIN" -> listOf(Screen.Home, Screen.Cart, Screen.Users, Screen.Orders, Screen.Admin)
         "USER" -> listOf(Screen.Home, Screen.Cart, Screen.Orders)
         else -> listOf(Screen.Home)
     }
 
-    @Composable
-    fun getCartIcon(): Pair<ImageVector, Color> {
-        return if (cartItemCount > 0) {
-            Pair(Icons.Filled.ShoppingCartCheckout, MaterialTheme.colorScheme.error)
+    val cartIcon = remember(cartItemCount) {
+        if (cartItemCount > 0) {
+            Icons.Filled.ShoppingCartCheckout
         } else {
-            Pair(Icons.Filled.ShoppingCart, MaterialTheme.colorScheme.onSurface)
+            Icons.Filled.ShoppingCart
         }
     }
+    val cartIconColor = if (cartItemCount > 0) {
+            MaterialTheme.colorScheme.error
+        } else {
+            MaterialTheme.colorScheme.onSurface
+        }
+
 
     var selectedDestination by rememberSaveable { mutableIntStateOf(bottomBarDestinations.indices.first) }
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination?.route
@@ -117,13 +112,6 @@ fun AppNavHost(
                         NavigationBarItem(
                             selected = selectedDestination == index,
                             onClick = {
-                                when(destination){
-                                    Screen.Cart -> { cartViewModel.refresh() }
-                                    Screen.Home -> { cartViewModel.refresh() }
-                                    Screen.Login -> {}
-                                    Screen.Orders -> { orderViewModel.load() }
-                                    Screen.Admin -> {}
-                                }
                                 navController.navigate(route = destination.route)
                                 selectedDestination = index
                             },
@@ -135,8 +123,8 @@ fun AppNavHost(
                                 )
                             },
                             icon = {
-                                val iconToShow = if (destination == Screen.Cart) getCartIcon().first else destination.icon
-                                val iconColor = if (destination == Screen.Cart) getCartIcon().second else MaterialTheme.colorScheme.onSurface
+                                val iconToShow = if (destination == Screen.Cart) cartIcon else destination.icon
+                                val iconColor = if (destination == Screen.Cart) cartIconColor else MaterialTheme.colorScheme.onSurface
                                 Icon(
                                     imageVector = iconToShow,
                                     contentDescription = destination.contentDescription,
@@ -169,9 +157,7 @@ fun AppNavHost(
                     ) {
                         ProductSearchBar(
                             onQuery = { query -> productViewModel.filterProducts(query) },
-                            onClearQuery = {
-                                productViewModel.loadProducts()
-                            }
+                            onClearQuery = { productViewModel.loadProducts() }
                         )
                     }
                     TextButton(
@@ -225,6 +211,15 @@ fun AppNavHost(
             composable(Screen.Admin.route) {
                 AdminPanelScreen(
                     adminViewModel = adminViewModel,
+                )
+            }
+
+            composable(Screen.Users.route) {
+                UsersScreen(
+                    adminViewModel = adminViewModel,
+                    onExit = { state ->
+                        authViewModel.logout(state)
+                    }
                 )
             }
 

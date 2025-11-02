@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.Shop
 import androidx.compose.material.icons.filled.ShoppingBasket
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.ShoppingCartCheckout
+import androidx.compose.material.icons.filled.SwitchAccount
 import androidx.compose.ui.graphics.vector.ImageVector
 enum class Screen(
     val route: String,
@@ -21,6 +22,7 @@ enum class Screen(
     Home("home", "Home", Icons.Default.Home, "Home Screen"),
     Login("login", "Login", Icons.AutoMirrored.Filled.Login, "Login Screen"),
     Cart("cart", "Cart", Icons.Default.ShoppingCart, "User Cart Screen"),
+    Users("users", "Users", Icons.Default.SwitchAccount, "Admin Users Screen"),
     Orders("orders", "Orders", Icons.Default.ShoppingBasket, "Orders Screen"),
     Admin("admin", "Admin", Icons.Default.AdminPanelSettings, "Admin Panel Screen"),
 }

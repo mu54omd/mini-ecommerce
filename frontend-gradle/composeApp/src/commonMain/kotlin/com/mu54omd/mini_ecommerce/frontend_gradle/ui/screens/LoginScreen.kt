@@ -115,7 +115,10 @@ fun LoginScreen(
                     if(haveAnAccount) Text("Login") else Text("Register")
                 }
                 TextButton(
-                    onClick = { haveAnAccount = !haveAnAccount }
+                    onClick = {
+                        authViewModel.reset()
+                        haveAnAccount = !haveAnAccount
+                    }
                 ) {
                     if(!haveAnAccount) Text("I have an account!") else Text("Don't have an account!")
                 }
@@ -161,6 +164,12 @@ fun LoginScreen(
                 is UiState.Success -> {
                     Text(text = (registerState as UiState.Success<RegisterResponse>).data.message)
                     haveAnAccount = true
+                    email = ""
+                    password = ""
+                    scope.launch {
+                        delay(1000)
+                        authViewModel.reset()
+                    }
                 }
 
                 is UiState.Unauthorized -> Text("Invalid credentials", color = Color.Red)

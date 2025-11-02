@@ -5,8 +5,10 @@ import com.mu54omd.mini_ecommerce.backend_maven.entity.User;
 import com.mu54omd.mini_ecommerce.backend_maven.repository.CartRepository;
 import com.mu54omd.mini_ecommerce.backend_maven.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -35,6 +37,25 @@ public class UserService {
         User newUser = userRepository.save(user);
         cartRepository.save(new Cart(user));
         return newUser;
+    }
+
+    public User editUser(Long userId, User newUser){
+        User oldUser = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        User.Role role;
+        try {
+            role = User.Role.valueOf(newUser.getRole().toString().toUpperCase());
+        }catch (IllegalArgumentException e){
+            throw new RuntimeException("Invalid user role: " + newUser.getRole());
+        }
+        oldUser.setUsername(newUser.getUsername());
+        oldUser.setEmail(newUser.getEmail());
+        if(!newUser.getPassword().isBlank()) {
+            oldUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
+        }
+        oldUser.setRole(role);
+        userRepository.save(oldUser);
+        return oldUser;
     }
 
     public List<User> getAllUsers(){

@@ -79,7 +79,6 @@ class AuthViewModel(private val repo: AuthRepository): ViewModel() {
         viewModelScope.launch {
             val user = repo.getUserInfo()
            _userState.update { user }
-            println(userState.value)
         }
     }
 

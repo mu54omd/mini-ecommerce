@@ -22,6 +22,11 @@ public class UserRestController {
         return ResponseEntity.ok(userService.createUser(user));
     }
 
+    @PutMapping("/{userId}")
+    public ResponseEntity<User> editUser(@PathVariable Long userId, @RequestBody User user){
+        return ResponseEntity.ok(userService.editUser(userId, user));
+    }
+
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers(){
         return ResponseEntity.ok(userService.getAllUsers());

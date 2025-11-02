@@ -6,7 +6,9 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,5 +46,8 @@ fun ProductSearchBar(
         },
         modifier = Modifier.scale(0.8f),
         maxLines = 1,
+        placeholder = {
+            Text("Search Products", color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
+        }
     )
 }

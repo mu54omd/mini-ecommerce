@@ -41,7 +41,10 @@ fun HomeScreen(
     val productState = productViewModel.products.collectAsState().value
     val cartState = cartViewModel.cartState.collectAsState().value
     val cartItems: Map<Long, Int> = if (cartState is UiState.Success) cartState.data.items.associate { (_, product, quantity) -> product.id to quantity } else emptyMap()
-    LaunchedEffect(Unit) { productViewModel.loadProducts() }
+    LaunchedEffect(Unit) {
+        productViewModel.loadProducts()
+        cartViewModel.refresh()
+    }
 
     when(productState){
         is UiState.Idle -> {}

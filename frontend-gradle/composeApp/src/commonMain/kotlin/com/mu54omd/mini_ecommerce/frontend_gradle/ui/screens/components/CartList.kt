@@ -68,7 +68,7 @@ fun CartList(
         contentAlignment = Alignment.TopCenter
     ) {
         Column(
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .align(Alignment.TopCenter)
@@ -91,7 +91,6 @@ fun CartList(
                         },
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    println(item.product.imageUrl)
                     AsyncImage(
                         model = item.product.imageUrl,
                         contentDescription = "Product Image",

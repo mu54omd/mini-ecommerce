@@ -25,6 +25,7 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.OrderViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.EmptyPage
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.LoadingView
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.OrderList
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -44,19 +45,7 @@ fun OrdersScreen(
                 if(ordersState.data.isEmpty()){
                     EmptyPage("Oops!", "There is no order right now!")
                 }else {
-                    LazyColumn {
-                        items(ordersState.data) { order ->
-                            Card(Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
-                                Column(Modifier.padding(12.dp)) {
-                                    Text("Order #${order.id}")
-                                    Text("Status: ${order.status}")
-                                    order.items.forEach {
-                                        Text("- ${it.productName} x${it.quantity}")
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    OrderList(orderItems = ordersState.data)
                 }
             }
             else -> onExit(ordersState)

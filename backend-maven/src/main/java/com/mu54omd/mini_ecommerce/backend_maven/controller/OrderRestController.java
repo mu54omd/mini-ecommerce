@@ -65,4 +65,15 @@ public class OrderRestController {
         List<Order> orders = orderService.getOrdersByStatus(s);
         return ResponseEntity.ok(OrderMapper.toDtoList(orders));
     }
+
+    @PostMapping("/status/{orderId}")
+    public ResponseEntity<OrderResponse> updateOrderStatus(@PathVariable Long orderId, @RequestParam String status){
+        Order.Status s;
+        try{
+            s = Order.Status.valueOf(status.toUpperCase());
+        }catch (IllegalArgumentException e){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid order status: " + status);
+        }
+        return ResponseEntity.ok(OrderMapper.toDto(orderService.updateOrderStatus(orderId, s)));
+    }
 }
