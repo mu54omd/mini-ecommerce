@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.OrderResponse
 
 @Composable
-fun OrderList(orderItems: List<OrderResponse>) {
+fun MyOrdersList(orderItems: List<OrderResponse>) {
     LazyColumn {
         items(orderItems) { order ->
             Card(Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
