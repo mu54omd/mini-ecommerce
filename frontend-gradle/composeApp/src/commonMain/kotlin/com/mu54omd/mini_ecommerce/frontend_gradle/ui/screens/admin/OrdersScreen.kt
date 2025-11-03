@@ -1,4 +1,4 @@
-package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens
+package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.admin
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,9 +11,9 @@ import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.OrderResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.AdminViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.EmptyPage
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.LoadingView
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.OrdersList
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.EmptyPage
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.LoadingView
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.admin.components.OrdersList
 
 @Composable
 fun OrdersScreen(

@@ -36,6 +36,12 @@ public class OrderRestController {
         return ResponseEntity.ok(order);
     }
 
+    @GetMapping
+    public ResponseEntity<List<OrderResponse>> getAllOrders() {
+        List<Order> orders = orderService.getAllOrders();
+        return ResponseEntity.ok(OrderMapper.toDtoList(orders));
+    }
+
     @GetMapping("/user/{username}")
     public ResponseEntity<List<OrderResponse>> getOrdersByUser(@PathVariable String username) {
         User user = userService.findByUsername(username)
@@ -44,7 +50,7 @@ public class OrderRestController {
         return ResponseEntity.ok(OrderMapper.toDtoList(orders));
     }
 
-    @GetMapping()
+    @GetMapping("/myOrders")
     public ResponseEntity<List<OrderResponse>> getOrders(@AuthenticationPrincipal UserDetails userDetails) {
         User user = userService.findByUsername(userDetails.getUsername())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));

@@ -4,6 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.filled.AddShoppingCart
 import androidx.compose.material.icons.filled.AdminPanelSettings
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Login
 import androidx.compose.material.icons.filled.Payments
@@ -21,8 +22,10 @@ enum class Screen(
 ) {
     Home("home", "Home", Icons.Default.Home, "Home Screen"),
     Login("login", "Login", Icons.AutoMirrored.Filled.Login, "Login Screen"),
-    Cart("cart", "Cart", Icons.Default.ShoppingCart, "User Cart Screen"),
+    Cart("cart", "My Cart", Icons.Default.ShoppingCart, "User Cart Screen"),
+    MyOrders("myOrders", "My Orders", Icons.Default.ShoppingCart, "My Orders Cart Screen"),
     Users("users", "Users", Icons.Default.SwitchAccount, "Admin Users Screen"),
     Orders("orders", "Orders", Icons.Default.ShoppingBasket, "Orders Screen"),
+    Products("products", "Products", Icons.Default.Edit, "Products Screen"),
     Admin("admin", "Admin", Icons.Default.AdminPanelSettings, "Admin Panel Screen"),
 }

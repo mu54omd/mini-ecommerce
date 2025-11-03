@@ -1,4 +1,4 @@
-package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components
+package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -16,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.text.style.TextOverflow
 
 @Composable
 fun ProductSearchBar(
@@ -47,7 +48,7 @@ fun ProductSearchBar(
         modifier = Modifier.scale(0.8f),
         maxLines = 1,
         placeholder = {
-            Text("Search Products", color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
+            Text("Search Products", color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), overflow = TextOverflow.Ellipsis)
         }
     )
 }

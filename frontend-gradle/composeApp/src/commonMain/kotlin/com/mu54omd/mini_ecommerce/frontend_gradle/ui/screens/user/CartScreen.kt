@@ -1,17 +1,10 @@
-package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens
+package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.user
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -25,10 +18,10 @@ import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.CartResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.CartViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.CartList
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.CheckoutDialog
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.EmptyPage
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.LoadingView
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.user.components.CartList
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.CheckoutDialog
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.EmptyPage
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.LoadingView
 
 @Composable
 fun CartScreen(

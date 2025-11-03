@@ -1,8 +1,9 @@
-package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens
+package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.admin
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,12 +31,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.UserResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.AdminViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.EditUserDialog
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.LoadingView
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.admin.components.EditUserDialog
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.LoadingView
 
 @Composable
 fun UsersScreen(
@@ -64,44 +66,66 @@ fun UsersScreen(
                         Card(
                             modifier = Modifier.padding(4.dp),
                         ) {
-                            Column(modifier = Modifier.padding(12.dp)) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
+                            Box(
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Column(modifier = Modifier.padding(12.dp).align(Alignment.TopCenter)) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = "User ID: ${user.id}",
+                                            style = MaterialTheme.typography.titleSmall,
+                                            fontWeight = FontWeight.Bold,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                        Text(
+                                            text = user.role,
+                                            style = MaterialTheme.typography.titleSmall,
+                                            fontWeight = FontWeight.Bold,
+                                            modifier = Modifier.background(
+                                                color = MaterialTheme.colorScheme.surface,
+                                                shape = RoundedCornerShape(20)
+                                            ).padding(4.dp),
+                                            color = if (user.role == "ADMIN") MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.tertiary,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
                                     Text(
-                                        text = "User ID: ${user.id}",
+                                        text = "Username: ${user.username}",
                                         style = MaterialTheme.typography.titleSmall,
-                                        fontWeight = FontWeight.Bold
+                                        fontStyle = FontStyle.Italic,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
                                     )
                                     Text(
-                                        text = user.role,
+                                        text = "Email: ${user.email}",
                                         style = MaterialTheme.typography.titleSmall,
-                                        fontWeight = FontWeight.Bold,
-                                        modifier = Modifier.background(
-                                            color = MaterialTheme.colorScheme.surface,
-                                            shape = RoundedCornerShape(20)
-                                        ).padding(4.dp)
+                                        fontStyle = FontStyle.Italic,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    Text(
+                                        text = "Creation date: ${user.createdAt.split("T").first()}",
+                                        style = MaterialTheme.typography.titleSmall,
+                                        fontStyle = FontStyle.Italic,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    Text(
+                                        text = "Creation Time: ${user.createdAt.split("T").last()}",
+                                        style = MaterialTheme.typography.titleSmall,
+                                        fontStyle = FontStyle.Italic,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
                                     )
                                 }
-                                Text(
-                                    text = "Username: ${user.username}",
-                                    style = MaterialTheme.typography.titleSmall,
-                                    fontStyle = FontStyle.Italic
-                                )
-                                Text(
-                                    text = "Email: ${user.email}",
-                                    style = MaterialTheme.typography.titleSmall,
-                                    fontStyle = FontStyle.Italic
-                                )
-                                Text(
-                                    text = "Creation date: ${user.createdAt}",
-                                    style = MaterialTheme.typography.titleSmall,
-                                    fontStyle = FontStyle.Italic
-                                )
                                 Row(
-                                    modifier = Modifier.fillMaxWidth().padding(2.dp),
+                                    modifier = Modifier.fillMaxWidth().padding(2.dp).align(Alignment.BottomEnd),
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.End
                                 ) {

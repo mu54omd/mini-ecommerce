@@ -2,6 +2,7 @@ package com.mu54omd.mini_ecommerce.frontend_gradle.ui.navigation
 
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -51,13 +52,15 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.CartViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.OrderViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.ProductViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.AdminPanelScreen
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.CartScreen
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.HomeScreen
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.admin.AdminPanelScreen
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.user.CartScreen
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.user.HomeScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.LoginScreen
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.OrdersScreen
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.UsersScreen
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.ProductSearchBar
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.user.MyOrdersScreen
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.admin.OrdersScreen
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.admin.ProductsScreen
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.admin.UsersScreen
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.ProductSearchBar
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -75,9 +78,9 @@ fun AppNavHost(
     val cartState = cartViewModel.cartState.collectAsState().value
     val cartItemCount by remember(cartState) { derivedStateOf { if (cartState is UiState.Success) cartState.data.items.size else 0 } }
 
-    val bottomBarDestinations = when(userState.role) {
-        "ADMIN" -> listOf(Screen.Home, Screen.Cart, Screen.Users, Screen.Orders, Screen.Admin)
-        "USER" -> listOf(Screen.Home, Screen.Cart, Screen.Orders)
+    val bottomBarDestinations = when (userState.role) {
+        "ADMIN" -> listOf(Screen.Products, Screen.Users, Screen.Orders, Screen.Admin)
+        "USER" -> listOf(Screen.Home, Screen.Cart, Screen.MyOrders)
         else -> listOf(Screen.Home)
     }
 
@@ -89,10 +92,10 @@ fun AppNavHost(
         }
     }
     val cartIconColor = if (cartItemCount > 0) {
-            MaterialTheme.colorScheme.error
-        } else {
-            MaterialTheme.colorScheme.onSurface
-        }
+        MaterialTheme.colorScheme.error
+    } else {
+        MaterialTheme.colorScheme.onSurface
+    }
 
 
     var selectedDestination by rememberSaveable { mutableIntStateOf(bottomBarDestinations.indices.first) }
@@ -118,13 +121,15 @@ fun AppNavHost(
                             label = {
                                 Text(
                                     text = destination.label,
-                                    maxLines = 2,
+                                    maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )
                             },
                             icon = {
-                                val iconToShow = if (destination == Screen.Cart) cartIcon else destination.icon
-                                val iconColor = if (destination == Screen.Cart) cartIconColor else MaterialTheme.colorScheme.onSurface
+                                val iconToShow =
+                                    if (destination == Screen.Cart) cartIcon else destination.icon
+                                val iconColor =
+                                    if (destination == Screen.Cart) cartIconColor else MaterialTheme.colorScheme.onSurface
                                 Icon(
                                     imageVector = iconToShow,
                                     contentDescription = destination.contentDescription,
@@ -137,7 +142,7 @@ fun AppNavHost(
             }
         },
         topBar = {
-            if(currentDestination != Screen.Login.route) {
+            if (currentDestination != Screen.Login.route) {
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(16.dp).height(64.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -145,19 +150,23 @@ fun AppNavHost(
                 ) {
                     Text(
                         text = currentDestination?.uppercase() ?: "",
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(end = 4.dp)
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.ExtraBold,
+                        modifier = Modifier.width(100.dp).padding(end = 2.dp),
                     )
                     AnimatedVisibility(
-                        visible = currentDestination == Screen.Home.route,
-                        enter = scaleIn() + fadeIn(),
-                        exit = scaleOut() + fadeOut(),
+                        visible = currentDestination == Screen.Home.route || currentDestination == Screen.Products.route,
+                        enter = scaleIn(tween()) + fadeIn(),
+                        exit = scaleOut(tween()) + fadeOut(),
                         modifier = Modifier.weight(0.4f)
                     ) {
                         ProductSearchBar(
-                            onQuery = { query -> productViewModel.filterProducts(query) },
-                            onClearQuery = { productViewModel.loadProducts() }
+                            onQuery = { query ->
+                                if (currentDestination == Screen.Home.route) productViewModel.filterProducts(
+                                    query
+                                ) else adminViewModel.filterProducts(query)
+                            },
+                            onClearQuery = { if (currentDestination == Screen.Home.route) productViewModel.loadProducts() else adminViewModel.getAllProducts() }
                         )
                     }
                     TextButton(
@@ -174,7 +183,7 @@ fun AppNavHost(
                             contentDescription = "Logout"
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = "Logout")
+                        Text(text = "Logout", overflow = TextOverflow.Ellipsis, maxLines = 1)
                     }
                 }
             }
@@ -195,7 +204,7 @@ fun AppNavHost(
                         cartViewModel.reset()
                         orderViewModel.reset()
                         cartViewModel.refresh()
-                        navController.navigate(Screen.Home.route) {
+                        navController.navigate(bottomBarDestinations.first().route) {
                             popUpTo(Screen.Login.route) { inclusive = true }
                         }
                     },
@@ -223,6 +232,20 @@ fun AppNavHost(
                 )
             }
 
+            composable(Screen.Orders.route) {
+                OrdersScreen(
+                    adminViewModel = adminViewModel,
+                    onExit = { state -> authViewModel.logout(state) }
+                )
+            }
+
+            composable(Screen.Products.route) {
+                ProductsScreen(
+                    adminViewModel = adminViewModel,
+                    onExit = { state -> authViewModel.logout(state) }
+                )
+            }
+
             composable(Screen.Home.route) {
                 HomeScreen(
                     productViewModel = productViewModel,
@@ -243,15 +266,15 @@ fun AppNavHost(
                         cartViewModel.checkout()
                         orderViewModel.load()
                         selectedDestination = 2
-                        navController.navigate(Screen.Orders.route) {
+                        navController.navigate(Screen.MyOrders.route) {
                             popUpTo(Screen.Home.route)
                         }
                     }
                 )
             }
 
-            composable(Screen.Orders.route) {
-                OrdersScreen(
+            composable(Screen.MyOrders.route) {
+                MyOrdersScreen(
                     orderViewModel = orderViewModel,
                     onExit = { state -> authViewModel.logout(state) }
                 )

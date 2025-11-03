@@ -1,5 +1,6 @@
-package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components
+package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.admin.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
@@ -15,10 +16,9 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.BrokenImage
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -26,12 +26,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -45,7 +42,7 @@ fun ProductEditList(
     onEditClick: (Long) -> Unit,
     onRemoveClick: (Long) -> Unit,
     modifier: Modifier = Modifier
-    ) {
+) {
 
     LazyVerticalGrid(
         modifier = modifier,
@@ -61,17 +58,28 @@ fun ProductEditList(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier.weight(0.7f)
                 ) {
-                    AsyncImage(
-                        model = product.imageUrl,
-                        contentDescription = product.description,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
+                    product.imageUrl?.let {
+                        AsyncImage(
+                            model = product.imageUrl,
+                            contentDescription = product.description,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    } ?: Image(
+                        imageVector = Icons.Default.BrokenImage,
+                        contentDescription = "Product With No Image",
+                        modifier = Modifier.fillMaxSize(0.5f),
+                        colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.onPrimaryContainer)
                     )
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .align(Alignment.BottomCenter)
-                            .background(color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5f)).height(70.dp)
+                            .background(
+                                color = MaterialTheme.colorScheme.tertiaryContainer.copy(
+                                    alpha = 0.7f
+                                )
+                            ).height(70.dp)
                             .padding(4.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
@@ -79,9 +87,24 @@ fun ProductEditList(
                         Column(
                             modifier = Modifier.weight(0.5f)
                         ) {
-                            Text(product.name, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleSmall, overflow = TextOverflow.Ellipsis, modifier = Modifier.basicMarquee())
-                            Text("${product.price} $", style = MaterialTheme.typography.bodyMedium)
-                            Text("#${product.stock}", style = MaterialTheme.typography.bodySmall)
+                            Text(
+                                product.name,
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.titleSmall,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.basicMarquee(),
+                                color = MaterialTheme.colorScheme.onTertiaryContainer
+                            )
+                            Text(
+                                text = "${product.price} $",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onTertiaryContainer
+                            )
+                            Text(
+                                text = "#${product.stock}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onTertiaryContainer
+                            )
                         }
                     }
                     Row(
