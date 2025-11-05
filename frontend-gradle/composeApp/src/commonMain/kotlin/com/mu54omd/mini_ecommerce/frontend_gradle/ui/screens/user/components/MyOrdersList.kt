@@ -16,11 +16,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.OrderResponse
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.helper.getOrderStatusColor
 
 @Composable
 fun MyOrdersList(orderItems: List<OrderResponse>) {
@@ -62,15 +62,5 @@ fun MyOrdersList(orderItems: List<OrderResponse>) {
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun getOrderStatusColor(status: String): Color {
-    return when(status){
-        "PAID" -> MaterialTheme.colorScheme.secondary
-        "SHIPPED" -> MaterialTheme.colorScheme.tertiary
-        "CANCELLED" -> MaterialTheme.colorScheme.error
-        else -> MaterialTheme.colorScheme.primary
     }
 }

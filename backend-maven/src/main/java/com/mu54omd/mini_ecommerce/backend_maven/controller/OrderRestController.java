@@ -72,7 +72,7 @@ public class OrderRestController {
         return ResponseEntity.ok(OrderMapper.toDtoList(orders));
     }
 
-    @PostMapping("/status/{orderId}")
+    @PutMapping("/status/{orderId}")
     public ResponseEntity<OrderResponse> updateOrderStatus(@PathVariable Long orderId, @RequestParam String status){
         Order.Status s;
         try{

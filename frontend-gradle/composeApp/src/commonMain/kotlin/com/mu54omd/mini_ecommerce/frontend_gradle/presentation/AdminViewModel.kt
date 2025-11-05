@@ -29,6 +29,9 @@ class AdminViewModel(private val repo: AdminRepository): ViewModel() {
     private val _ordersState = MutableStateFlow<UiState<List<OrderResponse>>>(UiState.Idle)
     val ordersState = _ordersState.asStateFlow()
 
+    private val _orderStatusState = MutableStateFlow<UiState<OrderResponse>>(UiState.Idle)
+    val orderStatusState = _orderStatusState.asStateFlow()
+
     private val _productsState = MutableStateFlow<UiState<List<Product>>>(UiState.Idle)
     val productsState = _productsState.asStateFlow()
 
@@ -113,6 +116,15 @@ class AdminViewModel(private val repo: AdminRepository): ViewModel() {
             _ordersState.update { UiState.Idle }
             val result = repo.getOrders()
             _ordersState.update { result.toUiState() }
+        }
+    }
+
+    fun updateOrderStatus(orderId: Long, newStatus: String){
+        viewModelScope.launch {
+            _orderStatusState.update { UiState.Loading }
+            val result = repo.updateOrderStatus(orderId, newStatus)
+            _orderStatusState.update { result.toUiState() }
+            println(orderStatusState.value)
         }
     }
 }

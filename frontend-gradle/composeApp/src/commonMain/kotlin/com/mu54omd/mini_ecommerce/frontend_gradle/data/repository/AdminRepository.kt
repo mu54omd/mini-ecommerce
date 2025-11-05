@@ -32,5 +32,5 @@ class AdminRepository(private val api: ApiClient) {
     suspend fun updateProductStock(id: Long, stock: Int): ApiResult<Product> = api.put("/products/$id/stock?stock=$stock", "")
     suspend fun deleteProduct(id: Long): ApiResult<Unit> = api.delete("/products?productId=$id")
     suspend fun getOrders(): ApiResult<List<OrderResponse>> = api.get("/orders")
-    suspend fun updateOrderStatus(id: Long, status: String): ApiResult<OrderResponse> = api.put("/api/orders/$id/status?status=$status", "")
+    suspend fun updateOrderStatus(orderId: Long, status: String): ApiResult<OrderResponse> = api.put("/orders/status/$orderId?status=$status", "")
 }

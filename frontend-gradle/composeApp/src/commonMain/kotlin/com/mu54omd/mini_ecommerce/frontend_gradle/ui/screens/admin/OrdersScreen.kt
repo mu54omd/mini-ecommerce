@@ -11,9 +11,9 @@ import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.OrderResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.AdminViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.admin.components.OrdersList
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.EmptyPage
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.LoadingView
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.admin.components.OrdersList
 
 @Composable
 fun OrdersScreen(
@@ -21,20 +21,31 @@ fun OrdersScreen(
     onExit: (UiState<*>) -> Unit
 ) {
     val ordersState = adminViewModel.ordersState.collectAsState().value
-    LaunchedEffect(Unit){
+    val orderStatusState = adminViewModel.orderStatusState.collectAsState().value
+
+    LaunchedEffect(Unit) {
         adminViewModel.refresh()
     }
     Column(Modifier.fillMaxSize().padding(16.dp)) {
-        when(ordersState){
+        when (ordersState) {
             is UiState.Idle -> {}
             is UiState.Loading -> LoadingView()
             is UiState.Success<List<OrderResponse>> -> {
-                if(ordersState.data.isEmpty()){
+                if (ordersState.data.isEmpty()) {
                     EmptyPage("Oops!", "There is no order right now!")
-                }else {
-                    OrdersList(orderItems = ordersState.data)
+                } else {
+                    OrdersList(
+                        orderItems = ordersState.data,
+                        onCancelChangesClick = { adminViewModel.getAllOrders() },
+                        onConfirmChangesClick = { changedOrders ->
+                            changedOrders.forEach { (orderId, newStatus) ->
+                                adminViewModel.updateOrderStatus(orderId, newStatus)
+                            }
+                        }
+                    )
                 }
             }
+
             else -> onExit(ordersState)
         }
     }

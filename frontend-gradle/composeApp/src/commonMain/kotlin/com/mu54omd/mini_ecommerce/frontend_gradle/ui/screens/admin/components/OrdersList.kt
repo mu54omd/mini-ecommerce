@@ -1,31 +1,82 @@
 package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.admin.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CardElevation
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.OrderResponse
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.helper.getOrderStatusColor
+import kotlin.collections.getValue
+import kotlin.collections.mutableMapOf
 
 @Composable
-fun OrdersList(orderItems: List<OrderResponse>) {
+fun OrdersList(
+    orderItems: List<OrderResponse>,
+    onCancelChangesClick: () -> Unit,
+    onConfirmChangesClick: (Map<Long, String>) -> Unit,
+) {
     val groupedOrders = orderItems.groupBy { it.username }
+    val statusList = listOf("CREATED", "PAID", "SHIPPED", "CANCELLED")
+    var isStatusChanged by rememberSaveable { mutableStateOf(false) }
+    val changedOrder = rememberSaveable { mutableMapOf<Long, String>() }
+
+    AnimatedVisibility(
+        visible = isStatusChanged,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            TextButton(onClick = {
+                isStatusChanged = false
+                onCancelChangesClick()
+                changedOrder.clear()
+            }) {
+                Text(text = "Cancel Changes")
+            }
+            TextButton(onClick = {
+                isStatusChanged = false
+                onConfirmChangesClick(changedOrder)
+            }) {
+                Text(text = "Confirm Changes")
+            }
+        }
+    }
     LazyColumn {
         groupedOrders.forEach { (username, orderItems) ->
             stickyHeader {
@@ -43,7 +94,10 @@ fun OrdersList(orderItems: List<OrderResponse>) {
                 }
             }
             items(orderItems) { order ->
-                Card(Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
+                var status by remember { mutableStateOf(statusList.indexOf(order.status.uppercase())) }
+                Card(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+                ) {
                     Column {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -56,14 +110,26 @@ fun OrdersList(orderItems: List<OrderResponse>) {
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                text = order.status,
+                                text = statusList[status],
                                 style = MaterialTheme.typography.bodyMedium,
+                                textAlign = TextAlign.Center,
                                 fontWeight = FontWeight.Bold,
-                                modifier = Modifier.background(
-                                    color = MaterialTheme.colorScheme.surface,
-                                    shape = RoundedCornerShape(40)
-                                ).padding(start = 2.dp, end = 2.dp),
-                                color = getOrderStatusColor(order.status)
+                                modifier = Modifier
+                                    .width(90.dp)
+                                    .clip(shape = RoundedCornerShape(40))
+                                    .clickable {
+                                        status = (status + 1) % 4
+                                        isStatusChanged = true
+                                        if (changedOrder[order.id].isNullOrBlank()) {
+                                            changedOrder[order.id] = statusList[status]
+                                        } else {
+                                            changedOrder.put(order.id, statusList[status])
+                                        }
+                                    }
+                                    .background(
+                                        color = getOrderStatusColor(statusList[status]),
+                                    ).padding(start = 2.dp, end = 2.dp),
+                                color = MaterialTheme.colorScheme.surface
                             )
                         }
                         HorizontalDivider(
@@ -83,15 +149,5 @@ fun OrdersList(orderItems: List<OrderResponse>) {
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun getOrderStatusColor(status: String): Color {
-    return when (status) {
-        "PAID" -> MaterialTheme.colorScheme.secondary
-        "SHIPPED" -> MaterialTheme.colorScheme.tertiary
-        "CANCELLED" -> MaterialTheme.colorScheme.error
-        else -> MaterialTheme.colorScheme.primary
     }
 }
