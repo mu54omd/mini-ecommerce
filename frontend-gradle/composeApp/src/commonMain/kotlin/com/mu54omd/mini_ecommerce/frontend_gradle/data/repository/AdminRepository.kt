@@ -16,10 +16,14 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.encodeURLParameter
 
 class AdminRepository(private val api: ApiClient) {
+
+    //============= Users ===========
     suspend fun getAllUsers(): ApiResult<List<UserResponse>> = api.get("/users")
     suspend fun deleteUser(userId: Long): ApiResult<Unit> = api.delete("/users/${userId}")
     suspend fun editUser(userId: Long, user: UserEditRequest): ApiResult<UserResponse> =
         api.put("/users/${userId}", user)
+
+    //============= Products ===========
 
     suspend fun getAllProducts(page: Int = 0, size: Int = 20): ApiResult<List<Product>> {
         return api.get<PageResponse<Product>>("/products?page=$page&size=$size")
@@ -28,7 +32,6 @@ class AdminRepository(private val api: ApiClient) {
             )
 
     }
-
     suspend fun searchProduct(query: String): ApiResult<List<Product>> {
         val encodedQuery = query.encodeURLParameter()
         return api.get<List<Product>>("/products/search?q=$encodedQuery")
@@ -59,11 +62,16 @@ class AdminRepository(private val api: ApiClient) {
             )
         )
     }
+    suspend fun editProduct(product: Product): ApiResult<Product>{
+        return api.put("/products", product)
+    }
 
     suspend fun updateProductStock(id: Long, stock: Int): ApiResult<Product> =
         api.put("/products/$id/stock?stock=$stock", "")
 
     suspend fun deleteProduct(id: Long): ApiResult<Unit> = api.delete("/products?productId=$id")
+    //============= Orders ===========
+
     suspend fun getOrders(): ApiResult<List<OrderResponse>> = api.get("/orders")
     suspend fun updateOrderStatus(orderId: Long, status: String): ApiResult<OrderResponse> =
         api.put("/orders/status/$orderId?status=$status", "")

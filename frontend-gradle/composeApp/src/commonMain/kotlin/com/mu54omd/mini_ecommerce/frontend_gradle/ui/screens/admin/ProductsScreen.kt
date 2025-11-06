@@ -21,17 +21,14 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.Product
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.AdminViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.admin.components.AddOrEditProduct
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.admin.components.ProductEditList
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.EmptyPage
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.LoadingView
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.admin.components.ProductEditList
 import io.github.vinceglb.filekit.dialogs.FileKitMode
 import io.github.vinceglb.filekit.dialogs.FileKitType
 import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
-import io.github.vinceglb.filekit.extension
 import io.github.vinceglb.filekit.name
-import io.github.vinceglb.filekit.nameWithoutExtension
 import io.github.vinceglb.filekit.readBytes
-import io.github.vinceglb.filekit.size
 import kotlinx.coroutines.launch
 
 @Composable
@@ -41,7 +38,10 @@ fun ProductsScreen(
 ) {
     val productsState = adminViewModel.productsState.collectAsState().value
     val addProductState = adminViewModel.addProductState.collectAsState().value
+    val editProductState = adminViewModel.editProductState.collectAsState().value
     var addProductModalState by remember { mutableStateOf(false) }
+    var editProductModalState by remember { mutableStateOf(false) }
+    var selectedProduct by remember { mutableStateOf<Product>(Product(name = "", description = "", price = 0.0, stock = 0))}
     val scope = rememberCoroutineScope()
 
     val launcher = rememberFilePickerLauncher(
@@ -57,6 +57,14 @@ fun ProductsScreen(
                         byteArray = file.readBytes()
                     )
                     adminViewModel.resetAddProductState()
+                }
+                if(editProductState is UiState.Success) {
+                    adminViewModel.uploadProductImage(
+                        productId = editProductState.data.id!!,
+                        fileName = file.name,
+                        byteArray = file.readBytes()
+                    )
+                    adminViewModel.resetEditProductState()
                 }
             }
         }
@@ -85,7 +93,10 @@ fun ProductsScreen(
                     }
                     ProductEditList(
                         products = productsState.data,
-                        onEditClick = { },
+                        onEditClick = { product ->
+                            selectedProduct = product
+                            editProductModalState = true
+                        },
                         onRemoveClick = { productId ->
                             adminViewModel.deleteProduct(productId)
                         },
@@ -111,6 +122,31 @@ fun ProductsScreen(
                         },
                         onUploadImageClick = {
                             addProductModalState = false
+                            launcher.launch()
+                        }
+                    )
+                }
+                if(editProductModalState) {
+                    AddOrEditProduct(
+                        product = selectedProduct,
+                        productState = editProductState,
+                        onCancelClick = {
+                            editProductModalState = false
+                            adminViewModel.resetEditProductState()
+                        },
+                        onConfirmClick = { name, description, price, stocks ->
+                            adminViewModel.editProduct(
+                                Product(
+                                    id = selectedProduct.id,
+                                    name = name,
+                                    description = description,
+                                    price = price,
+                                    stock = stocks
+                                )
+                            )
+                        },
+                        onUploadImageClick = {
+                            editProductModalState = false
                             launcher.launch()
                         }
                     )

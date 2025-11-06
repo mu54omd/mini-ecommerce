@@ -41,6 +41,9 @@ class AdminViewModel(private val repo: AdminRepository): ViewModel() {
     private val _deleteProductState = MutableStateFlow<UiState<Unit>>(UiState.Idle)
     val deleteProductState = _deleteProductState.asStateFlow()
 
+    private val _editProductState = MutableStateFlow<UiState<Product>>(UiState.Idle)
+    val editProductState = _editProductState.asStateFlow()
+
     private val _uploadProductImageState = MutableStateFlow<UiState<ImageUploadResponse>>(UiState.Idle)
     val uploadProductImageState = _uploadProductImageState.asStateFlow()
 
@@ -56,6 +59,10 @@ class AdminViewModel(private val repo: AdminRepository): ViewModel() {
 
     fun resetAddProductState(){
         _addProductState.update { UiState.Idle }
+    }
+
+    fun resetEditProductState(){
+        _editProductState.update { UiState.Idle }
     }
 
     fun refresh(){
@@ -129,6 +136,17 @@ class AdminViewModel(private val repo: AdminRepository): ViewModel() {
         }
     }
 
+    fun editProduct(product: Product){
+        viewModelScope.launch {
+            _editProductState.update { UiState.Loading }
+            val result = repo.editProduct(product)
+            _editProductState.update { result.toUiState() }
+            if(editProductState.value is UiState.Success){
+                getAllProducts()
+            }
+        }
+    }
+
     fun uploadProductImage(productId: Long, fileName: String, byteArray: ByteArray){
         viewModelScope.launch {
             _uploadProductImageState.update { UiState.Loading }
@@ -137,12 +155,6 @@ class AdminViewModel(private val repo: AdminRepository): ViewModel() {
             if(uploadProductImageState.value is UiState.Success){
                 getAllProducts()
             }
-        }
-    }
-
-    fun updateProductStock(productId: Long, stock: Int){
-        viewModelScope.launch {
-            repo.updateProductStock(productId, stock)
         }
     }
 

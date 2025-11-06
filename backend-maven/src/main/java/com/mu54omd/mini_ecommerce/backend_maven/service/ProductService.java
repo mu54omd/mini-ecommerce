@@ -36,6 +36,19 @@ public class ProductService {
         productRepository.deleteById(productId);
     }
 
+    public Product editProduct(Product product){
+        Product theProduct = productRepository
+                .findById(product.getId())
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+        theProduct.setName(product.getName());
+        theProduct.setDescription(product.getDescription());
+        theProduct.setPrice(product.getPrice());
+        theProduct.setStock(product.getStock());
+        System.out.println("input product id: " + theProduct.getId());
+        System.out.println("result product id: " + theProduct.getId());
+        return productRepository.save(theProduct);
+    }
+
     public List<Product> searchProducts(String keyword) {
         return productRepository.findByNameContainingIgnoreCase(keyword);
     }

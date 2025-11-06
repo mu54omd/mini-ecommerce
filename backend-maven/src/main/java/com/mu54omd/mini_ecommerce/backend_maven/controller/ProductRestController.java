@@ -43,6 +43,11 @@ public class ProductRestController {
         return ResponseEntity.ok(productService.searchProducts(q));
     }
 
+    @PutMapping
+    public ResponseEntity<Product> editProduct(@RequestBody Product product) {
+        return ResponseEntity.ok(productService.editProduct(product));
+    }
+
     @PutMapping("/{id}/stock")
     public ResponseEntity<Product> updateStock(@PathVariable Long id, @RequestParam int stock) {
         return ResponseEntity.ok(productService.updateStock(id, stock));

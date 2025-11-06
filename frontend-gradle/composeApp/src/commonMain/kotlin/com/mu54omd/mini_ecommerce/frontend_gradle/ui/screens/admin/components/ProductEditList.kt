@@ -40,7 +40,7 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.ui.Constants.BASE_URL
 @Composable
 fun ProductEditList(
     products: List<Product>,
-    onEditClick: (Long) -> Unit,
+    onEditClick: (Product) -> Unit,
     onRemoveClick: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -126,7 +126,7 @@ fun ProductEditList(
                         }
                         IconButton(
                             onClick = {
-                                onEditClick
+                                onEditClick(product)
                             },
                             enabled = true
                         ) {
