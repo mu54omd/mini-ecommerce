@@ -18,6 +18,7 @@ ktor_version = "3.3.1"
 koin-bom = "4.1.1"
 navigation-version = "2.9.1"
 coilCompose = "3.3.0"
+filekit = "0.12.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -61,6 +62,13 @@ koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel" }
 ### Coil
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
 coil-network-ktor3 = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coilCompose" }
+
+
+### FileKit
+filekit-core = { module = "io.github.vinceglb:filekit-core", version.ref = "filekit" }
+filekit-dialogs = { module = "io.github.vinceglb:filekit-dialogs", version.ref = "filekit" }
+filekit-dialogs-compose = { module = "io.github.vinceglb:filekit-dialogs-compose", version.ref = "filekit" }
+filekit-coil = { module = "io.github.vinceglb:filekit-coil", version.ref = "filekit" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

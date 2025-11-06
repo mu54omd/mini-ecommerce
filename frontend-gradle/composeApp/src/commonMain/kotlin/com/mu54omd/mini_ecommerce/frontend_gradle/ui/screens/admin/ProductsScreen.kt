@@ -12,6 +12,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,6 +24,15 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.admin.components.Ad
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.EmptyPage
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.LoadingView
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.admin.components.ProductEditList
+import io.github.vinceglb.filekit.dialogs.FileKitMode
+import io.github.vinceglb.filekit.dialogs.FileKitType
+import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
+import io.github.vinceglb.filekit.extension
+import io.github.vinceglb.filekit.name
+import io.github.vinceglb.filekit.nameWithoutExtension
+import io.github.vinceglb.filekit.readBytes
+import io.github.vinceglb.filekit.size
+import kotlinx.coroutines.launch
 
 @Composable
 fun ProductsScreen(
@@ -32,7 +42,25 @@ fun ProductsScreen(
     val productsState = adminViewModel.productsState.collectAsState().value
     val addProductState = adminViewModel.addProductState.collectAsState().value
     var addProductModalState by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
+    val launcher = rememberFilePickerLauncher(
+        type = FileKitType.Image,
+        mode = FileKitMode.Single
+    ) { file ->
+        file?.let {
+            scope.launch {
+                if(addProductState is UiState.Success) {
+                    adminViewModel.uploadProductImage(
+                        productId = addProductState.data.id!!,
+                        fileName = file.name,
+                        byteArray = file.readBytes()
+                    )
+                    adminViewModel.resetAddProductState()
+                }
+            }
+        }
+    }
 
     LaunchedEffect(Unit) {
         adminViewModel.refresh()
@@ -80,6 +108,10 @@ fun ProductsScreen(
                                     stock = stocks
                                 )
                             )
+                        },
+                        onUploadImageClick = {
+                            addProductModalState = false
+                            launcher.launch()
                         }
                     )
                 }

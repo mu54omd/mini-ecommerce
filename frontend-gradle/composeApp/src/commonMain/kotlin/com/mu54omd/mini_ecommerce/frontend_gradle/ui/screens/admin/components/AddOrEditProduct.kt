@@ -29,6 +29,17 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.Product
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
+import io.github.vinceglb.filekit.FileKit
+import io.github.vinceglb.filekit.PlatformFile
+import io.github.vinceglb.filekit.dialogs.FileKitMode
+import io.github.vinceglb.filekit.dialogs.FileKitType
+import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
+import io.github.vinceglb.filekit.dialogs.openFilePicker
+import io.github.vinceglb.filekit.extension
+import io.github.vinceglb.filekit.name
+import io.github.vinceglb.filekit.nameWithoutExtension
+import io.github.vinceglb.filekit.readBytes
+import io.github.vinceglb.filekit.size
 import kotlinx.coroutines.launch
 
 
@@ -44,6 +55,7 @@ fun AddOrEditProduct(
     product: Product? = null,
     onCancelClick: () -> Unit,
     onConfirmClick: (String, String, Double, Int) -> Unit,
+    onUploadImageClick: () -> Unit,
 ) {
     var productName by remember { mutableStateOf(product?.name ?: "") }
     var productDescription by remember { mutableStateOf(product?.description ?: "") }
@@ -150,9 +162,22 @@ fun AddOrEditProduct(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
+                    .fillMaxWidth()
                     .padding(10.dp)
                 ){
-                    Text("Upload Image")
+                    Text(text = "Do you want to upload an image for this product?")
+                    Row {
+                        TextButton(onClick = {
+                            onCancelClick()
+                        }) {
+                            Text("Cancel")
+                        }
+                        TextButton(onClick = {
+                            onUploadImageClick()
+                        }) {
+                            Text("Upload Image")
+                        }
+                    }
                 }
             }
         }

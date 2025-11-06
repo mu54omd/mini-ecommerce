@@ -4,6 +4,7 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.storage.SessionManager
 import io.ktor.client.HttpClient
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.delete
+import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -86,6 +87,25 @@ class ApiClient(
             e.toApiError()
         }
     }
+
+    suspend fun <R> postMultipart(
+        path: String,
+        body: MultiPartFormDataContent,
+        resSerializer: KSerializer<R>
+    ): ApiResult<R> {
+        return try {
+            val response = client.post("$baseUrl$path") {
+                authHeader()
+                setBody(body)
+            }
+            handleResponse(response, resSerializer)
+        } catch (e: Exception) {
+            e.toApiError()
+        }
+    }
+
+    suspend inline fun <reified T, reified R> postMultipart(path: String, body: T): ApiResult<R> =
+        postMultipart(path, body as MultiPartFormDataContent, serializer())
 
     suspend inline fun <reified T, reified R> post(path: String, body: T): ApiResult<R> =
         post(path, body, serializer(), serializer())

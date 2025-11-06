@@ -2,6 +2,7 @@ package com.mu54omd.mini_ecommerce.frontend_gradle.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.ImageUploadResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.OrderResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.Product
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.UserEditRequest
@@ -39,6 +40,9 @@ class AdminViewModel(private val repo: AdminRepository): ViewModel() {
 
     private val _deleteProductState = MutableStateFlow<UiState<Unit>>(UiState.Idle)
     val deleteProductState = _deleteProductState.asStateFlow()
+
+    private val _uploadProductImageState = MutableStateFlow<UiState<ImageUploadResponse>>(UiState.Idle)
+    val uploadProductImageState = _uploadProductImageState.asStateFlow()
 
     fun reset(){
         _usersState.update { UiState.Idle}
@@ -122,6 +126,17 @@ class AdminViewModel(private val repo: AdminRepository): ViewModel() {
             val result = repo.deleteProduct(productId)
             _deleteProductState.update { result.toUiState() }
             getAllProducts()
+        }
+    }
+
+    fun uploadProductImage(productId: Long, fileName: String, byteArray: ByteArray){
+        viewModelScope.launch {
+            _uploadProductImageState.update { UiState.Loading }
+            val result = repo.uploadProductImage(productId, fileName, byteArray)
+            _uploadProductImageState.update { result.toUiState() }
+            if(uploadProductImageState.value is UiState.Success){
+                getAllProducts()
+            }
         }
     }
 

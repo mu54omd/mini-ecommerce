@@ -1,5 +1,6 @@
 package com.mu54omd.mini_ecommerce.backend_maven.controller;
 
+import com.mu54omd.mini_ecommerce.backend_maven.dto.UploadImageResponse;
 import com.mu54omd.mini_ecommerce.backend_maven.entity.Product;
 import com.mu54omd.mini_ecommerce.backend_maven.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +49,16 @@ public class ProductRestController {
     }
 
     @DeleteMapping
-    public ResponseEntity<?> deleteProduct(@RequestParam Long productId){
+    public ResponseEntity<?> deleteProduct(@RequestParam Long productId) throws IOException {
+        Product product = productService.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        if (product.getImageUrl() != null) {
+            String uploadDir = System.getProperty("user.home") + "/uploads/";
+            String fileName = Paths.get(product.getImageUrl()).getFileName().toString();
+            Path filePath = Paths.get(uploadDir + fileName);
+            Files.deleteIfExists(filePath);
+        }
         productService.deleteProduct(productId);
         return ResponseEntity.noContent().build();
     }
@@ -70,6 +80,6 @@ public class ProductRestController {
 
         product.setImageUrl(fileUrl);
         productService.addProduct(product);
-        return ResponseEntity.ok("Image uploaded!");
+        return ResponseEntity.ok(new UploadImageResponse("Image Successfully Uploaded."));
     }
 }
