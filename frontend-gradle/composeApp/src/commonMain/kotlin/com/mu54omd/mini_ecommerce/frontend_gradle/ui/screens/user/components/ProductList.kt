@@ -39,6 +39,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.Product
 import coil3.compose.AsyncImage
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.Constants.BASE_URL
 
 @Composable
 fun ProductList(
@@ -53,7 +54,7 @@ fun ProductList(
         modifier = modifier,
         columns = GridCells.Adaptive(200.dp)
     ) {
-        items(items = products, key = { product -> product.id }) { product ->
+        items(items = products, key = { product -> product.id!! }) { product ->
             Card(
                 modifier = Modifier.size(300.dp).padding(8.dp),
                 onClick = { },
@@ -66,7 +67,7 @@ fun ProductList(
                 ) {
                     product.imageUrl?.let {
                         AsyncImage(
-                            model = product.imageUrl,
+                            model = "$BASE_URL${product.imageUrl}",
                             contentDescription = product.description,
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize()
@@ -102,7 +103,7 @@ fun ProductList(
                         IconButton(
                             onClick = {
                                 addedItem--
-                                onRemoveClick(product.id)
+                                onRemoveClick(product.id!!)
                             },
                             enabled = addedItem > 0
                         ) {
@@ -115,7 +116,7 @@ fun ProductList(
                         IconButton(
                             onClick = {
                                 addedItem++
-                                onAddClick(product.id)
+                                onAddClick(product.id!!)
                             },
                             enabled = (addedItem < product.stock) && (product.stock > 0)
                         ) {

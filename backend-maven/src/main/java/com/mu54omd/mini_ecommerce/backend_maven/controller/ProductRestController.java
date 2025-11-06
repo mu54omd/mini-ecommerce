@@ -53,7 +53,7 @@ public class ProductRestController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/products/{id}/upload-image")
+    @PostMapping("/{id}/upload-image")
     public ResponseEntity<?> uploadImage(@PathVariable Long id, @RequestParam("file") MultipartFile file) throws IOException {
 
         Product product = productService.findById(id)
@@ -66,7 +66,7 @@ public class ProductRestController {
         Path filePath = Paths.get(uploadDir + fileName);
         Files.write(filePath, file.getBytes());
 
-        String fileUrl = "http://localhost:8080/uploads/" + fileName;
+        String fileUrl = "/uploads/" + fileName;
 
         product.setImageUrl(fileUrl);
         productService.addProduct(product);

@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.OrderResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.Product
-import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.ProductResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.UserEditRequest
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.UserResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.repository.AdminRepository
@@ -35,10 +34,24 @@ class AdminViewModel(private val repo: AdminRepository): ViewModel() {
     private val _productsState = MutableStateFlow<UiState<List<Product>>>(UiState.Idle)
     val productsState = _productsState.asStateFlow()
 
+    private val _addProductState = MutableStateFlow<UiState<Product>>(UiState.Idle)
+    val addProductState = _addProductState.asStateFlow()
+
+    private val _deleteProductState = MutableStateFlow<UiState<Unit>>(UiState.Idle)
+    val deleteProductState = _deleteProductState.asStateFlow()
+
     fun reset(){
         _usersState.update { UiState.Idle}
         _deleteUserState.update { UiState.Idle}
         _editUserState.update { UiState.Idle}
+        _ordersState.update { UiState.Idle }
+        _orderStatusState.update { UiState.Idle }
+        _productsState.update { UiState.Idle }
+        _deleteProductState.update { UiState.Idle }
+    }
+
+    fun resetAddProductState(){
+        _addProductState.update { UiState.Idle }
     }
 
     fun refresh(){
@@ -94,13 +107,21 @@ class AdminViewModel(private val repo: AdminRepository): ViewModel() {
 
     fun addProduct(product: Product){
         viewModelScope.launch {
-            repo.addProduct(product)
+            _addProductState.update { UiState.Loading }
+            val result = repo.addProduct(product)
+            _addProductState.update { result.toUiState() }
+            if(addProductState.value is UiState.Success){
+                getAllProducts()
+            }
         }
     }
 
     fun deleteProduct(productId: Long){
         viewModelScope.launch {
-            repo.deleteProduct(productId)
+            _deleteProductState.update { UiState.Loading }
+            val result = repo.deleteProduct(productId)
+            _deleteProductState.update { result.toUiState() }
+            getAllProducts()
         }
     }
 
@@ -124,7 +145,6 @@ class AdminViewModel(private val repo: AdminRepository): ViewModel() {
             _orderStatusState.update { UiState.Loading }
             val result = repo.updateOrderStatus(orderId, newStatus)
             _orderStatusState.update { result.toUiState() }
-            println(orderStatusState.value)
         }
     }
 }

@@ -8,6 +8,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,6 +25,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailDefaults
+import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -41,7 +45,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -78,7 +81,7 @@ fun AppNavHost(
     val cartState = cartViewModel.cartState.collectAsState().value
     val cartItemCount by remember(cartState) { derivedStateOf { if (cartState is UiState.Success) cartState.data.items.size else 0 } }
 
-    val bottomBarDestinations = when (userState.role) {
+    val navigationDestination = when (userState.role) {
         "ADMIN" -> listOf(Screen.Products, Screen.Users, Screen.Orders, Screen.Admin)
         "USER" -> listOf(Screen.Home, Screen.Cart, Screen.MyOrders)
         else -> listOf(Screen.Home)
@@ -98,8 +101,9 @@ fun AppNavHost(
     }
 
 
-    var selectedDestination by rememberSaveable { mutableIntStateOf(bottomBarDestinations.indices.first) }
+    var selectedDestination by rememberSaveable { mutableIntStateOf(navigationDestination.indices.first) }
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination?.route
+
     LaunchedEffect(tokenState) {
         if (tokenState is UiState.Error || tokenState is UiState.Unauthorized) {
             navController.navigate(Screen.Login.route) {
@@ -109,34 +113,37 @@ fun AppNavHost(
     }
     Scaffold(
         bottomBar = {
-            if (currentDestination != Screen.Login.route) {
-                NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
-                    bottomBarDestinations.forEachIndexed { index, destination ->
-                        NavigationBarItem(
-                            selected = selectedDestination == index,
-                            onClick = {
-                                navController.navigate(route = destination.route)
-                                selectedDestination = index
-                            },
-                            label = {
-                                Text(
-                                    text = destination.label,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            },
-                            icon = {
-                                val iconToShow =
-                                    if (destination == Screen.Cart) cartIcon else destination.icon
-                                val iconColor =
-                                    if (destination == Screen.Cart) cartIconColor else MaterialTheme.colorScheme.onSurface
-                                Icon(
-                                    imageVector = iconToShow,
-                                    contentDescription = destination.contentDescription,
-                                    tint = iconColor
-                                )
-                            }
-                        )
+            BoxWithConstraints {
+                val isDesktop = maxWidth > 840.dp
+                if (!isDesktop && currentDestination != Screen.Login.route) {
+                    NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
+                        navigationDestination.forEachIndexed { index, destination ->
+                            NavigationBarItem(
+                                selected = selectedDestination == index,
+                                onClick = {
+                                    navController.navigate(route = destination.route)
+                                    selectedDestination = index
+                                },
+                                label = {
+                                    Text(
+                                        text = destination.label,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                },
+                                icon = {
+                                    val iconToShow =
+                                        if (destination == Screen.Cart) cartIcon else destination.icon
+                                    val iconColor =
+                                        if (destination == Screen.Cart) cartIconColor else MaterialTheme.colorScheme.onSurface
+                                    Icon(
+                                        imageVector = iconToShow,
+                                        contentDescription = destination.contentDescription,
+                                        tint = iconColor
+                                    )
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -175,7 +182,7 @@ fun AppNavHost(
                             navController.navigate(Screen.Login.route) {
                                 popUpTo(0)
                             }
-                            selectedDestination = bottomBarDestinations.indices.first
+                            selectedDestination = navigationDestination.indices.first
                         },
                     ) {
                         Icon(
@@ -189,95 +196,132 @@ fun AppNavHost(
             }
         }
     ) { contentPadding ->
-        NavHost(
-            navController = navController,
-            startDestination = Screen.Login.route,
-            enterTransition = { slideIntoContainer(towards = AnimatedContentTransitionScope.SlideDirection.Start) },
-            exitTransition = { slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.End) },
-            modifier = Modifier.padding(contentPadding)
-        ) {
-            composable(Screen.Login.route) {
-                LoginScreen(
-                    authViewModel = authViewModel,
-                    onLoginSuccess = {
-                        productViewModel.reset()
-                        cartViewModel.reset()
-                        orderViewModel.reset()
-                        cartViewModel.refresh()
-                        navController.navigate(bottomBarDestinations.first().route) {
-                            popUpTo(Screen.Login.route) { inclusive = true }
-                        }
-                    },
-                    onLoginAsGuest = {
-                        authViewModel.clearToken()
-                        navController.navigate(Screen.Home.route) {
-                            popUpTo(Screen.Login.route) { inclusive = true }
-                        }
-                    }
-                )
-            }
-
-            composable(Screen.Admin.route) {
-                AdminPanelScreen(
-                    adminViewModel = adminViewModel,
-                )
-            }
-
-            composable(Screen.Users.route) {
-                UsersScreen(
-                    adminViewModel = adminViewModel,
-                    onExit = { state ->
-                        authViewModel.logout(state)
-                    }
-                )
-            }
-
-            composable(Screen.Orders.route) {
-                OrdersScreen(
-                    adminViewModel = adminViewModel,
-                    onExit = { state -> authViewModel.logout(state) }
-                )
-            }
-
-            composable(Screen.Products.route) {
-                ProductsScreen(
-                    adminViewModel = adminViewModel,
-                    onExit = { state -> authViewModel.logout(state) }
-                )
-            }
-
-            composable(Screen.Home.route) {
-                HomeScreen(
-                    productViewModel = productViewModel,
-                    cartViewModel = cartViewModel,
-                    onExit = { state ->
-                        authViewModel.logout(state)
-                    }
-                )
-            }
-
-            composable(Screen.Cart.route) {
-                CartScreen(
-                    cartViewModel = cartViewModel,
-                    onExit = { state ->
-                        authViewModel.logout(state)
-                    },
-                    onConfirmClick = {
-                        cartViewModel.checkout()
-                        orderViewModel.load()
-                        selectedDestination = 2
-                        navController.navigate(Screen.MyOrders.route) {
-                            popUpTo(Screen.Home.route)
+        BoxWithConstraints {
+            val isDesktop = maxWidth > 840.dp
+            Row(
+                modifier = Modifier.padding(contentPadding)
+            ) {
+                if(isDesktop && currentDestination != Screen.Login.route){
+                    NavigationRail {
+                        navigationDestination.forEachIndexed { index, destination ->
+                            NavigationRailItem(
+                                selected = selectedDestination == index,
+                                onClick = {
+                                    navController.navigate(destination.route)
+                                    selectedDestination = index
+                                },
+                                label = {
+                                    Text(
+                                        text = destination.label,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                },
+                                icon = {
+                                    val iconToShow =
+                                        if (destination == Screen.Cart) cartIcon else destination.icon
+                                    val iconColor =
+                                        if (destination == Screen.Cart) cartIconColor else MaterialTheme.colorScheme.onSurface
+                                    Icon(
+                                        imageVector = iconToShow,
+                                        contentDescription = destination.contentDescription,
+                                        tint = iconColor
+                                    )
+                                }
+                            )
                         }
                     }
-                )
-            }
+                }
+                NavHost(
+                    navController = navController,
+                    startDestination = Screen.Login.route,
+                    enterTransition = { slideIntoContainer(towards = AnimatedContentTransitionScope.SlideDirection.Start) },
+                    exitTransition = { slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.End) },
+                ) {
+                    composable(Screen.Login.route) {
+                        LoginScreen(
+                            authViewModel = authViewModel,
+                            onLoginSuccess = {
+                                productViewModel.reset()
+                                cartViewModel.reset()
+                                orderViewModel.reset()
+                                cartViewModel.refresh()
+                                navController.navigate(navigationDestination.first().route) {
+                                    popUpTo(Screen.Login.route) { inclusive = true }
+                                }
+                            },
+                            onLoginAsGuest = {
+                                authViewModel.clearToken()
+                                navController.navigate(Screen.Home.route) {
+                                    popUpTo(Screen.Login.route) { inclusive = true }
+                                }
+                            }
+                        )
+                    }
 
-            composable(Screen.MyOrders.route) {
-                MyOrdersScreen(
-                    orderViewModel = orderViewModel,
-                    onExit = { state -> authViewModel.logout(state) }
-                )
+                    composable(Screen.Admin.route) {
+                        AdminPanelScreen(
+                            adminViewModel = adminViewModel,
+                        )
+                    }
+
+                    composable(Screen.Users.route) {
+                        UsersScreen(
+                            adminViewModel = adminViewModel,
+                            onExit = { state ->
+                                authViewModel.logout(state)
+                            }
+                        )
+                    }
+
+                    composable(Screen.Orders.route) {
+                        OrdersScreen(
+                            adminViewModel = adminViewModel,
+                            onExit = { state -> authViewModel.logout(state) }
+                        )
+                    }
+
+                    composable(Screen.Products.route) {
+                        ProductsScreen(
+                            adminViewModel = adminViewModel,
+                            onExit = { state -> authViewModel.logout(state) }
+                        )
+                    }
+
+                    composable(Screen.Home.route) {
+                        HomeScreen(
+                            productViewModel = productViewModel,
+                            cartViewModel = cartViewModel,
+                            onExit = { state ->
+                                authViewModel.logout(state)
+                            }
+                        )
+                    }
+
+                    composable(Screen.Cart.route) {
+                        CartScreen(
+                            cartViewModel = cartViewModel,
+                            onExit = { state ->
+                                authViewModel.logout(state)
+                            },
+                            onConfirmClick = {
+                                cartViewModel.checkout()
+                                orderViewModel.load()
+                                selectedDestination = 2
+                                navController.navigate(Screen.MyOrders.route) {
+                                    popUpTo(Screen.Home.route)
+                                }
+                            }
+                        )
+                    }
+
+                    composable(Screen.MyOrders.route) {
+                        MyOrdersScreen(
+                            orderViewModel = orderViewModel,
+                            onExit = { state -> authViewModel.logout(state) }
+                        )
+                    }
+                }
             }
         }
     }
