@@ -4,8 +4,8 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
+    alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeHotReload)
     kotlin("plugin.serialization") version "2.2.20"
@@ -64,7 +64,6 @@ kotlin {
             implementation(libs.navigation.compose)
             implementation(libs.coil.compose)
             implementation(libs.coil.network.ktor3)
-//            implementation(libs.filekit.core)
             implementation(libs.filekit.dialogs.compose)
             implementation(libs.filekit.coil)
         }

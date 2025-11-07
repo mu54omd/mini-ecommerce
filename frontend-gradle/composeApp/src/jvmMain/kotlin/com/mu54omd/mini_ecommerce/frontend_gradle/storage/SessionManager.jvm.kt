@@ -1,6 +1,7 @@
 package com.mu54omd.mini_ecommerce.frontend_gradle.storage
 
-import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.User
+import com.mu54omd.mini_ecommerce.frontend_gradle.domain.model.User
+import com.mu54omd.mini_ecommerce.frontend_gradle.domain.model.UserRole
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -46,12 +47,14 @@ actual class SessionManager {
             val payload = String(decoder.decode(parts[1]))
             val json = Json.parseToJsonElement(payload).jsonObject
             val username = json["sub"]?.jsonPrimitive?.content ?: "guest"
-            var role = json["role"]?.jsonPrimitive?.content
-            role = when(role){
-                "[ROLE_USER]" -> "USER"
-                "[ROLE_ADMIN]" -> "ADMIN"
-                else -> "GUEST"
-            }
+            val roleString = json["role"]?.jsonPrimitive?.content
+            val role = UserRole.fromString(
+                when (roleString) {
+                    "[ROLE_USER]" -> "USER"
+                    "[ROLE_ADMIN]" -> "ADMIN"
+                    else -> "GUEST"
+                }
+            )
             User(username = username, role = role)
         } catch (e: Exception) {
             println("Error parsing token: ${e.message}")

@@ -20,12 +20,12 @@ enum class Screen(
     val icon: ImageVector,
     val contentDescription: String
 ) {
-    Home("home", "Home", Icons.Default.Home, "Home Screen"),
+    Products("products", "Products", Icons.Default.Edit, "Products Screen"),
+
     Login("login", "Login", Icons.AutoMirrored.Filled.Login, "Login Screen"),
     Cart("cart", "My Cart", Icons.Default.ShoppingCart, "User Cart Screen"),
     MyOrders("myOrders", "My Orders", Icons.Default.ShoppingCart, "My Orders Cart Screen"),
     Users("users", "Users", Icons.Default.SwitchAccount, "Admin Users Screen"),
     Orders("orders", "Orders", Icons.Default.ShoppingBasket, "Orders Screen"),
-    Products("products", "Products", Icons.Default.Edit, "Products Screen"),
     Admin("admin", "Admin", Icons.Default.AdminPanelSettings, "Admin Panel Screen"),
 }

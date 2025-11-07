@@ -26,7 +26,6 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationRail
-import androidx.compose.material3.NavigationRailDefaults
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -49,20 +48,20 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.AdminViewModel
+import com.mu54omd.mini_ecommerce.frontend_gradle.domain.model.UserRole
+import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.UserViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.AuthViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.CartViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.OrderViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.ProductViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.admin.AdminPanelScreen
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.user.CartScreen
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.user.HomeScreen
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.AdminPanelScreen
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.CartScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.LoginScreen
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.user.MyOrdersScreen
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.admin.OrdersScreen
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.admin.ProductsScreen
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.admin.UsersScreen
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.MyOrdersScreen
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.OrdersScreen
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.ProductsScreen
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.UsersScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.ProductSearchBar
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -73,7 +72,7 @@ fun AppNavHost(
     productViewModel: ProductViewModel = koinViewModel<ProductViewModel>(),
     orderViewModel: OrderViewModel = koinViewModel<OrderViewModel>(),
     cartViewModel: CartViewModel = koinViewModel<CartViewModel>(),
-    adminViewModel: AdminViewModel = koinViewModel<AdminViewModel>()
+    userViewModel: UserViewModel = koinViewModel<UserViewModel>()
 ) {
     val navController = rememberNavController()
     val tokenState = authViewModel.tokenState.collectAsState().value
@@ -82,9 +81,9 @@ fun AppNavHost(
     val cartItemCount by remember(cartState) { derivedStateOf { if (cartState is UiState.Success) cartState.data.items.size else 0 } }
 
     val navigationDestination = when (userState.role) {
-        "ADMIN" -> listOf(Screen.Products, Screen.Users, Screen.Orders, Screen.Admin)
-        "USER" -> listOf(Screen.Home, Screen.Cart, Screen.MyOrders)
-        else -> listOf(Screen.Home)
+        UserRole.ADMIN -> listOf(Screen.Products, Screen.Users, Screen.Orders, Screen.Admin)
+        UserRole.USER -> listOf(Screen.Products, Screen.Cart, Screen.MyOrders)
+        else -> listOf(Screen.Products)
     }
 
     val cartIcon = remember(cartItemCount) {
@@ -162,18 +161,14 @@ fun AppNavHost(
                         modifier = Modifier.width(100.dp).padding(end = 2.dp),
                     )
                     AnimatedVisibility(
-                        visible = currentDestination == Screen.Home.route || currentDestination == Screen.Products.route,
+                        visible = currentDestination == Screen.Products.route,
                         enter = scaleIn(tween()) + fadeIn(),
                         exit = scaleOut(tween()) + fadeOut(),
                         modifier = Modifier.weight(0.4f)
                     ) {
                         ProductSearchBar(
-                            onQuery = { query ->
-                                if (currentDestination == Screen.Home.route) productViewModel.filterProducts(
-                                    query
-                                ) else adminViewModel.filterProducts(query)
-                            },
-                            onClearQuery = { if (currentDestination == Screen.Home.route) productViewModel.loadProducts() else adminViewModel.getAllProducts() }
+                            onQuery = { query -> productViewModel.filterProducts(query) },
+                            onClearQuery = { productViewModel.getAllProducts() }
                         )
                     }
                     TextButton(
@@ -242,17 +237,17 @@ fun AppNavHost(
                         LoginScreen(
                             authViewModel = authViewModel,
                             onLoginSuccess = {
-                                productViewModel.reset()
-                                cartViewModel.reset()
-                                orderViewModel.reset()
-                                cartViewModel.refresh()
+                                productViewModel.resetAllStates()
+                                cartViewModel.resetAllStates()
+                                orderViewModel.resetAllStates()
+                                cartViewModel.getCart()
                                 navController.navigate(navigationDestination.first().route) {
                                     popUpTo(Screen.Login.route) { inclusive = true }
                                 }
                             },
                             onLoginAsGuest = {
                                 authViewModel.clearToken()
-                                navController.navigate(Screen.Home.route) {
+                                navController.navigate(Screen.Products.route) {
                                     popUpTo(Screen.Login.route) { inclusive = true }
                                 }
                             }
@@ -260,14 +255,12 @@ fun AppNavHost(
                     }
 
                     composable(Screen.Admin.route) {
-                        AdminPanelScreen(
-                            adminViewModel = adminViewModel,
-                        )
+                        AdminPanelScreen()
                     }
 
                     composable(Screen.Users.route) {
                         UsersScreen(
-                            adminViewModel = adminViewModel,
+                            userViewModel = userViewModel,
                             onExit = { state ->
                                 authViewModel.logout(state)
                             }
@@ -276,25 +269,17 @@ fun AppNavHost(
 
                     composable(Screen.Orders.route) {
                         OrdersScreen(
-                            adminViewModel = adminViewModel,
+                            orderViewModel = orderViewModel,
                             onExit = { state -> authViewModel.logout(state) }
                         )
                     }
 
                     composable(Screen.Products.route) {
                         ProductsScreen(
-                            adminViewModel = adminViewModel,
-                            onExit = { state -> authViewModel.logout(state) }
-                        )
-                    }
-
-                    composable(Screen.Home.route) {
-                        HomeScreen(
                             productViewModel = productViewModel,
                             cartViewModel = cartViewModel,
-                            onExit = { state ->
-                                authViewModel.logout(state)
-                            }
+                            userRole = userState.role,
+                            onExit = { state -> authViewModel.logout(state) }
                         )
                     }
 
@@ -306,10 +291,10 @@ fun AppNavHost(
                             },
                             onConfirmClick = {
                                 cartViewModel.checkout()
-                                orderViewModel.load()
+                                orderViewModel.getUserOrders()
                                 selectedDestination = 2
                                 navController.navigate(Screen.MyOrders.route) {
-                                    popUpTo(Screen.Home.route)
+                                    popUpTo(Screen.Products.route)
                                 }
                             }
                         )

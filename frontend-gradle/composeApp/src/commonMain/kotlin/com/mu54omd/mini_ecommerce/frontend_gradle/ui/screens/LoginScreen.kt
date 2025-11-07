@@ -1,10 +1,6 @@
 package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.animate
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -29,17 +25,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.max
-import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.LoginResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.RegisterResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.AuthViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.ui.tooling.preview.Preview
-import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun LoginScreen(
@@ -104,7 +95,7 @@ fun LoginScreen(
                 Button(
                     enabled = loginState !is UiState.Loading,
                     onClick = {
-                        authViewModel.reset()
+                        authViewModel.resetAllStates()
                         if(haveAnAccount) {
                             authViewModel.login(username, password)
                         }else {
@@ -116,7 +107,7 @@ fun LoginScreen(
                 }
                 TextButton(
                     onClick = {
-                        authViewModel.reset()
+                        authViewModel.resetAllStates()
                         haveAnAccount = !haveAnAccount
                     }
                 ) {
@@ -168,7 +159,7 @@ fun LoginScreen(
                     password = ""
                     scope.launch {
                         delay(1000)
-                        authViewModel.reset()
+                        authViewModel.resetAllStates()
                     }
                 }
 
