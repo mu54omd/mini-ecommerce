@@ -2,9 +2,9 @@
 
 A modular mini e-commerce project built with:
 
-- **Backend:** Spring Boot + JWT + MongoDB/MySQL  
+- **Backend:** Spring Boot + JWT + MariaDB/MySQL  
 - **Frontend:** Android (Jetpack Compose), Desktop & Web (Compose Multiplatform)  
-- **Shared:** Kotlin Multiplatform (Ktor client, SQLDelight, shared logic)
+- **Shared:** Kotlin Multiplatform (Ktor client, shared logic)
 
 This project demonstrates full-stack development, modular architecture, and cross-platform Kotlin capabilities.
 
@@ -17,22 +17,50 @@ This project demonstrates full-stack development, modular architecture, and cros
     
 ## 🚀 Features
 
+- User authentication with JWT  
+- CRUD operations for products  
+- Shopping cart management  
+- Order creation and tracking  
+- Admin panel for managing products and orders  
+- Modular and clean architecture  
+- Cross-platform shared logic (KMP)  
 
 ## 📦 Technology Stack
 
-
-## 🏁 How to Run
-
+- **Kotlin Multiplatform (Shared module):** Ktor Client, Coroutines, Serialization, Koin, Coil  
+- **Android:** Jetpack Compose  
+- **Desktop:** Compose for Desktop  
+- **Web:** Compose for Web  
+- **Backend:** Spring Boot, Spring Security (JWT), MariaDB/MySQL, Swagger UI  
 
 ### 1️⃣ Backend
-
+```bash
+cd backend-maven
+mvn spring-boot:run
+```
+The backend will run at `http://localhost:5050`
 
 ### 2️⃣ Frontend
+* Android App
+`./gradlew frontend-gradle:androidApp:run`
+
+* Desktop App
+`./gradlew frontend-gradle:desktopApp:run`
 
 
+* Web App
+`./gradlew frontend-gradle:webApp:browserProductionRun`
 
-## 🧩 Notes
+Make sure the backend is running before launching any frontend applications.
 
+
+🧩 Notes
+
+- All shared logic is in the shared/ module, reused across Android, Desktop, and Web.
+
+- Use Postman or Swagger UI to test API endpoints directly.
+
+- Designed with clean architecture principles (Repository → UseCase → ViewModel → UI).
 
 
 ## 🎯 Future Improvements
