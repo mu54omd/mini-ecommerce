@@ -24,6 +24,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.RegisterResponse
@@ -101,7 +103,8 @@ fun LoginScreen(
                         }else {
                             authViewModel.register(username, password, email)
                         }
-                    }
+                    },
+                    modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
                 ) {
                     if(haveAnAccount) Text("Login") else Text("Register")
                 }
@@ -109,13 +112,14 @@ fun LoginScreen(
                     onClick = {
                         authViewModel.resetAllStates()
                         haveAnAccount = !haveAnAccount
-                    }
+                    },
+                    modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
                 ) {
                     if(!haveAnAccount) Text("I have an account!") else Text("Don't have an account!")
                 }
             }
             TextButton(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().pointerHoverIcon(PointerIcon.Hand),
                 onClick = onLoginAsGuest
             ) {
                 Text("Login as guest!")

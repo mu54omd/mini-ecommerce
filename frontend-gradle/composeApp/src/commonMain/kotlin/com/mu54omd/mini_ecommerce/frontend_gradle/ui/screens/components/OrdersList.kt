@@ -33,6 +33,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -62,17 +64,24 @@ fun OrdersList(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            TextButton(onClick = {
-                isStatusChanged = false
-                onCancelChangesClick()
-                changedOrder.clear()
-            }) {
+            TextButton(
+                onClick = {
+                    isStatusChanged = false
+                    onCancelChangesClick()
+                    changedOrder.clear()
+                },
+                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+
+            ) {
                 Text(text = "Cancel Changes")
             }
-            TextButton(onClick = {
-                isStatusChanged = false
-                onConfirmChangesClick(changedOrder)
-            }) {
+            TextButton(
+                onClick = {
+                    isStatusChanged = false
+                    onConfirmChangesClick(changedOrder)
+                },
+                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+            ) {
                 Text(text = "Confirm Changes")
             }
         }
@@ -126,6 +135,7 @@ fun OrdersList(
                                             changedOrder.put(order.id, statusList[status])
                                         }
                                     }
+                                    .pointerHoverIcon(PointerIcon.Hand)
                                     .background(
                                         color = getOrderStatusColor(statusList[status]),
                                     ).padding(start = 2.dp, end = 2.dp),
@@ -144,6 +154,12 @@ fun OrdersList(
                                     fontStyle = FontStyle.Italic,
                                 )
                             }
+                            Text(
+                                text = "${order.totalPrice}$",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Bold,
+                                fontStyle = FontStyle.Italic,
+                            )
                         }
                     }
                 }

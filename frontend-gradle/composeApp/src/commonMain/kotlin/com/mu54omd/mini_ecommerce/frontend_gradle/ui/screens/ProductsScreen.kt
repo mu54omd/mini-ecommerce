@@ -16,16 +16,17 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.Product
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.model.UserRole
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.CartViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.ProductViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.AddOrEditProduct
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.ProductEditList
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.EmptyPage
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.LoadingView
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.AddOrEditProduct
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.ProductList
 import io.github.vinceglb.filekit.dialogs.FileKitMode
 import io.github.vinceglb.filekit.dialogs.FileKitType
@@ -46,10 +47,20 @@ fun ProductsScreen(
     val editProductState = productViewModel.editProductState.collectAsState().value
     var addProductModalState by remember { mutableStateOf(false) }
     var editProductModalState by remember { mutableStateOf(false) }
-    var selectedProduct by remember { mutableStateOf<Product>(Product(name = "", description = "", price = 0.0, stock = 0))}
+    var selectedProduct by remember {
+        mutableStateOf<Product>(
+            Product(
+                name = "",
+                description = "",
+                price = 0.0,
+                stock = 0
+            )
+        )
+    }
 
     val cartState = cartViewModel.cartState.collectAsState().value
-    val cartItems: Map<Long, Int> = if (cartState is UiState.Success) cartState.data.items.associate { (_, product, quantity) -> product.id to quantity } else emptyMap()
+    val cartItems: Map<Long, Int> =
+        if (cartState is UiState.Success) cartState.data.items.associate { (_, product, quantity) -> product.id to quantity } else emptyMap()
 
 
     val scope = rememberCoroutineScope()
@@ -60,7 +71,7 @@ fun ProductsScreen(
     ) { file ->
         file?.let {
             scope.launch {
-                if(addProductState is UiState.Success) {
+                if (addProductState is UiState.Success) {
                     productViewModel.uploadProductImage(
                         productId = addProductState.data.id!!,
                         fileName = file.name,
@@ -68,7 +79,7 @@ fun ProductsScreen(
                     )
                     productViewModel.resetAddProductState()
                 }
-                if(editProductState is UiState.Success) {
+                if (editProductState is UiState.Success) {
                     productViewModel.uploadProductImage(
                         productId = editProductState.data.id!!,
                         fileName = file.name,
@@ -97,77 +108,76 @@ fun ProductsScreen(
                     modifier = Modifier.fillMaxSize().padding(16.dp)
                 ) {
                     if (userRole == UserRole.ADMIN) {
-                        TextButton(onClick = {
-                            addProductModalState = true
-                        }) {
+                        TextButton(
+                            onClick = {
+                                addProductModalState = true
+                            },
+                            modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+                        ) {
                             Text("Add Product")
                         }
-                        ProductEditList(
-                            products = productsState.data,
-                            onEditClick = { product ->
-                                selectedProduct = product
-                                editProductModalState = true
+                    }
+                    ProductList(
+                        userRole = userRole,
+                        products = productsState.data,
+                        cartItems = cartItems,
+                        onIncreaseItem = { cartViewModel.add(it) },
+                        onDecreaseItem = { cartViewModel.remove(it) },
+                        onEditClick = { product ->
+                            selectedProduct = product
+                            editProductModalState = true
+                        },
+                        onRemoveClick = { productId ->
+                            productViewModel.deleteProduct(productId)
+                        },
+                        modifier = Modifier.weight(0.9f)
+                    )
+                    if (addProductModalState) {
+                        AddOrEditProduct(
+                            productState = addProductState,
+                            onCancelClick = {
+                                addProductModalState = false
+                                productViewModel.resetAddProductState()
                             },
-                            onRemoveClick = { productId ->
-                                productViewModel.deleteProduct(productId)
+                            onConfirmClick = { name, description, price, stocks ->
+                                productViewModel.addProduct(
+                                    Product(
+                                        name = name,
+                                        description = description,
+                                        price = price,
+                                        stock = stocks
+                                    )
+                                )
                             },
-                            modifier = Modifier.weight(0.9f)
+                            onUploadImageClick = {
+                                addProductModalState = false
+                                launcher.launch()
+                            }
                         )
-                        if (addProductModalState) {
-                            AddOrEditProduct(
-                                productState = addProductState,
-                                onCancelClick = {
-                                    addProductModalState = false
-                                    productViewModel.resetAddProductState()
-                                },
-                                onConfirmClick = { name, description, price, stocks ->
-                                    productViewModel.addProduct(
-                                        Product(
-                                            name = name,
-                                            description = description,
-                                            price = price,
-                                            stock = stocks
-                                        )
+                    }
+                    if (editProductModalState) {
+                        AddOrEditProduct(
+                            product = selectedProduct,
+                            productState = editProductState,
+                            onCancelClick = {
+                                editProductModalState = false
+                                productViewModel.resetEditProductState()
+                            },
+                            onConfirmClick = { name, description, price, stocks ->
+                                productViewModel.editProduct(
+                                    Product(
+                                        id = selectedProduct.id,
+                                        name = name,
+                                        description = description,
+                                        price = price,
+                                        stock = stocks
                                     )
-                                },
-                                onUploadImageClick = {
-                                    addProductModalState = false
-                                    launcher.launch()
-                                }
-                            )
-                        }
-                        if (editProductModalState) {
-                            AddOrEditProduct(
-                                product = selectedProduct,
-                                productState = editProductState,
-                                onCancelClick = {
-                                    editProductModalState = false
-                                    productViewModel.resetEditProductState()
-                                },
-                                onConfirmClick = { name, description, price, stocks ->
-                                    productViewModel.editProduct(
-                                        Product(
-                                            id = selectedProduct.id,
-                                            name = name,
-                                            description = description,
-                                            price = price,
-                                            stock = stocks
-                                        )
-                                    )
-                                },
-                                onUploadImageClick = {
-                                    editProductModalState = false
-                                    launcher.launch()
-                                }
-                            )
-                        }
-                    }else{
-                        ProductList(
-                            products = productsState.data,
-                            cartItems = cartItems,
-                            onAddClick = { cartViewModel.add(it) },
-                            onRemoveClick = { cartViewModel.remove(it) },
-                            modifier = Modifier.weight(0.9f)
+                                )
+                            },
+                            onUploadImageClick = {
+                                editProductModalState = false
+                                launcher.launch()
+                            }
                         )
                     }
                 }

@@ -28,6 +28,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -146,7 +148,10 @@ fun AddOrEditProduct(
                             horizontalArrangement = Arrangement.Center,
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            TextButton(onClick = { onCancelClick() }) {
+                            TextButton(
+                                onClick = { onCancelClick() },
+                                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+                            ) {
                                 Text(text = "Cancel")
                             }
                             TextButton(
@@ -158,7 +163,9 @@ fun AddOrEditProduct(
                                         productStocks.toInt()
                                     )
                                 },
-                                enabled = productName.isNotBlank() && productPrice.isNotBlank() && productDescription.isNotBlank() && productStocks.isNotBlank()
+                                enabled = productName.isNotBlank() && productPrice.isNotBlank() && productDescription.isNotBlank() && productStocks.isNotBlank(),
+                                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+
                             ) {
                                 Text(text = "Save")
                             }
@@ -181,14 +188,20 @@ fun AddOrEditProduct(
                             textAlign = TextAlign.Center
                         )
                         Row {
-                            TextButton(onClick = {
-                                onCancelClick()
-                            }) {
+                            TextButton(
+                                onClick = {
+                                    onCancelClick()
+                                },
+                                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+                            ) {
                                 Text("Cancel")
                             }
-                            TextButton(onClick = {
-                                onUploadImageClick()
-                            }) {
+                            TextButton(
+                                onClick = {
+                                    onUploadImageClick()
+                                },
+                                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+                            ) {
                                 Text("Upload Image")
                             }
                         }

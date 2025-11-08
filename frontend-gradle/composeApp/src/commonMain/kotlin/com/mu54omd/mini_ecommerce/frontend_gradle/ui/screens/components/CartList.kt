@@ -1,5 +1,6 @@
 package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -33,7 +34,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -53,7 +57,10 @@ fun CartList(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
     ) {
-        TextButton(onClick = onCheckoutClick) {
+        TextButton(
+            onClick = onCheckoutClick,
+            modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+        ) {
             Icon(
                 imageVector = Icons.Default.ShoppingCartCheckout,
                 contentDescription = "Checkout"
@@ -62,7 +69,11 @@ fun CartList(
             Text(text = "Checkout")
         }
         Spacer(Modifier.width(8.dp))
-        TextButton(onClick = onClearCartClick) {
+        TextButton(
+            onClick = onClearCartClick,
+            modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+
+        ) {
             Icon(imageVector = Icons.Default.Clear, contentDescription = "Clear Cart")
             Spacer(modifier = Modifier.width(4.dp))
             Text(text = "Clear")
@@ -95,12 +106,10 @@ fun CartList(
                         },
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    AsyncImage(
-                        model = "$BASE_URL${item.product.imageUrl}",
-                        contentDescription = "Product Image",
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier.defaultMinSize(100.dp),
-                        error = rememberVectorPainter(Icons.Default.BrokenImage)
+                    CustomAsyncImage(
+                        url = "$BASE_URL${item.product.imageUrl}",
+                        contentDescription = "Product Image In Cart Screen",
+                        errorTint = MaterialTheme.colorScheme.surface
                     )
                     Column(
                         modifier = Modifier.padding(8.dp)

@@ -1,13 +1,11 @@
 package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -17,7 +15,8 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.BrokenImage
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -32,28 +31,27 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.Product
-import coil3.compose.AsyncImage
+import com.mu54omd.mini_ecommerce.frontend_gradle.domain.model.UserRole
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.Constants.BASE_URL
-import frontend_gradle.composeapp.generated.resources.Res
-import frontend_gradle.composeapp.generated.resources.compose_multiplatform
-import org.jetbrains.compose.resources.painterResource
 import kotlin.collections.get
 
 @Composable
 fun ProductList(
+    userRole: UserRole,
     products: List<Product>,
-    cartItems: Map<Long,Int>,
-    onAddClick: (Long) -> Unit,
+    cartItems: Map<Long, Int>,
+    onEditClick: (Product) -> Unit,
     onRemoveClick: (Long) -> Unit,
+    onIncreaseItem: (Long) -> Unit,
+    onDecreaseItem: (Long) -> Unit,
     modifier: Modifier = Modifier
-    ) {
+) {
 
     LazyVerticalGrid(
         modifier = modifier,
@@ -70,18 +68,18 @@ fun ProductList(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier.weight(0.7f)
                 ) {
-                    AsyncImage(
-                        model = "$BASE_URL${product.imageUrl}",
-                        contentDescription = product.description,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize(),
-                        error = rememberVectorPainter(Icons.Default.BrokenImage)
+                    CustomAsyncImage(
+                        url = "$BASE_URL${product.imageUrl}",
+                        contentDescription = "Product Image In Products Screen",
+                        errorTint = MaterialTheme.colorScheme.surface,
+                        size = 200.dp
                     )
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .align(Alignment.BottomCenter)
-                            .background(color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5f)).height(70.dp)
+                            .background(color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5f))
+                            .height(70.dp)
                             .padding(4.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
@@ -89,9 +87,24 @@ fun ProductList(
                         Column(
                             modifier = Modifier.weight(0.5f)
                         ) {
-                            Text(product.name, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleSmall, overflow = TextOverflow.Ellipsis, modifier = Modifier.basicMarquee())
-                            Text("${product.price} $", style = MaterialTheme.typography.bodyMedium)
-                            Text("#${product.stock}", style = MaterialTheme.typography.bodySmall)
+                            Text(
+                                product.name,
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.titleSmall,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.basicMarquee(),
+                                color = MaterialTheme.colorScheme.onTertiaryContainer
+                            )
+                            Text(
+                                text = "${product.price} $",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onTertiaryContainer
+                            )
+                            Text(
+                                text = "#${product.stock}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onTertiaryContainer
+                            )
                         }
                     }
                     Row(
@@ -99,30 +112,59 @@ fun ProductList(
                         horizontalArrangement = Arrangement.End,
                         modifier = Modifier.align(Alignment.BottomEnd)
                     ) {
-                        IconButton(
-                            onClick = {
-                                addedItem--
-                                onRemoveClick(product.id!!)
-                            },
-                            enabled = addedItem > 0
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Remove,
-                                contentDescription = "Remove Product from Cart"
-                            )
-                        }
-                        Text(text = "$addedItem")
-                        IconButton(
-                            onClick = {
-                                addedItem++
-                                onAddClick(product.id!!)
-                            },
-                            enabled = (addedItem < product.stock) && (product.stock > 0)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Add,
-                                contentDescription = "Add Product to Cart"
-                            )
+                        if(userRole == UserRole.USER) {
+                            IconButton(
+                                onClick = {
+                                    addedItem--
+                                    onDecreaseItem(product.id!!)
+                                },
+                                enabled = addedItem > 0,
+                                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Remove,
+                                    contentDescription = "Remove Product from Cart"
+                                )
+                            }
+                            Text(text = "$addedItem")
+                            IconButton(
+                                onClick = {
+                                    addedItem++
+                                    onIncreaseItem(product.id!!)
+                                },
+                                enabled = (addedItem < product.stock) && (product.stock > 0),
+                                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Add,
+                                    contentDescription = "Add Product to Cart"
+                                )
+                            }
+                        }else if(userRole == UserRole.ADMIN){
+                            IconButton(
+                                onClick = {
+                                    onRemoveClick(product.id!!)
+                                },
+                                enabled = true,
+                                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Delete,
+                                    contentDescription = "Delete Product"
+                                )
+                            }
+                            IconButton(
+                                onClick = {
+                                    onEditClick(product)
+                                },
+                                enabled = true,
+                                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Edit,
+                                    contentDescription = "Edit Product"
+                                )
+                            }
                         }
                     }
                 }

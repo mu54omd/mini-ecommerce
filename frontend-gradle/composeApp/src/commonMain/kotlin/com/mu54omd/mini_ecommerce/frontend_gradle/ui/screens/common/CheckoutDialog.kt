@@ -25,6 +25,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -79,13 +81,19 @@ fun CheckoutDialog(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceAround,
                 ) {
-                    TextButton(onClick = onConfirmClick) {
+                    TextButton(
+                        onClick = onConfirmClick,
+                        modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+                    ) {
                         Icon(imageVector = Icons.Default.CheckCircle, contentDescription = "Confirm Checkout")
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(text = "Confirm")
                     }
                     Spacer(Modifier.width(8.dp))
-                    TextButton(onClick = onCancelClick) {
+                    TextButton(
+                        onClick = onCancelClick,
+                        modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+                    ) {
                         Icon(imageVector = Icons.Default.Cancel, contentDescription = "Cancel Checkout")
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(text = "Cancel")

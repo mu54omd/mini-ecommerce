@@ -25,6 +25,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -100,7 +102,9 @@ fun EditUserDialog(
                                 role = role
                             )
                         )
-                    }
+                    },
+                    modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+
                 ) {
                     Icon(
                         imageVector = Icons.Default.CheckCircle,
@@ -110,7 +114,10 @@ fun EditUserDialog(
                     Text(text = "Confirm")
                 }
                 Spacer(Modifier.width(8.dp))
-                TextButton(onClick = onCancelClick) {
+                TextButton(
+                    onClick = onCancelClick,
+                    modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+                ) {
                     Icon(
                         imageVector = Icons.Default.Cancel,
                         contentDescription = "Cancel Edit"

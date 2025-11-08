@@ -41,6 +41,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -140,7 +143,8 @@ fun AppNavHost(
                                         contentDescription = destination.contentDescription,
                                         tint = iconColor
                                     )
-                                }
+                                },
+                                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
                             )
                         }
                     }
@@ -150,7 +154,7 @@ fun AppNavHost(
         topBar = {
             if (currentDestination != Screen.Login.route) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(16.dp).height(64.dp),
+                    modifier = Modifier.fillMaxWidth().padding(20.dp).height(64.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -160,15 +164,11 @@ fun AppNavHost(
                         fontWeight = FontWeight.ExtraBold,
                         modifier = Modifier.width(100.dp).padding(end = 2.dp),
                     )
-                    AnimatedVisibility(
-                        visible = currentDestination == Screen.Products.route,
-                        enter = scaleIn(tween()) + fadeIn(),
-                        exit = scaleOut(tween()) + fadeOut(),
-                        modifier = Modifier.weight(0.4f)
-                    ) {
+                    if(currentDestination == Screen.Products.route) {
                         ProductSearchBar(
                             onQuery = { query -> productViewModel.filterProducts(query) },
-                            onClearQuery = { productViewModel.getAllProducts() }
+                            onClearQuery = { productViewModel.getAllProducts() },
+                            modifier = Modifier.weight(0.4f).scale(0.75f)
                         )
                     }
                     TextButton(
@@ -179,10 +179,11 @@ fun AppNavHost(
                             }
                             selectedDestination = navigationDestination.indices.first
                         },
+                        modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.Logout,
-                            contentDescription = "Logout"
+                            contentDescription = "Logout",
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(text = "Logout", overflow = TextOverflow.Ellipsis, maxLines = 1)
@@ -222,7 +223,8 @@ fun AppNavHost(
                                         contentDescription = destination.contentDescription,
                                         tint = iconColor
                                     )
-                                }
+                                },
+                                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
                             )
                         }
                     }
