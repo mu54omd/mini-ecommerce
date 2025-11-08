@@ -33,6 +33,8 @@ This project demonstrates full-stack development, modular architecture, and cros
 - **Web:** Compose for Web  
 - **Backend:** Spring Boot, Spring Security (JWT), MariaDB/MySQL, Swagger UI  
 
+## 🏁 How to Run
+
 ### 1️⃣ Backend
 ```bash
 cd backend-maven
@@ -42,14 +44,13 @@ The backend will run at `http://localhost:5050`
 
 ### 2️⃣ Frontend
 * Android App
-`./gradlew frontend-gradle:androidApp:run`
+`use android-studio to run application`
 
 * Desktop App
-`./gradlew frontend-gradle:desktopApp:run`
-
+`./gradlew composeApp:run`
 
 * Web App
-`./gradlew frontend-gradle:webApp:browserProductionRun`
+`./gradlew composeApp:wasmJsBrowserDevelopmentRun`
 
 Make sure the backend is running before launching any frontend applications.
 
