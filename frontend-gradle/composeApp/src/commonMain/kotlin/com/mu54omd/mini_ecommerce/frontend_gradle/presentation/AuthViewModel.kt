@@ -76,10 +76,12 @@ class AuthViewModel(private val authUseCases: AuthUseCases): ViewModel() {
         }
     }
     fun logout(cause: UiState<*> = UiState.Idle){
-        _tokenState.update { cause as UiState<LoginResponse> }
-        viewModelScope.launch {
-            authUseCases.logoutUseCase()
-            setUserInfo()
+        if(cause is UiState.Error || cause is UiState.Unauthorized || cause is UiState.Idle || cause is UiState.Loading) {
+            _tokenState.update { cause as UiState<LoginResponse> }
+            viewModelScope.launch {
+                authUseCases.logoutUseCase()
+                setUserInfo()
+            }
         }
     }
 

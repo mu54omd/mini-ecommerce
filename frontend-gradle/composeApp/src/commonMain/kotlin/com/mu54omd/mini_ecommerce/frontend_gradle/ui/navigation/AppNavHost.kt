@@ -103,7 +103,7 @@ fun AppNavHost(
     }
 
 
-    var selectedDestination by rememberSaveable { mutableIntStateOf(navigationDestination.indices.first) }
+    var selectedDestination by rememberSaveable(tokenState) { mutableIntStateOf(navigationDestination.indices.first) }
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination?.route
 
     LaunchedEffect(tokenState) {
@@ -265,6 +265,7 @@ fun AppNavHost(
                             userViewModel = userViewModel,
                             onExit = { state ->
                                 authViewModel.logout(state)
+                                userViewModel.resetAllStates()
                             }
                         )
                     }
@@ -272,7 +273,10 @@ fun AppNavHost(
                     composable(Screen.Orders.route) {
                         OrdersScreen(
                             orderViewModel = orderViewModel,
-                            onExit = { state -> authViewModel.logout(state) }
+                            onExit = { state ->
+                                authViewModel.logout(state)
+                                orderViewModel.resetAllStates()
+                            }
                         )
                     }
 
@@ -281,7 +285,10 @@ fun AppNavHost(
                             productViewModel = productViewModel,
                             cartViewModel = cartViewModel,
                             userRole = userState.role,
-                            onExit = { state -> authViewModel.logout(state) }
+                            onExit = { state ->
+                                authViewModel.logout(state)
+                                productViewModel.resetAllStates()
+                            }
                         )
                     }
 
@@ -290,6 +297,7 @@ fun AppNavHost(
                             cartViewModel = cartViewModel,
                             onExit = { state ->
                                 authViewModel.logout(state)
+                                cartViewModel.resetAllStates()
                             },
                             onConfirmClick = {
                                 cartViewModel.checkout()
@@ -305,7 +313,10 @@ fun AppNavHost(
                     composable(Screen.MyOrders.route) {
                         MyOrdersScreen(
                             orderViewModel = orderViewModel,
-                            onExit = { state -> authViewModel.logout(state) }
+                            onExit = { state ->
+                                authViewModel.logout(state)
+                                orderViewModel.resetAllStates()
+                            }
                         )
                     }
                 }
@@ -313,3 +324,5 @@ fun AppNavHost(
         }
     }
 }
+
+
