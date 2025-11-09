@@ -26,7 +26,7 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.ProductViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.EmptyPage
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.LoadingView
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.AddOrEditProduct
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.AddEditProductModal
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.ProductList
 import io.github.vinceglb.filekit.dialogs.FileKitMode
 import io.github.vinceglb.filekit.dialogs.FileKitType
@@ -133,7 +133,7 @@ fun ProductsScreen(
                         modifier = Modifier.weight(0.9f)
                     )
                     if (addProductModalState) {
-                        AddOrEditProduct(
+                        AddEditProductModal(
                             productState = addProductState,
                             onCancelClick = {
                                 addProductModalState = false
@@ -156,7 +156,7 @@ fun ProductsScreen(
                         )
                     }
                     if (editProductModalState) {
-                        AddOrEditProduct(
+                        AddEditProductModal(
                             product = selectedProduct,
                             productState = editProductState,
                             onCancelClick = {

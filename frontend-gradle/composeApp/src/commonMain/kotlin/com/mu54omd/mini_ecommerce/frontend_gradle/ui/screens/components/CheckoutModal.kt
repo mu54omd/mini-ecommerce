@@ -1,4 +1,4 @@
-package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common
+package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -17,36 +16,49 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.CartItemResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.ProductResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.helper.calculateTotalPrice
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CheckoutDialog(
+fun CheckoutModal(
     cartItems: List<CartItemResponse>,
     onCancelClick: () -> Unit,
     onConfirmClick: () -> Unit,
 ) {
-    Dialog(
-        onDismissRequest = onCancelClick
+    ModalBottomSheet(
+        onDismissRequest = onCancelClick,
+        sheetState = rememberModalBottomSheetState(),
+        containerColor = Color.Transparent,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        shape = RectangleShape,
+        dragHandle = null,
+        scrimColor = Color.Black.copy(alpha = .5f),
     ) {
         Box(
             contentAlignment = Alignment.Center,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp)
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -108,7 +120,7 @@ fun CheckoutDialog(
 @Preview
 fun CheckoutDialogPreview(){
     MaterialTheme {
-        CheckoutDialog(
+        CheckoutModal(
             cartItems = listOf(
                 CartItemResponse(id = 2, product = ProductResponse(10, "Phone", "Phone", 3000.0), quantity = 4),
                 CartItemResponse(id = 2, product = ProductResponse(10, "Phone", "Phone", 3000.0), quantity = 4),

@@ -5,10 +5,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -44,7 +47,7 @@ enum class ProductModalStep {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddOrEditProduct(
+fun AddEditProductModal(
     productState: UiState<Product>,
     product: Product? = null,
     onCancelClick: () -> Unit,
@@ -65,7 +68,7 @@ fun AddOrEditProduct(
 
     ModalBottomSheet(
         onDismissRequest = onCancelClick,
-        sheetState = rememberModalBottomSheetState(),
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         containerColor = Color.Transparent,
         contentColor = MaterialTheme.colorScheme.onSurface,
         shape = RectangleShape,
@@ -86,67 +89,84 @@ fun AddOrEditProduct(
                         modifier = Modifier
                             .statusBarsPadding()
                             .width(350.dp)
-                            .background(color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(5))
-                            .padding(start = 10.dp, end = 10.dp, top = 20.dp, bottom = 20.dp)
+                            .height(400.dp)
+                            .background(
+                                color = MaterialTheme.colorScheme.surface,
+                                shape = RoundedCornerShape(5)
+                            )
+                            .padding(8.dp)
                     ) {
                         OutlinedTextField(
                             value = productName,
                             onValueChange = { productName = it },
                             label = {
                                 Text(
-                                    text = "Product Name",
+                                    text = "Name",
                                     style = MaterialTheme.typography.bodySmall
                                 )
-                            }
+                            },
+                            singleLine = true,
+                            modifier = Modifier.width(300.dp)
                         )
                         OutlinedTextField(
                             value = productDescription,
                             onValueChange = { productDescription = it },
                             label = {
                                 Text(
-                                    text = "Product Description",
+                                    text = "Description",
                                     style = MaterialTheme.typography.bodySmall
                                 )
                             },
+                            modifier = Modifier.height(150.dp).width(300.dp),
                             maxLines = 5,
                             singleLine = false,
                         )
-                        OutlinedTextField(
-                            value = productPrice,
-                            onValueChange = { newValue ->
-                                if (newValue.all { it.isDigit() || it == '.' }) {
-                                    productPrice = newValue
-                                }
-                            },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            label = {
-                                Text(
-                                    text = "Product Price",
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                            },
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.width(300.dp)
+                        ) {
+                            OutlinedTextField(
+                                value = productPrice,
+                                onValueChange = { newValue ->
+                                    if (newValue.all { it.isDigit() || it == '.' }) {
+                                        productPrice = newValue
+                                    }
+                                },
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                label = {
+                                    Text(
+                                        text = "Price",
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                },
+                                singleLine = true,
+                                modifier = Modifier.width(170.dp)
+                            )
 
-                        OutlinedTextField(
-                            value = productStocks,
-                            onValueChange = { newValue ->
-                                if (newValue.all(Char::isDigit)) {
-                                    productStocks = newValue
-                                }
-                            },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            label = {
-                                Text(
-                                    text = "Product Stocks",
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                            },
-                        )
-
+                            OutlinedTextField(
+                                value = productStocks,
+                                onValueChange = { newValue ->
+                                    if (newValue.all(Char::isDigit)) {
+                                        productStocks = newValue
+                                    }
+                                },
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                label = {
+                                    Text(
+                                        text = "Stocks",
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                },
+                                singleLine = true,
+                                modifier = Modifier.width(120.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(30.dp))
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.Center,
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.width(300.dp)
                         ) {
                             TextButton(
                                 onClick = { onCancelClick() },

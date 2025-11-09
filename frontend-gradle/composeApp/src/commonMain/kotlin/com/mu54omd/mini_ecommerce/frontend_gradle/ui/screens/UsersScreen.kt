@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.UserResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.UserViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.EditUserDialog
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.EditUserModal
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.LoadingView
 
 @Composable
@@ -160,7 +160,7 @@ fun UsersScreen(
                     }
                 }
                 AnimatedVisibility(visible = editUserDialogState) {
-                    EditUserDialog(
+                    EditUserModal(
                         user = editUserRequest,
                         onCancelClick = { editUserDialogState = false },
                         onConfirmClick = { user ->
