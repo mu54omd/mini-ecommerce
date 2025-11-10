@@ -1,6 +1,5 @@
 package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -40,6 +40,13 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.UserViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.EditUserModal
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.LoadingView
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.AlertModal
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.DeleteModal
+import frontend_gradle.composeapp.generated.resources.Res
+import frontend_gradle.composeapp.generated.resources.delete_user_successful_alert
+import frontend_gradle.composeapp.generated.resources.edit_user_successful_alert
+import frontend_gradle.composeapp.generated.resources.error_alert
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun UsersScreen(
@@ -51,8 +58,11 @@ fun UsersScreen(
     val deleteUserState = userViewModel.deleteUserState.collectAsState().value
     val editUserState = userViewModel.editUserState.collectAsState().value
 
-    var editUserDialogState by remember { mutableStateOf(false) }
+    var editUserModalState by remember { mutableStateOf(false) }
+    var deleteUserModalState by remember { mutableStateOf(false) }
+    var alertModalState by remember { mutableStateOf(false) }
     var editUserRequest by remember { mutableStateOf(UserResponse()) }
+    var selectedUserForDelete by remember { mutableLongStateOf(-1) }
 
     LaunchedEffect(Unit) {
         userViewModel.getAllUsers()
@@ -134,7 +144,7 @@ fun UsersScreen(
                                     IconButton(
                                         onClick = {
                                             editUserRequest = user
-                                            editUserDialogState = true
+                                            editUserModalState = true
                                         },
                                         modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
                                     ) {
@@ -145,7 +155,8 @@ fun UsersScreen(
                                     }
                                     IconButton(
                                         onClick = {
-                                            userViewModel.deleteUser(user.id)
+                                            deleteUserModalState = true
+                                            selectedUserForDelete = user.id
                                         },
                                         modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
                                     ) {
@@ -159,16 +170,77 @@ fun UsersScreen(
                         }
                     }
                 }
-                AnimatedVisibility(visible = editUserDialogState) {
+                if(editUserModalState) {
                     EditUserModal(
                         user = editUserRequest,
-                        onCancelClick = { editUserDialogState = false },
+                        onCancelClick = { editUserModalState = false },
                         onConfirmClick = { user ->
                             userViewModel.editUser(editUserRequest.id, user)
-                            editUserDialogState = false
+                            editUserModalState = false
                         }
                     )
                 }
+
+                if(deleteUserModalState){
+                    DeleteModal(
+                        id = selectedUserForDelete,
+                        onCancelClick = {
+                            deleteUserModalState = false
+                            selectedUserForDelete = -1
+                        },
+                        onConfirmClick = {
+                            deleteUserModalState = false
+                            userViewModel.deleteUser(selectedUserForDelete)
+                            selectedUserForDelete = -1
+                        }
+                    )
+                }
+                when(deleteUserState){
+                    is UiState.Idle -> {}
+                    is UiState.Loading -> {}
+                    else -> {
+                        alertModalState = true
+                        if(alertModalState) {
+                            AlertModal(
+                                message =
+                                    if(deleteUserState is UiState.Success) {
+                                        stringResource( Res.string.delete_user_successful_alert)
+                                    }else {
+                                        stringResource( Res.string.error_alert)
+                                    },
+                                onConfirmClick = {
+                                    alertModalState = false
+                                    userViewModel.resetDeleteUserState()
+                                    userViewModel.getAllUsers()
+                                },
+                            )
+                        }
+                    }
+                }
+                when(editUserState){
+                    is UiState.Idle -> {}
+                    is UiState.Loading -> {}
+                    else -> {
+                        alertModalState = true
+                        if(alertModalState) {
+                            AlertModal(
+                                message =
+                                    if(editUserState is UiState.Success) {
+                                        stringResource( Res.string.edit_user_successful_alert)
+                                    }else {
+                                        stringResource( Res.string.error_alert)
+                                    },
+                                onConfirmClick = {
+                                    alertModalState = false
+                                    userViewModel.resetEditUserState()
+                                    userViewModel.getAllUsers()
+                                },
+                            )
+                        }
+                    }
+                }
+
+
             }
         }
 

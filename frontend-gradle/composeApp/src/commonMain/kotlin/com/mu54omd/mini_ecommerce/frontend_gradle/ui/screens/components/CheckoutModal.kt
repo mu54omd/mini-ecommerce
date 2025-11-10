@@ -25,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.CartItemResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.ProductResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.helper.calculateTotalPrice
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,9 +47,12 @@ fun CheckoutModal(
     onCancelClick: () -> Unit,
     onConfirmClick: () -> Unit,
 ) {
+    val sheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
+
     ModalBottomSheet(
         onDismissRequest = onCancelClick,
-        sheetState = rememberModalBottomSheetState(),
+        sheetState = sheetState,
         containerColor = Color.Transparent,
         contentColor = MaterialTheme.colorScheme.onSurface,
         shape = RectangleShape,
@@ -103,7 +108,12 @@ fun CheckoutModal(
                     }
                     Spacer(Modifier.width(8.dp))
                     TextButton(
-                        onClick = onCancelClick,
+                        onClick = {
+                            scope.launch {
+                                sheetState.hide()
+                                onCancelClick()
+                            }
+                        },
                         modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
                     ) {
                         Icon(imageVector = Icons.Default.Cancel, contentDescription = "Cancel Checkout")

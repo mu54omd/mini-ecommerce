@@ -133,7 +133,6 @@ fun LoginScreen(
                         text = "Error: ${(loginState as UiState.Error).message}",
                         color = Color.Red,
                     )
-                    println("Error: ${(loginState as UiState.Error).message}")
                 }
                 is UiState.Success -> {
                     Text(text = "Welcome!")
@@ -153,7 +152,6 @@ fun LoginScreen(
                         text = "Error: ${(registerState as UiState.Error).message}",
                         color = Color.Red,
                     )
-                    println("Error: ${(registerState as UiState.Error).message}")
                 }
 
                 is UiState.Success -> {

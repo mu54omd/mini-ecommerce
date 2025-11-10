@@ -1,12 +1,17 @@
 package com.mu54omd.mini_ecommerce.frontend_gradle.ui.navigation
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideIn
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
@@ -41,6 +46,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
@@ -103,7 +109,11 @@ fun AppNavHost(
     }
 
 
-    var selectedDestination by rememberSaveable(tokenState) { mutableIntStateOf(navigationDestination.indices.first) }
+    var selectedDestination by rememberSaveable(tokenState) {
+        mutableIntStateOf(
+            navigationDestination.indices.first
+        )
+    }
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination?.route
 
     LaunchedEffect(tokenState) {
@@ -117,123 +127,178 @@ fun AppNavHost(
         bottomBar = {
             BoxWithConstraints {
                 val isDesktop = maxWidth > 840.dp
-                if (!isDesktop && currentDestination != Screen.Login.route) {
-                    NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
-                        navigationDestination.forEachIndexed { index, destination ->
-                            NavigationBarItem(
-                                selected = selectedDestination == index,
-                                onClick = {
-                                    navController.navigate(route = destination.route)
-                                    selectedDestination = index
-                                },
-                                label = {
-                                    Text(
-                                        text = destination.label,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                },
-                                icon = {
-                                    val iconToShow =
-                                        if (destination == Screen.Cart) cartIcon else destination.icon
-                                    val iconColor =
-                                        if (destination == Screen.Cart) cartIconColor else MaterialTheme.colorScheme.onSurface
-                                    Icon(
-                                        imageVector = iconToShow,
-                                        contentDescription = destination.contentDescription,
-                                        tint = iconColor
-                                    )
-                                },
-                                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
-                            )
+                val isLogin = currentDestination == Screen.Login.route
+                AnimatedContent(
+                    targetState = !isDesktop,
+                    transitionSpec = {
+                        slideIntoContainer(towards = AnimatedContentTransitionScope.SlideDirection.Up) togetherWith slideOutOfContainer(
+                            towards = AnimatedContentTransitionScope.SlideDirection.Down
+                        )
+                    }
+                ) { state ->
+                    if (state) {
+                        NavigationBar(
+                            modifier = Modifier.alpha(if (isLogin) 0f else 1f),
+                            windowInsets = NavigationBarDefaults.windowInsets
+                        ) {
+                            navigationDestination.forEachIndexed { index, destination ->
+                                NavigationBarItem(
+                                    selected = selectedDestination == index,
+                                    onClick = {
+                                        if (currentDestination != destination.route) {
+                                            navController.navigate(route = destination.route) {
+                                                launchSingleTop = true
+                                                restoreState = true
+                                                popUpTo(navController.graph.startDestinationId) {
+                                                    saveState = true
+                                                }
+                                            }
+                                            selectedDestination = index
+                                        }
+                                    },
+                                    label = {
+                                        Text(
+                                            text = destination.label,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    },
+                                    icon = {
+                                        val iconToShow =
+                                            if (destination == Screen.Cart) cartIcon else destination.icon
+                                        val iconColor =
+                                            if (destination == Screen.Cart) cartIconColor else MaterialTheme.colorScheme.onSurface
+                                        Icon(
+                                            imageVector = iconToShow,
+                                            contentDescription = destination.contentDescription,
+                                            tint = iconColor
+                                        )
+                                    },
+                                    modifier = Modifier.pointerHoverIcon(if(!isLogin) PointerIcon.Hand else PointerIcon.Default),
+                                    enabled = !isLogin
+                                )
+                            }
                         }
                     }
                 }
             }
         },
         topBar = {
-            if (currentDestination != Screen.Login.route) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(20.dp).height(64.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = currentDestination?.uppercase() ?: "",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.ExtraBold,
-                        modifier = Modifier.width(100.dp).padding(end = 2.dp),
+            val isLogin = currentDestination == Screen.Login.route
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(20.dp).height(64.dp)
+                    .alpha(if (isLogin) 0f else 1f),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = currentDestination?.uppercase() ?: "",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.ExtraBold,
+                    modifier = Modifier.width(100.dp).padding(end = 2.dp),
+                )
+                if (currentDestination == Screen.Products.route) {
+                    ProductSearchBar(
+                        onQuery = { query -> productViewModel.filterProducts(query) },
+                        onClearQuery = { productViewModel.getAllProducts() },
+                        modifier = Modifier.weight(0.4f).scale(0.75f)
                     )
-                    if(currentDestination == Screen.Products.route) {
-                        ProductSearchBar(
-                            onQuery = { query -> productViewModel.filterProducts(query) },
-                            onClearQuery = { productViewModel.getAllProducts() },
-                            modifier = Modifier.weight(0.4f).scale(0.75f)
-                        )
-                    }
-                    TextButton(
-                        onClick = {
-                            authViewModel.logout()
-                            navController.navigate(Screen.Login.route) {
-                                popUpTo(0)
-                            }
-                            selectedDestination = navigationDestination.indices.first
-                        },
-                        modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.Logout,
-                            contentDescription = "Logout",
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = "Logout", overflow = TextOverflow.Ellipsis, maxLines = 1)
-                    }
+                }
+                TextButton(
+                    onClick = {
+                        authViewModel.logout()
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(0)
+                        }
+                        selectedDestination = navigationDestination.indices.first
+                    },
+                    modifier = Modifier.pointerHoverIcon(if(!isLogin) PointerIcon.Hand else PointerIcon.Default),
+                    enabled = !isLogin
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.Logout,
+                        contentDescription = "Logout",
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = "Logout", overflow = TextOverflow.Ellipsis, maxLines = 1)
                 }
             }
         }
     ) { contentPadding ->
         BoxWithConstraints {
             val isDesktop = maxWidth > 840.dp
+            val isLogin = currentDestination == Screen.Login.route
             Row(
                 modifier = Modifier.padding(contentPadding)
             ) {
-                if(isDesktop && currentDestination != Screen.Login.route){
-                    NavigationRail {
-                        navigationDestination.forEachIndexed { index, destination ->
-                            NavigationRailItem(
-                                selected = selectedDestination == index,
-                                onClick = {
-                                    navController.navigate(destination.route)
-                                    selectedDestination = index
-                                },
-                                label = {
-                                    Text(
-                                        text = destination.label,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                },
-                                icon = {
-                                    val iconToShow =
-                                        if (destination == Screen.Cart) cartIcon else destination.icon
-                                    val iconColor =
-                                        if (destination == Screen.Cart) cartIconColor else MaterialTheme.colorScheme.onSurface
-                                    Icon(
-                                        imageVector = iconToShow,
-                                        contentDescription = destination.contentDescription,
-                                        tint = iconColor
-                                    )
-                                },
-                                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
-                            )
+                AnimatedContent(
+                    targetState = isDesktop,
+                    transitionSpec = {
+                        slideIntoContainer(towards = AnimatedContentTransitionScope.SlideDirection.End) togetherWith slideOutOfContainer(
+                            towards = AnimatedContentTransitionScope.SlideDirection.Start
+                        )
+                    }
+                ) { state ->
+                    if (state) {
+                        NavigationRail(
+                            modifier = Modifier.alpha(if (isLogin) 0f else 1f)
+                        ) {
+                            navigationDestination.forEachIndexed { index, destination ->
+                                NavigationRailItem(
+                                    selected = selectedDestination == index,
+                                    onClick = {
+                                        if (currentDestination != destination.route) {
+                                            navController.navigate(destination.route) {
+                                                launchSingleTop = true
+                                                restoreState = true
+                                                popUpTo(navController.graph.startDestinationId) {
+                                                    saveState = true
+                                                }
+                                            }
+                                            selectedDestination = index
+                                        }
+                                    },
+                                    label = {
+                                        Text(
+                                            text = destination.label,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    },
+                                    icon = {
+                                        val iconToShow =
+                                            if (destination == Screen.Cart) cartIcon else destination.icon
+                                        val iconColor =
+                                            if (destination == Screen.Cart) cartIconColor else MaterialTheme.colorScheme.onSurface
+                                        Icon(
+                                            imageVector = iconToShow,
+                                            contentDescription = destination.contentDescription,
+                                            tint = iconColor
+                                        )
+                                    },
+                                    modifier = Modifier.pointerHoverIcon(if(!isLogin) PointerIcon.Hand else PointerIcon.Default),
+                                    enabled = !isLogin                                )
+                            }
                         }
                     }
                 }
                 NavHost(
                     navController = navController,
                     startDestination = Screen.Login.route,
-                    enterTransition = { slideIntoContainer(towards = AnimatedContentTransitionScope.SlideDirection.Start) },
-                    exitTransition = { slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.End) },
+                    enterTransition = {
+                        if (initialState.destination.route == Screen.Login.route) {
+                            scaleIn()
+                        } else {
+                            fadeIn(tween(100))
+                        }
+                    },
+                    exitTransition = {
+                        if (targetState.destination.route == Screen.Login.route) {
+                            fadeOut(tween(200))
+                        } else {
+                            fadeOut(tween(100))
+                        }
+                    }
                 ) {
                     composable(Screen.Login.route) {
                         LoginScreen(

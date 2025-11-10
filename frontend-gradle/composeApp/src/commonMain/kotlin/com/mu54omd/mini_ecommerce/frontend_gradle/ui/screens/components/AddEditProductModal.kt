@@ -26,6 +26,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,6 +39,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.Product
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
+import kotlinx.coroutines.launch
 
 
 enum class ProductModalStep {
@@ -59,6 +61,8 @@ fun AddEditProductModal(
     var productPrice by remember { mutableStateOf(if (product?.price == null) "" else product.price.toString()) }
     var productStocks by remember { mutableStateOf(if (product?.stock == null) "" else product.stock.toString()) }
     var currentStep by remember { mutableStateOf(ProductModalStep.FORM) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(productState) {
         if (productState is UiState.Success) {
@@ -68,7 +72,7 @@ fun AddEditProductModal(
 
     ModalBottomSheet(
         onDismissRequest = onCancelClick,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        sheetState = sheetState,
         containerColor = Color.Transparent,
         contentColor = MaterialTheme.colorScheme.onSurface,
         shape = RectangleShape,
@@ -169,7 +173,12 @@ fun AddEditProductModal(
                             modifier = Modifier.width(300.dp)
                         ) {
                             TextButton(
-                                onClick = { onCancelClick() },
+                                onClick = {
+                                    scope.launch {
+                                        sheetState.hide()
+                                        onCancelClick()
+                                    }
+                                },
                                 modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
                             ) {
                                 Text(text = "Cancel")

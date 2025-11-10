@@ -18,7 +18,6 @@ fun LoadingView() {
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize().padding(16.dp)
     ) {
-        Text("Loading...")
         CircularProgressIndicator(modifier = Modifier.padding(24.dp))
     }
 }

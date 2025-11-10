@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -27,13 +28,19 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.EmptyPage
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.LoadingView
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.AddEditProductModal
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.AlertModal
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.DeleteModal
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.ProductList
+import frontend_gradle.composeapp.generated.resources.Res
+import frontend_gradle.composeapp.generated.resources.error_alert
+import frontend_gradle.composeapp.generated.resources.upload_image_successful_alert
 import io.github.vinceglb.filekit.dialogs.FileKitMode
 import io.github.vinceglb.filekit.dialogs.FileKitType
 import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
 import io.github.vinceglb.filekit.name
 import io.github.vinceglb.filekit.readBytes
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun ProductsScreen(
@@ -45,8 +52,13 @@ fun ProductsScreen(
     val productsState = productViewModel.productsState.collectAsState().value
     val addProductState = productViewModel.addProductState.collectAsState().value
     val editProductState = productViewModel.editProductState.collectAsState().value
+    val uploadProductImageState = productViewModel.uploadProductImageState.collectAsState().value
+
     var addProductModalState by remember { mutableStateOf(false) }
     var editProductModalState by remember { mutableStateOf(false) }
+    var deleteProductModalState by remember { mutableStateOf(false) }
+    var showAlertModalState by remember { mutableStateOf(false) }
+
     var selectedProduct by remember {
         mutableStateOf<Product>(
             Product(
@@ -57,6 +69,7 @@ fun ProductsScreen(
             )
         )
     }
+    var selectedProductIdForDelete by remember { mutableLongStateOf(-1) }
 
     val cartState = cartViewModel.cartState.collectAsState().value
     val cartItems: Map<Long, Int> =
@@ -77,7 +90,6 @@ fun ProductsScreen(
                         fileName = file.name,
                         byteArray = file.readBytes()
                     )
-                    productViewModel.resetAddProductState()
                 }
                 if (editProductState is UiState.Success) {
                     productViewModel.uploadProductImage(
@@ -85,7 +97,6 @@ fun ProductsScreen(
                         fileName = file.name,
                         byteArray = file.readBytes()
                     )
-                    productViewModel.resetEditProductState()
                 }
             }
         }
@@ -128,7 +139,8 @@ fun ProductsScreen(
                             editProductModalState = true
                         },
                         onRemoveClick = { productId ->
-                            productViewModel.deleteProduct(productId)
+                            selectedProductIdForDelete = productId
+                            deleteProductModalState = true
                         },
                         modifier = Modifier.weight(0.9f)
                     )
@@ -180,10 +192,89 @@ fun ProductsScreen(
                             }
                         )
                     }
+                    if(deleteProductModalState){
+                        DeleteModal(
+                            id = selectedProductIdForDelete,
+                            onCancelClick = {
+                                deleteProductModalState = false
+                                selectedProductIdForDelete = -1
+                                            },
+                            onConfirmClick = { productId ->
+                                deleteProductModalState = false
+                                productViewModel.deleteProduct(productId)
+                                selectedProductIdForDelete = -1
+                            }
+                        )
+                    }
+                    when(addProductState){
+                        is UiState.Idle -> {}
+                        is UiState.Loading -> {}
+                        is UiState.Success -> {}
+                        else -> {
+                            showAlertModalState = true
+                            if(showAlertModalState){
+                                AlertModal(
+                                    message = stringResource(Res.string.error_alert),
+                                    onConfirmClick = {
+                                        showAlertModalState = false
+                                        productViewModel.resetAddProductState()
+                                    }
+                                )
+                            }
+                        }
+                    }
+                    when(editProductState){
+                        is UiState.Idle -> {}
+                        is UiState.Loading -> {}
+                        is UiState.Success -> {
+
+                        }
+                        else -> {
+                            showAlertModalState = true
+                            if(showAlertModalState){
+                                AlertModal(
+                                    message = stringResource(Res.string.error_alert),
+                                    onConfirmClick = {
+                                        showAlertModalState = false
+                                        productViewModel.resetEditProductState()
+                                    }
+                                )
+                            }
+                        }
+                    }
+                    when(uploadProductImageState){
+                        is UiState.Idle -> {}
+                        is UiState.Loading -> {}
+                        is UiState.Success -> {
+                            showAlertModalState = true
+                            if(showAlertModalState){
+                                AlertModal(
+                                    message = stringResource(Res.string.upload_image_successful_alert),
+                                    onConfirmClick = {
+                                        showAlertModalState = false
+                                        productViewModel.resetAddProductState()
+                                        productViewModel.resetEditProductState()
+                                        productViewModel.resetUploadProductImageState()
+                                    }
+                                )
+                            }
+                        }
+                        else -> {
+                            showAlertModalState = true
+                            if(showAlertModalState){
+                                AlertModal(
+                                    message = stringResource(Res.string.error_alert),
+                                    onConfirmClick = {
+                                        showAlertModalState = false
+                                        productViewModel.resetUploadProductImageState()
+                                    }
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
-
         else -> onExit(productsState)
     }
 }
