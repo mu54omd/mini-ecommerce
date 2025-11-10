@@ -52,6 +52,7 @@ fun ProductsScreen(
     val productsState = productViewModel.productsState.collectAsState().value
     val addProductState = productViewModel.addProductState.collectAsState().value
     val editProductState = productViewModel.editProductState.collectAsState().value
+    val deleteProductState = productViewModel.deleteProductState.collectAsState().value
     val uploadProductImageState = productViewModel.uploadProductImageState.collectAsState().value
 
     var addProductModalState by remember { mutableStateOf(false) }
@@ -226,9 +227,7 @@ fun ProductsScreen(
                     when(editProductState){
                         is UiState.Idle -> {}
                         is UiState.Loading -> {}
-                        is UiState.Success -> {
-
-                        }
+                        is UiState.Success -> {}
                         else -> {
                             showAlertModalState = true
                             if(showAlertModalState){
@@ -237,6 +236,23 @@ fun ProductsScreen(
                                     onConfirmClick = {
                                         showAlertModalState = false
                                         productViewModel.resetEditProductState()
+                                    }
+                                )
+                            }
+                        }
+                    }
+                    when(deleteProductState){
+                        is UiState.Idle -> {}
+                        is UiState.Loading -> {}
+                        is UiState.Success -> {}
+                        else -> {
+                            showAlertModalState = true
+                            if(showAlertModalState){
+                                AlertModal(
+                                    message = stringResource(Res.string.error_alert),
+                                    onConfirmClick = {
+                                        showAlertModalState = false
+                                        productViewModel.resetDeleteProductState()
                                     }
                                 )
                             }

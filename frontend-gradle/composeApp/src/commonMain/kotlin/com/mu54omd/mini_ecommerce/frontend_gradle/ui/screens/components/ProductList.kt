@@ -70,7 +70,7 @@ fun ProductList(
                 ) {
                     CustomAsyncImage(
                         url = "$BASE_URL${product.imageUrl}",
-                        contentDescription = "Product Image In Products Screen",
+                        contentDescription = product.description,
                         errorTint = MaterialTheme.colorScheme.surface,
                         size = 200.dp
                     )
@@ -78,7 +78,7 @@ fun ProductList(
                         modifier = Modifier
                             .fillMaxWidth()
                             .align(Alignment.BottomCenter)
-                            .background(color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5f))
+                            .background(color = MaterialTheme.colorScheme.surfaceBright.copy(alpha = 0.7f))
                             .height(70.dp)
                             .padding(4.dp),
                         verticalAlignment = Alignment.CenterVertically,
@@ -93,7 +93,7 @@ fun ProductList(
                                 style = MaterialTheme.typography.titleSmall,
                                 overflow = TextOverflow.Ellipsis,
                                 modifier = Modifier.basicMarquee(),
-                                color = MaterialTheme.colorScheme.onTertiaryContainer
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
                                 text = "${product.price} $",

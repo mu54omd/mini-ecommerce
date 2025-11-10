@@ -1,6 +1,7 @@
 package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -60,16 +61,17 @@ fun AlertModal(
                     .statusBarsPadding()
                     .fillMaxWidth()
                     .background(
-                        color = MaterialTheme.colorScheme.surface,
+                        color = MaterialTheme.colorScheme.surfaceBright,
                         shape = RoundedCornerShape(5)
                     )
-                    .padding(5.dp)
+                    .padding(start = 10.dp, end = 10.dp, top = 5.dp, bottom = 5.dp)
             ) {
                 Text(
                     text = message,
                     textAlign = TextAlign.Start,
                     overflow = TextOverflow.Ellipsis,
-                    maxLines = 1
+                    maxLines = 1,
+                    modifier = Modifier.weight(0.8f).basicMarquee()
                 )
                 TextButton(
                     onClick = {
@@ -78,7 +80,7 @@ fun AlertModal(
                             onConfirmClick()
                         }
                     },
-                    modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+                    modifier = Modifier.pointerHoverIcon(PointerIcon.Hand).weight(0.2f)
                 ) {
                     Text("Ok", maxLines = 1)
                 }

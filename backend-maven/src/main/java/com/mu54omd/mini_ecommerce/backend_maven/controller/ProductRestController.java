@@ -54,36 +54,44 @@ public class ProductRestController {
     }
 
     @DeleteMapping
-    public ResponseEntity<?> deleteProduct(@RequestParam Long productId) throws IOException {
+    public ResponseEntity<?> deleteProduct(@RequestParam Long productId) {
         Product product = productService.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
-
-        if (product.getImageUrl() != null) {
-            String uploadDir = System.getProperty("user.home") + "/uploads/";
-            String fileName = Paths.get(product.getImageUrl()).getFileName().toString();
-            Path filePath = Paths.get(uploadDir + fileName);
-            Files.deleteIfExists(filePath);
+        try {
+            productService.deleteProduct(productId);
+            if (product.getImageUrl() != null) {
+                String uploadDir = System.getProperty("user.home") + "/uploads/";
+                String fileName = Paths.get(product.getImageUrl()).getFileName().toString();
+                Path filePath = Paths.get(uploadDir + fileName);
+                Files.deleteIfExists(filePath);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        productService.deleteProduct(productId);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{id}/upload-image")
-    public ResponseEntity<?> uploadImage(@PathVariable Long id, @RequestParam("file") MultipartFile file) throws IOException {
+    public ResponseEntity<?> uploadImage(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
 
         Product product = productService.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
-        String uploadDir = System.getProperty("user.home") + "/uploads/";
-        Files.createDirectories(Paths.get(uploadDir));
+        try {
+            String uploadDir = System.getProperty("user.home") + "/uploads/";
+            Files.createDirectories(Paths.get(uploadDir));
 
-        String fileName = id + "_" + file.getOriginalFilename();
-        Path filePath = Paths.get(uploadDir + fileName);
-        Files.write(filePath, file.getBytes());
+            String fileName = id + "_" + file.getOriginalFilename();
+            Path filePath = Paths.get(uploadDir + fileName);
+            Files.write(filePath, file.getBytes());
 
-        String fileUrl = "/uploads/" + fileName;
+            String fileUrl = "/uploads/" + fileName;
+            product.setImageUrl(fileUrl);
 
-        product.setImageUrl(fileUrl);
+        }catch (Exception e){
+            throw new RuntimeException(e);
+
+        }
         productService.addProduct(product);
         return ResponseEntity.ok(new UploadImageResponse("Image Successfully Uploaded."));
     }

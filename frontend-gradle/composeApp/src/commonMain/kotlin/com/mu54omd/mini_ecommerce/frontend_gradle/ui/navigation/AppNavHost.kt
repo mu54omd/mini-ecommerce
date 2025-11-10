@@ -131,10 +131,11 @@ fun AppNavHost(
                 AnimatedContent(
                     targetState = !isDesktop,
                     transitionSpec = {
-                        slideIntoContainer(towards = AnimatedContentTransitionScope.SlideDirection.Up) togetherWith slideOutOfContainer(
+                        slideIntoContainer(
+                            towards = AnimatedContentTransitionScope.SlideDirection.Up) togetherWith slideOutOfContainer(
                             towards = AnimatedContentTransitionScope.SlideDirection.Down
                         )
-                    }
+                    },
                 ) { state ->
                     if (state) {
                         NavigationBar(
@@ -186,7 +187,7 @@ fun AppNavHost(
         topBar = {
             val isLogin = currentDestination == Screen.Login.route
             Row(
-                modifier = Modifier.fillMaxWidth().padding(20.dp).height(64.dp)
+                modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 30.dp).height(64.dp)
                     .alpha(if (isLogin) 0f else 1f),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
@@ -201,7 +202,7 @@ fun AppNavHost(
                     ProductSearchBar(
                         onQuery = { query -> productViewModel.filterProducts(query) },
                         onClearQuery = { productViewModel.getAllProducts() },
-                        modifier = Modifier.weight(0.4f).scale(0.75f)
+                        modifier = Modifier.weight(1f).scale(0.75f)
                     )
                 }
                 TextButton(

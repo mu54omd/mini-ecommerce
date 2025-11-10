@@ -27,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,11 +57,11 @@ fun AddEditProductModal(
     onConfirmClick: (String, String, Double, Int) -> Unit,
     onUploadImageClick: () -> Unit,
 ) {
-    var productName by remember { mutableStateOf(product?.name ?: "") }
-    var productDescription by remember { mutableStateOf(product?.description ?: "") }
-    var productPrice by remember { mutableStateOf(if (product?.price == null) "" else product.price.toString()) }
-    var productStocks by remember { mutableStateOf(if (product?.stock == null) "" else product.stock.toString()) }
-    var currentStep by remember { mutableStateOf(ProductModalStep.FORM) }
+    var productName by rememberSaveable { mutableStateOf(product?.name ?: "") }
+    var productDescription by rememberSaveable { mutableStateOf(product?.description ?: "") }
+    var productPrice by rememberSaveable { mutableStateOf(if (product?.price == null) "" else product.price.toString()) }
+    var productStocks by rememberSaveable { mutableStateOf(if (product?.stock == null) "" else product.stock.toString()) }
+    var currentStep by rememberSaveable { mutableStateOf(ProductModalStep.FORM) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
 
@@ -95,7 +96,7 @@ fun AddEditProductModal(
                             .width(350.dp)
                             .height(400.dp)
                             .background(
-                                color = MaterialTheme.colorScheme.surface,
+                                color = MaterialTheme.colorScheme.surfaceBright,
                                 shape = RoundedCornerShape(5)
                             )
                             .padding(8.dp)

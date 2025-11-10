@@ -60,7 +60,7 @@ fun DeleteModal(
                     .statusBarsPadding()
                     .width(350.dp)
                     .background(
-                        color = MaterialTheme.colorScheme.surface,
+                        color = MaterialTheme.colorScheme.surfaceBright,
                         shape = RoundedCornerShape(5)
                     )
                     .padding(start = 10.dp, end = 10.dp, top = 20.dp, bottom = 20.dp)

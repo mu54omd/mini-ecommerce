@@ -75,7 +75,7 @@ fun EditUserModal(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
                 modifier = Modifier.background(
-                    color = MaterialTheme.colorScheme.surfaceDim,
+                    color = MaterialTheme.colorScheme.surfaceBright,
                     shape = RoundedCornerShape(5)
                 ).width(350.dp).height(400.dp).padding(8.dp)
             ) {
