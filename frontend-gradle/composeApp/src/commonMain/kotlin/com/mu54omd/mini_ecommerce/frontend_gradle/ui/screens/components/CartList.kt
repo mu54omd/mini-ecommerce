@@ -11,9 +11,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -99,7 +102,7 @@ fun CartList(
                         .height(if (isItemClicked) 150.dp else 100.dp)
                         .clip(shape = RoundedCornerShape(10))
                         .background(
-                            color = MaterialTheme.colorScheme.surfaceDim,
+                            color = MaterialTheme.colorScheme.surfaceBright,
                         )
                         .clickable {
                             isItemClicked = !isItemClicked
@@ -108,11 +111,13 @@ fun CartList(
                 ) {
                     CustomAsyncImage(
                         url = "$BASE_URL${item.product.imageUrl}",
-                        contentDescription = "Product Image In Cart Screen",
-                        errorTint = MaterialTheme.colorScheme.surface
+                        contentDescription = item.product.description,
+                        errorTint = MaterialTheme.colorScheme.surface,
+                        size = 150.dp,
+                        modifier = Modifier.weight(0.3f)
                     )
                     Column(
-                        modifier = Modifier.padding(8.dp)
+                        modifier = Modifier.padding(8.dp).weight(0.7f)
                     ) {
                         Row(
                             horizontalArrangement = Arrangement.SpaceBetween,

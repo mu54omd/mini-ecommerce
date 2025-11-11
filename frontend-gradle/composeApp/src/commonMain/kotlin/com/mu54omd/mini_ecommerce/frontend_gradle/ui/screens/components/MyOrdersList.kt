@@ -7,7 +7,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
@@ -23,9 +25,14 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.OrderResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.helper.getOrderStatusColor
 
 @Composable
-fun MyOrdersList(orderItems: List<OrderResponse>) {
-    LazyColumn {
-        items(orderItems) { order ->
+fun MyOrdersList(
+    lazyListState: LazyListState = rememberLazyListState(),
+    orderItems: List<OrderResponse>
+) {
+    LazyColumn(
+        state = lazyListState
+    ) {
+        items( items =orderItems, key = { orderItem -> orderItem.id }) { order ->
             Card(Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
                 Column {
                     Row(

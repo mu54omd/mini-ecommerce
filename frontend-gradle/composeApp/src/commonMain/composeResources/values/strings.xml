@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Mini-Ecommerce</string>
     <string name="error_alert">Something went wrong! Please contact your IT support.</string>
+    <string name="delete_warning_alert">Are you sure?</string>
     <string name="delete_user_successful_alert">The user successfully deleted.</string>
     <string name="edit_user_successful_alert">The user successfully edited.</string>
     <string name="add_product_successful_alert">New product successfully added.</string>

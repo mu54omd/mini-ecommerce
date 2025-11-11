@@ -5,12 +5,17 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -26,7 +31,10 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import frontend_gradle.composeapp.generated.resources.Res
+import frontend_gradle.composeapp.generated.resources.delete_warning_alert
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,7 +53,7 @@ fun DeleteModal(
         contentColor = MaterialTheme.colorScheme.onSurface,
         shape = RectangleShape,
         dragHandle = null,
-        scrimColor = Color.Black.copy(alpha = .5f),
+        scrimColor = Color.Black.copy(alpha = 0.5f),
     ) {
         Box(
             contentAlignment = Alignment.Center,
@@ -53,9 +61,9 @@ fun DeleteModal(
                 .fillMaxWidth()
                 .padding(10.dp)
         ) {
-            Column(
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .statusBarsPadding()
                     .width(350.dp)
@@ -63,31 +71,43 @@ fun DeleteModal(
                         color = MaterialTheme.colorScheme.surfaceBright,
                         shape = RoundedCornerShape(5)
                     )
-                    .padding(start = 10.dp, end = 10.dp, top = 20.dp, bottom = 20.dp)
+                    .padding(10.dp)
             ) {
-                Text(
-                    text = "Are you sure???",
-                    textAlign = TextAlign.Center
+                Icon(
+                    imageVector = Icons.Default.Warning,
+                    contentDescription = "Warning Delete Icon",
+                    modifier = Modifier.size(50.dp),
+                    tint = MaterialTheme.colorScheme.errorContainer
                 )
-                Row {
-                    TextButton(
-                        onClick = {
-                            scope.launch {
-                                sheetState.hide()
-                                onCancelClick()
-                            }
-                        },
-                        modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
-                    ) {
-                        Text("Cancel")
-                    }
-                    TextButton(
-                        onClick = {
-                            onConfirmClick(id)
-                        },
-                        modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
-                    ) {
-                        Text("Delete")
+                Spacer(Modifier.width(30.dp))
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = stringResource(Res.string.delete_warning_alert),
+                        textAlign = TextAlign.Center
+                    )
+                    Row() {
+                        TextButton(
+                            onClick = {
+                                scope.launch {
+                                    sheetState.hide()
+                                    onCancelClick()
+                                }
+                            },
+                            modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+                        ) {
+                            Text("Cancel")
+                        }
+                        TextButton(
+                            onClick = {
+                                onConfirmClick(id)
+                            },
+                            modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+                        ) {
+                            Text("Delete")
+                        }
                     }
                 }
             }

@@ -20,8 +20,8 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.CartViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.CartList
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.CheckoutModal
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.EmptyPage
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.LoadingView
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.EmptyPage
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.LoadingView
 
 @Composable
 fun CartScreen(

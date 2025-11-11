@@ -2,15 +2,10 @@ package com.mu54omd.mini_ecommerce.frontend_gradle.ui.navigation
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.animation.slideIn
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -71,7 +66,7 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.MyOrdersScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.OrdersScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.ProductsScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.UsersScreen
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.ProductSearchBar
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.ProductSearchBar
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)

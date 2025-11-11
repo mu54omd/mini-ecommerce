@@ -62,7 +62,7 @@ fun AddEditProductModal(
     var productPrice by rememberSaveable { mutableStateOf(if (product?.price == null) "" else product.price.toString()) }
     var productStocks by rememberSaveable { mutableStateOf(if (product?.stock == null) "" else product.stock.toString()) }
     var currentStep by rememberSaveable { mutableStateOf(ProductModalStep.FORM) }
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberModalBottomSheetState( skipPartiallyExpanded = true )
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(productState) {
@@ -210,7 +210,7 @@ fun AddEditProductModal(
                         modifier = Modifier
                             .statusBarsPadding()
                             .width(350.dp)
-                            .background(color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(5))
+                            .background(color = MaterialTheme.colorScheme.surfaceBright, shape = RoundedCornerShape(5))
                             .padding(start = 10.dp, end = 10.dp, top = 20.dp, bottom = 20.dp)
                     ) {
                         Text(

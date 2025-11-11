@@ -12,8 +12,8 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.OrderResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.OrderViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.OrdersList
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.EmptyPage
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.LoadingView
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.EmptyPage
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.LoadingView
 
 @Composable
 fun OrdersScreen(

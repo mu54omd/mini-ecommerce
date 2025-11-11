@@ -39,7 +39,7 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.UserResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.UserViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.EditUserModal
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.LoadingView
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.LoadingView
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.AlertModal
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.DeleteModal
 import frontend_gradle.composeapp.generated.resources.Res
