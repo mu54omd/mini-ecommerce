@@ -1,5 +1,8 @@
 package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components
 
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
@@ -11,8 +14,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -31,6 +37,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.font.FontWeight
@@ -41,8 +48,10 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.domain.model.UserRole
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.Constants.BASE_URL
 import kotlin.collections.get
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun ProductList(
+    lazyGridState: LazyGridState = rememberLazyGridState(),
     userRole: UserRole,
     products: List<Product>,
     cartItems: Map<Long, Int>,
@@ -50,120 +59,153 @@ fun ProductList(
     onRemoveClick: (Long) -> Unit,
     onIncreaseItem: (Long) -> Unit,
     onDecreaseItem: (Long) -> Unit,
+    onProductClick: (Product) -> Unit,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope,
     modifier: Modifier = Modifier
 ) {
-
     LazyVerticalGrid(
         modifier = modifier,
-        columns = GridCells.Adaptive(200.dp)
+        columns = GridCells.Adaptive(200.dp),
+        state = lazyGridState
     ) {
         items(items = products, key = { product -> product.id!! }) { product ->
-            Card(
-                modifier = Modifier.size(300.dp).padding(8.dp),
-                onClick = { },
-                elevation = CardDefaults.cardElevation(4.dp)
-            ) {
-                var addedItem by rememberSaveable { mutableIntStateOf(cartItems[product.id] ?: 0) }
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier.weight(0.7f)
+            with(sharedTransitionScope) {
+                Card(
+                    modifier = Modifier.size(300.dp).padding(8.dp).animateItem(),
+                    onClick = { onProductClick(product) },
+                    elevation = CardDefaults.cardElevation(4.dp)
                 ) {
-                    CustomAsyncImage(
-                        url = "$BASE_URL${product.imageUrl}",
-                        contentDescription = product.description,
-                        errorTint = MaterialTheme.colorScheme.surface,
-                        size = 200.dp
-                    )
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .align(Alignment.BottomCenter)
-                            .background(color = MaterialTheme.colorScheme.surfaceBright.copy(alpha = 0.7f))
-                            .height(70.dp)
-                            .padding(4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Column(
-                            modifier = Modifier.weight(0.5f)
-                        ) {
-                            Text(
-                                product.name,
-                                fontWeight = FontWeight.Bold,
-                                style = MaterialTheme.typography.titleSmall,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.basicMarquee(),
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Text(
-                                text = "${product.price} $",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onTertiaryContainer
-                            )
-                            Text(
-                                text = "#${product.stock}",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onTertiaryContainer
-                            )
-                        }
+                    var addedItem by rememberSaveable {
+                        mutableIntStateOf(
+                            cartItems[product.id] ?: 0
+                        )
                     }
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.End,
-                        modifier = Modifier.align(Alignment.BottomEnd)
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.weight(0.7f)
                     ) {
-                        if(userRole == UserRole.USER) {
-                            IconButton(
-                                onClick = {
-                                    addedItem--
-                                    onDecreaseItem(product.id!!)
-                                },
-                                enabled = addedItem > 0,
-                                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+                        CustomAsyncImage(
+                            url = "$BASE_URL${product.imageUrl}",
+                            contentDescription = product.description,
+                            errorTint = MaterialTheme.colorScheme.surface,
+                            size = 150.dp,
+                            modifier = Modifier
+                                .sharedBounds(
+                                    sharedContentState = rememberSharedContentState(key = "image_${product.id}"),
+                                    animatedVisibilityScope = animatedVisibilityScope,
+                                )
+                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .align(Alignment.BottomCenter)
+                                .background(
+                                    color = MaterialTheme.colorScheme.surfaceBright.copy(
+                                        alpha = 0.7f
+                                    )
+                                )
+                                .height(70.dp)
+                                .padding(4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column(
+                                modifier = Modifier.weight(0.5f)
                             ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Remove,
-                                    contentDescription = "Remove Product from Cart"
+                                Text(
+                                    product.name,
+                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.titleSmall,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier
+                                        .basicMarquee()
+                                        .sharedBounds(
+                                            sharedContentState = rememberSharedContentState(key = "name_${product.id}"),
+                                            animatedVisibilityScope = animatedVisibilityScope,
+                                        ),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Text(
+                                    text = "${product.price} $",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier
+                                        .sharedBounds(
+                                            sharedContentState = rememberSharedContentState(key = "price_${product.id}"),
+                                            animatedVisibilityScope = animatedVisibilityScope,
+                                        )
+                                )
+                                Text(
+                                    text = "#${product.stock}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier
+                                        .sharedBounds(
+                                            sharedContentState = rememberSharedContentState(key = "stock_${product.id}"),
+                                            animatedVisibilityScope = animatedVisibilityScope,
+                                        )
                                 )
                             }
-                            Text(text = "$addedItem")
-                            IconButton(
-                                onClick = {
-                                    addedItem++
-                                    onIncreaseItem(product.id!!)
-                                },
-                                enabled = (addedItem < product.stock) && (product.stock > 0),
-                                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Add,
-                                    contentDescription = "Add Product to Cart"
-                                )
-                            }
-                        }else if(userRole == UserRole.ADMIN){
-                            IconButton(
-                                onClick = {
-                                    onRemoveClick(product.id!!)
-                                },
-                                enabled = true,
-                                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Delete,
-                                    contentDescription = "Delete Product"
-                                )
-                            }
-                            IconButton(
-                                onClick = {
-                                    onEditClick(product)
-                                },
-                                enabled = true,
-                                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Edit,
-                                    contentDescription = "Edit Product"
-                                )
+                        }
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.End,
+                            modifier = Modifier.align(Alignment.BottomEnd)
+                        ) {
+                            if (userRole == UserRole.USER) {
+                                IconButton(
+                                    onClick = {
+                                        addedItem--
+                                        onDecreaseItem(product.id!!)
+                                    },
+                                    enabled = addedItem > 0,
+                                    modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Remove,
+                                        contentDescription = "Remove Product from Cart"
+                                    )
+                                }
+                                Text(text = "$addedItem")
+                                IconButton(
+                                    onClick = {
+                                        addedItem++
+                                        onIncreaseItem(product.id!!)
+                                    },
+                                    enabled = (addedItem < product.stock) && (product.stock > 0),
+                                    modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Add,
+                                        contentDescription = "Add Product to Cart"
+                                    )
+                                }
+                            } else if (userRole == UserRole.ADMIN) {
+                                IconButton(
+                                    onClick = {
+                                        onRemoveClick(product.id!!)
+                                    },
+                                    enabled = true,
+                                    modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Delete,
+                                        contentDescription = "Delete Product"
+                                    )
+                                }
+                                IconButton(
+                                    onClick = {
+                                        onEditClick(product)
+                                    },
+                                    enabled = true,
+                                    modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Edit,
+                                        contentDescription = "Edit Product"
+                                    )
+                                }
                             }
                         }
                     }
