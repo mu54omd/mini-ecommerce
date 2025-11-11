@@ -1,7 +1,9 @@
 package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
@@ -33,6 +35,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -70,6 +74,7 @@ fun ProductList(
         state = lazyGridState
     ) {
         items(items = products, key = { product -> product.id!! }) { product ->
+
             with(sharedTransitionScope) {
                 Card(
                     modifier = Modifier.size(300.dp).padding(8.dp).animateItem(),
@@ -93,7 +98,7 @@ fun ProductList(
                             modifier = Modifier
                                 .sharedBounds(
                                     sharedContentState = rememberSharedContentState(key = "image_${product.id}"),
-                                    animatedVisibilityScope = animatedVisibilityScope,
+                                    animatedVisibilityScope = animatedVisibilityScope
                                 )
                         )
                         Row(
@@ -121,8 +126,10 @@ fun ProductList(
                                     modifier = Modifier
                                         .basicMarquee()
                                         .sharedBounds(
-                                            sharedContentState = rememberSharedContentState(key = "name_${product.id}"),
-                                            animatedVisibilityScope = animatedVisibilityScope,
+                                            sharedContentState = rememberSharedContentState(
+                                                key = "name_${product.id}"
+                                            ),
+                                            animatedVisibilityScope = animatedVisibilityScope
                                         ),
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -132,8 +139,10 @@ fun ProductList(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier
                                         .sharedBounds(
-                                            sharedContentState = rememberSharedContentState(key = "price_${product.id}"),
-                                            animatedVisibilityScope = animatedVisibilityScope,
+                                            sharedContentState = rememberSharedContentState(
+                                                key = "price_${product.id}"
+                                            ),
+                                            animatedVisibilityScope = animatedVisibilityScope
                                         )
                                 )
                                 Text(
@@ -142,8 +151,10 @@ fun ProductList(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier
                                         .sharedBounds(
-                                            sharedContentState = rememberSharedContentState(key = "stock_${product.id}"),
-                                            animatedVisibilityScope = animatedVisibilityScope,
+                                            sharedContentState = rememberSharedContentState(
+                                                key = "stock_${product.id}"
+                                            ),
+                                            animatedVisibilityScope = animatedVisibilityScope
                                         )
                                 )
                             }

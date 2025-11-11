@@ -78,11 +78,8 @@ fun ProductsScreen(
             )
         )
     }
-    var showProductDetails by remember { mutableStateOf(false)}
-    val animatedCornerSize by animateIntAsState(
-        targetValue = if(showProductDetails) 100 else 0,
-        animationSpec = tween(durationMillis = 1000)
-    )
+    var showProductDetails by remember { mutableStateOf(false) }
+
     var selectedProductIdForDelete by remember { mutableLongStateOf(-1) }
 
     val cartState = cartViewModel.cartState.collectAsState().value
@@ -326,6 +323,7 @@ fun ProductsScreen(
                 }
             }
         }
+
         else -> onExit(productsState)
     }
 }
