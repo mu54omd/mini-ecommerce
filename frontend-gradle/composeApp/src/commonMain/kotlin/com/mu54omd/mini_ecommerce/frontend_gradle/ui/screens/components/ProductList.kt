@@ -1,7 +1,9 @@
 package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -11,13 +13,16 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridCells.*
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -37,6 +42,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -52,6 +59,13 @@ import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.Product
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.model.UserRole
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.Constants.BASE_URL
+import kotlin.collections.get
+
+
+enum class ProductListState {
+    Cards,
+    Details,
+}
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -64,14 +78,70 @@ fun ProductList(
     onRemoveClick: (Long) -> Unit,
     onIncreaseItem: (Long) -> Unit,
     onDecreaseItem: (Long) -> Unit,
-    onProductClick: (Product) -> Unit,
-    sharedTransitionScope: SharedTransitionScope,
-    animatedVisibilityScope: AnimatedVisibilityScope,
     modifier: Modifier = Modifier
+) {
+    var productListState by remember { mutableStateOf(ProductListState.Cards) }
+    var selectedProduct by remember { mutableStateOf<Product?>(null) }
+
+    SharedTransitionLayout(modifier = Modifier.fillMaxSize()) {
+        AnimatedContent(targetState = productListState) { state ->
+            when (state) {
+                ProductListState.Cards -> {
+                    Cards(
+                        modifier = modifier,
+                        lazyGridState = lazyGridState,
+                        products = products,
+                        cartItems = cartItems,
+                        userRole = userRole,
+                        onProductClick = { product ->
+                            selectedProduct = product
+                            productListState = ProductListState.Details
+                        },
+                        onEditClick = onEditClick,
+                        onRemoveClick = onRemoveClick,
+                        onIncreaseItem = onIncreaseItem,
+                        onDecreaseItem = onDecreaseItem,
+                        sharedTransitionScope = this@SharedTransitionLayout,
+                        animatedVisibilityScope = this@AnimatedContent,
+                    )
+                }
+
+                ProductListState.Details -> {
+                    selectedProduct?.let { product ->
+                        ProductDetails(
+                            product = product,
+                            onDismiss = {
+                                productListState = ProductListState.Cards
+                            },
+                            sharedTransitionScope = this@SharedTransitionLayout,
+                            animatedVisibilityScope = this@AnimatedContent,
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalSharedTransitionApi::class)
+@Composable
+fun Cards(
+    modifier: Modifier = Modifier,
+    lazyGridState: LazyGridState = rememberLazyGridState(),
+    products: List<Product>,
+    cartItems: Map<Long, Int>,
+    userRole: UserRole,
+    onProductClick: (Product) -> Unit,
+    onEditClick: (Product) -> Unit,
+    onRemoveClick: (Long) -> Unit,
+    onIncreaseItem: (Long) -> Unit,
+    onDecreaseItem: (Long) -> Unit,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope
 ) {
     LazyVerticalGrid(
         modifier = modifier,
-        columns = GridCells.Adaptive(200.dp),
+        columns = Adaptive(200.dp),
         state = lazyGridState
     ) {
         items(items = products, key = { product -> product.id!! }) { product ->
@@ -103,7 +173,9 @@ fun ProductList(
                                 size = 150.dp,
                                 modifier = Modifier
                                     .sharedElement(
-                                        sharedContentState = rememberSharedContentState(key = "image_${product.id}"),
+                                        sharedContentState = rememberSharedContentState(
+                                            key = "image_${product.id}"
+                                        ),
                                         animatedVisibilityScope = animatedVisibilityScope
                                     )
                                     .clip(RoundedCornerShape(10.dp))
@@ -117,7 +189,7 @@ fun ProductList(
                                         sharedContentState = rememberSharedContentState(
                                             key = "product_info${product.id}"
                                         ),
-                                        animatedVisibilityScope = animatedVisibilityScope,
+                                        animatedVisibilityScope = animatedVisibilityScope
                                     )
                                     .graphicsLayer { alpha = 0.7f }
                                     .background(
@@ -160,7 +232,9 @@ fun ProductList(
                                             onDecreaseItem(product.id!!)
                                         },
                                         enabled = addedItem > 0,
-                                        modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+                                        modifier = Modifier.pointerHoverIcon(
+                                            PointerIcon.Hand
+                                        )
                                     ) {
                                         Icon(
                                             imageVector = Icons.Filled.Remove,
@@ -174,7 +248,9 @@ fun ProductList(
                                             onIncreaseItem(product.id!!)
                                         },
                                         enabled = (addedItem < product.stock) && (product.stock > 0),
-                                        modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+                                        modifier = Modifier.pointerHoverIcon(
+                                            PointerIcon.Hand
+                                        )
                                     ) {
                                         Icon(
                                             imageVector = Icons.Filled.Add,
@@ -187,7 +263,9 @@ fun ProductList(
                                             onRemoveClick(product.id!!)
                                         },
                                         enabled = true,
-                                        modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+                                        modifier = Modifier.pointerHoverIcon(
+                                            PointerIcon.Hand
+                                        )
                                     ) {
                                         Icon(
                                             imageVector = Icons.Filled.Delete,
@@ -199,7 +277,9 @@ fun ProductList(
                                             onEditClick(product)
                                         },
                                         enabled = true,
-                                        modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+                                        modifier = Modifier.pointerHoverIcon(
+                                            PointerIcon.Hand
+                                        )
                                     ) {
                                         Icon(
                                             imageVector = Icons.Filled.Edit,

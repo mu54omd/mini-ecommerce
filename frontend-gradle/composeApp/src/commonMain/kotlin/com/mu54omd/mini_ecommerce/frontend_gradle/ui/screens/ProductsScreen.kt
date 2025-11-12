@@ -78,7 +78,6 @@ fun ProductsScreen(
             )
         )
     }
-    var showProductDetails by remember { mutableStateOf(false) }
 
     var selectedProductIdForDelete by remember { mutableLongStateOf(-1) }
 
@@ -125,199 +124,181 @@ fun ProductsScreen(
             if (productsState.data.isEmpty()) {
                 EmptyPage("Oops!", "No product found!")
             } else {
-                SharedTransitionLayout() {
-                    AnimatedContent(targetState = showProductDetails) { targetState ->
-                        if (!targetState) {
-                            Column(
-                                verticalArrangement = Arrangement.Top,
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                modifier = Modifier.fillMaxSize().padding(16.dp)
-                            ) {
-                                if (userRole == UserRole.ADMIN) {
-                                    TextButton(
-                                        onClick = {
-                                            addProductModalState = true
-                                        },
-                                        modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
-                                    ) {
-                                        Text("Add Product")
-                                    }
-                                }
-                                ProductList(
-                                    lazyGridState = lazyGridState,
-                                    userRole = userRole,
-                                    products = productsState.data,
-                                    cartItems = cartItems,
-                                    onIncreaseItem = { cartViewModel.add(it) },
-                                    onDecreaseItem = { cartViewModel.remove(it) },
-                                    onEditClick = { product ->
-                                        selectedProduct = product
-                                        editProductModalState = true
-                                    },
-                                    onRemoveClick = { productId ->
-                                        selectedProductIdForDelete = productId
-                                        deleteProductModalState = true
-                                    },
-                                    onProductClick = { product ->
-                                        selectedProduct = product
-                                        showProductDetails = true
-                                    },
-                                    animatedVisibilityScope = this@AnimatedContent,
-                                    sharedTransitionScope = this@SharedTransitionLayout,
-                                    modifier = Modifier.weight(0.9f)
-                                )
-                                if (addProductModalState) {
-                                    AddEditProductModal(
-                                        productState = addProductState,
-                                        onCancelClick = {
-                                            addProductModalState = false
-                                            productViewModel.resetAddProductState()
-                                        },
-                                        onConfirmClick = { name, description, price, stocks ->
-                                            productViewModel.addProduct(
-                                                Product(
-                                                    name = name,
-                                                    description = description,
-                                                    price = price,
-                                                    stock = stocks
-                                                )
-                                            )
-                                        },
-                                        onUploadImageClick = {
-                                            addProductModalState = false
-                                            launcher.launch()
-                                        }
-                                    )
-                                }
-                                if (editProductModalState) {
-                                    AddEditProductModal(
-                                        product = selectedProduct,
-                                        productState = editProductState,
-                                        onCancelClick = {
-                                            editProductModalState = false
-                                            productViewModel.resetEditProductState()
-                                        },
-                                        onConfirmClick = { name, description, price, stocks ->
-                                            productViewModel.editProduct(
-                                                Product(
-                                                    id = selectedProduct.id,
-                                                    name = name,
-                                                    description = description,
-                                                    price = price,
-                                                    stock = stocks
-                                                )
-                                            )
-                                        },
-                                        onUploadImageClick = {
-                                            editProductModalState = false
-                                            launcher.launch()
-                                        }
-                                    )
-                                }
-                                if (deleteProductModalState) {
-                                    DeleteModal(
-                                        id = selectedProductIdForDelete,
-                                        onCancelClick = {
-                                            deleteProductModalState = false
-                                            selectedProductIdForDelete = -1
-                                        },
-                                        onConfirmClick = { productId ->
-                                            deleteProductModalState = false
-                                            productViewModel.deleteProduct(productId)
-                                            selectedProductIdForDelete = -1
-                                        }
-                                    )
-                                }
-                                when (addProductState) {
-                                    is UiState.Idle -> {}
-                                    is UiState.Loading -> {}
-                                    is UiState.Success -> {}
-                                    else -> {
-                                        showAlertModalState = true
-                                        if (showAlertModalState) {
-                                            AlertModal(
-                                                message = stringResource(Res.string.error_alert),
-                                                onConfirmClick = {
-                                                    showAlertModalState = false
-                                                    productViewModel.resetAddProductState()
-                                                }
-                                            )
-                                        }
-                                    }
-                                }
-                                when (editProductState) {
-                                    is UiState.Idle -> {}
-                                    is UiState.Loading -> {}
-                                    is UiState.Success -> {}
-                                    else -> {
-                                        showAlertModalState = true
-                                        if (showAlertModalState) {
-                                            AlertModal(
-                                                message = stringResource(Res.string.error_alert),
-                                                onConfirmClick = {
-                                                    showAlertModalState = false
-                                                    productViewModel.resetEditProductState()
-                                                }
-                                            )
-                                        }
-                                    }
-                                }
-                                when (deleteProductState) {
-                                    is UiState.Idle -> {}
-                                    is UiState.Loading -> {}
-                                    is UiState.Success -> {}
-                                    else -> {
-                                        showAlertModalState = true
-                                        if (showAlertModalState) {
-                                            AlertModal(
-                                                message = stringResource(Res.string.error_alert),
-                                                onConfirmClick = {
-                                                    showAlertModalState = false
-                                                    productViewModel.resetDeleteProductState()
-                                                }
-                                            )
-                                        }
-                                    }
-                                }
-                                when (uploadProductImageState) {
-                                    is UiState.Idle -> {}
-                                    is UiState.Loading -> {}
-                                    is UiState.Success -> {
-                                        showAlertModalState = true
-                                        if (showAlertModalState) {
-                                            AlertModal(
-                                                message = stringResource(Res.string.upload_image_successful_alert),
-                                                onConfirmClick = {
-                                                    showAlertModalState = false
-                                                    productViewModel.resetAddProductState()
-                                                    productViewModel.resetEditProductState()
-                                                    productViewModel.resetUploadProductImageState()
-                                                }
-                                            )
-                                        }
-                                    }
 
-                                    else -> {
-                                        showAlertModalState = true
-                                        if (showAlertModalState) {
-                                            AlertModal(
-                                                message = stringResource(Res.string.error_alert),
-                                                onConfirmClick = {
-                                                    showAlertModalState = false
-                                                    productViewModel.resetUploadProductImageState()
-                                                }
-                                            )
-                                        }
-                                    }
-                                }
+                Column(
+                    verticalArrangement = Arrangement.Top,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxSize().padding(16.dp)
+                ) {
+                    if (userRole == UserRole.ADMIN) {
+                        TextButton(
+                            onClick = {
+                                addProductModalState = true
+                            },
+                            modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+                        ) {
+                            Text("Add Product")
+                        }
+                    }
+                    ProductList(
+                        lazyGridState = lazyGridState,
+                        userRole = userRole,
+                        products = productsState.data,
+                        cartItems = cartItems,
+                        onIncreaseItem = { cartViewModel.add(it) },
+                        onDecreaseItem = { cartViewModel.remove(it) },
+                        onEditClick = { product ->
+                            selectedProduct = product
+                            editProductModalState = true
+                        },
+                        onRemoveClick = { productId ->
+                            selectedProductIdForDelete = productId
+                            deleteProductModalState = true
+                        },
+                        modifier = Modifier.weight(0.9f)
+                    )
+                    if (addProductModalState) {
+                        AddEditProductModal(
+                            productState = addProductState,
+                            onCancelClick = {
+                                addProductModalState = false
+                                productViewModel.resetAddProductState()
+                            },
+                            onConfirmClick = { name, description, price, stocks ->
+                                productViewModel.addProduct(
+                                    Product(
+                                        name = name,
+                                        description = description,
+                                        price = price,
+                                        stock = stocks
+                                    )
+                                )
+                            },
+                            onUploadImageClick = {
+                                addProductModalState = false
+                                launcher.launch()
                             }
-                        } else {
-                            ProductDetails(
-                                product = selectedProduct,
-                                onDismiss = { showProductDetails = false },
-                                animatedVisibilityScope = this@AnimatedContent,
-                                sharedTransitionScope = this@SharedTransitionLayout
-                            )
+                        )
+                    }
+                    if (editProductModalState) {
+                        AddEditProductModal(
+                            product = selectedProduct,
+                            productState = editProductState,
+                            onCancelClick = {
+                                editProductModalState = false
+                                productViewModel.resetEditProductState()
+                            },
+                            onConfirmClick = { name, description, price, stocks ->
+                                productViewModel.editProduct(
+                                    Product(
+                                        id = selectedProduct.id,
+                                        name = name,
+                                        description = description,
+                                        price = price,
+                                        stock = stocks
+                                    )
+                                )
+                            },
+                            onUploadImageClick = {
+                                editProductModalState = false
+                                launcher.launch()
+                            }
+                        )
+                    }
+                    if (deleteProductModalState) {
+                        DeleteModal(
+                            id = selectedProductIdForDelete,
+                            onCancelClick = {
+                                deleteProductModalState = false
+                                selectedProductIdForDelete = -1
+                            },
+                            onConfirmClick = { productId ->
+                                deleteProductModalState = false
+                                productViewModel.deleteProduct(productId)
+                                selectedProductIdForDelete = -1
+                            }
+                        )
+                    }
+                    when (addProductState) {
+                        is UiState.Idle -> {}
+                        is UiState.Loading -> {}
+                        is UiState.Success -> {}
+                        else -> {
+                            showAlertModalState = true
+                            if (showAlertModalState) {
+                                AlertModal(
+                                    message = stringResource(Res.string.error_alert),
+                                    onConfirmClick = {
+                                        showAlertModalState = false
+                                        productViewModel.resetAddProductState()
+                                    }
+                                )
+                            }
+                        }
+                    }
+                    when (editProductState) {
+                        is UiState.Idle -> {}
+                        is UiState.Loading -> {}
+                        is UiState.Success -> {}
+                        else -> {
+                            showAlertModalState = true
+                            if (showAlertModalState) {
+                                AlertModal(
+                                    message = stringResource(Res.string.error_alert),
+                                    onConfirmClick = {
+                                        showAlertModalState = false
+                                        productViewModel.resetEditProductState()
+                                    }
+                                )
+                            }
+                        }
+                    }
+                    when (deleteProductState) {
+                        is UiState.Idle -> {}
+                        is UiState.Loading -> {}
+                        is UiState.Success -> {}
+                        else -> {
+                            showAlertModalState = true
+                            if (showAlertModalState) {
+                                AlertModal(
+                                    message = stringResource(Res.string.error_alert),
+                                    onConfirmClick = {
+                                        showAlertModalState = false
+                                        productViewModel.resetDeleteProductState()
+                                    }
+                                )
+                            }
+                        }
+                    }
+                    when (uploadProductImageState) {
+                        is UiState.Idle -> {}
+                        is UiState.Loading -> {}
+                        is UiState.Success -> {
+                            showAlertModalState = true
+                            if (showAlertModalState) {
+                                AlertModal(
+                                    message = stringResource(Res.string.upload_image_successful_alert),
+                                    onConfirmClick = {
+                                        showAlertModalState = false
+                                        productViewModel.resetAddProductState()
+                                        productViewModel.resetEditProductState()
+                                        productViewModel.resetUploadProductImageState()
+                                    }
+                                )
+                            }
+                        }
+
+                        else -> {
+                            showAlertModalState = true
+                            if (showAlertModalState) {
+                                AlertModal(
+                                    message = stringResource(Res.string.error_alert),
+                                    onConfirmClick = {
+                                        showAlertModalState = false
+                                        productViewModel.resetUploadProductImageState()
+                                    }
+                                )
+                            }
                         }
                     }
                 }

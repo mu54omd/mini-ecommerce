@@ -30,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -55,11 +56,11 @@ fun ProductDetails(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .fillMaxSize()
-                    .zIndex(100f)
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null
                     ) { onDismiss() }
+                    .background(color = Color.Transparent)
             ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -70,6 +71,11 @@ fun ProductDetails(
                         .clip(RoundedCornerShape(10.dp))
                         .background(color = MaterialTheme.colorScheme.surfaceBright)
                         .verticalScroll(state = rememberScrollState())
+                        .sharedBounds(
+                            sharedContentState = rememberSharedContentState(key = "container_${product.id}"),
+                            animatedVisibilityScope = animatedVisibilityScope,
+                            placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize
+                        )
 
                 ) {
                     CustomAsyncImage(
@@ -89,10 +95,10 @@ fun ProductDetails(
                                     topEnd = 10.dp,
                                     bottomEnd = 10.dp
                                 )
-                            )
-
-
-                    )
+                            ),
+                        errorTint = MaterialTheme.colorScheme.surface,
+                        size = 250.dp,
+                        )
                     Column(
                         horizontalAlignment = Alignment.Start,
                         verticalArrangement = Arrangement.Center,
@@ -128,6 +134,7 @@ fun ProductDetails(
                         modifier = Modifier
                             .padding(start = 4.dp, end = 4.dp, top = 2.dp, bottom = 2.dp)
                             .fillMaxWidth()
+                            .skipToLookaheadSize()
                             .animateEnterExit(
                                 enter = fadeIn() + slideInVertically(),
                                 exit = fadeOut() + slideOutVertically()
@@ -138,7 +145,6 @@ fun ProductDetails(
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
-
                         Text(
                             text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, " +
                                     "sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. " +
@@ -155,6 +161,7 @@ fun ProductDetails(
                     }
                 }
             }
+
         }
     }
 }
