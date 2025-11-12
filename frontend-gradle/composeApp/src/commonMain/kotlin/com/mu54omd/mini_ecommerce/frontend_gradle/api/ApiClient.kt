@@ -1,6 +1,7 @@
 package com.mu54omd.mini_ecommerce.frontend_gradle.api
 
 import com.mu54omd.mini_ecommerce.frontend_gradle.storage.SessionManager
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.Constants.BASE_URL_API_CLIENT
 import io.ktor.client.HttpClient
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.delete
@@ -15,11 +16,10 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
-import io.ktor.http.isSuccess
-import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.serializer
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.serializer
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -28,7 +28,6 @@ class ApiClient(
 ) : KoinComponent {
 
     private val sessionManager: SessionManager by inject()
-    private val baseUrl = "http://192.168.1.101:5050/api"
     private val json = Json { ignoreUnknownKeys = true }
 
 
@@ -62,7 +61,7 @@ class ApiClient(
     // region GET
     suspend fun <R> get(path: String, deserializer: KSerializer<R>): ApiResult<R> {
         return try {
-            val response = client.get("$baseUrl$path") { authHeader() }
+            val response = client.get("$BASE_URL_API_CLIENT$path") { authHeader() }
             handleResponse(response, deserializer)
         } catch (e: Exception) {
             e.toApiError()
@@ -77,7 +76,7 @@ class ApiClient(
     // region POST
     suspend fun <T, R> post(path: String, body: T, reqSerializer: KSerializer<T>, resSerializer: KSerializer<R>): ApiResult<R> {
         return try {
-            val response = client.post("$baseUrl$path") {
+            val response = client.post("$BASE_URL_API_CLIENT$path") {
                 authHeader()
                 contentType(ContentType.Application.Json)
                 setBody(json.encodeToString(reqSerializer, body))
@@ -94,7 +93,7 @@ class ApiClient(
         resSerializer: KSerializer<R>
     ): ApiResult<R> {
         return try {
-            val response = client.post("$baseUrl$path") {
+            val response = client.post("$BASE_URL_API_CLIENT$path") {
                 authHeader()
                 setBody(body)
             }
@@ -114,7 +113,7 @@ class ApiClient(
     // region PUT
     suspend fun <T, R> put(path: String, body: T, reqSerializer: KSerializer<T>, resSerializer: KSerializer<R>): ApiResult<R> {
         return try {
-            val response = client.put("$baseUrl$path") {
+            val response = client.put("$BASE_URL_API_CLIENT$path") {
                 authHeader()
                 contentType(ContentType.Application.Json)
                 setBody(json.encodeToString(reqSerializer, body))
@@ -132,7 +131,7 @@ class ApiClient(
     // region DELETE
     suspend fun delete(path: String): ApiResult<Unit> {
         return try {
-            val response = client.delete("$baseUrl$path") { authHeader() }
+            val response = client.delete("$BASE_URL_API_CLIENT$path") { authHeader() }
             if (response.status.value in 200..299)
                 ApiResult.Success(Unit)
             else if (response.status.value == 401)

@@ -1,10 +1,12 @@
 package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
@@ -35,13 +37,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.font.FontWeight
@@ -50,7 +52,6 @@ import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.Product
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.model.UserRole
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.Constants.BASE_URL
-import kotlin.collections.get
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -75,48 +76,56 @@ fun ProductList(
     ) {
         items(items = products, key = { product -> product.id!! }) { product ->
 
-            with(sharedTransitionScope) {
-                Card(
-                    modifier = Modifier.size(300.dp).padding(8.dp).animateItem(),
-                    onClick = { onProductClick(product) },
-                    elevation = CardDefaults.cardElevation(4.dp)
-                ) {
-                    var addedItem by rememberSaveable {
-                        mutableIntStateOf(
-                            cartItems[product.id] ?: 0
-                        )
-                    }
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier.weight(0.7f)
+            with(animatedVisibilityScope) {
+                with(sharedTransitionScope) {
+                    Card(
+                        modifier = Modifier
+                            .size(300.dp)
+                            .padding(8.dp)
+                            .animateItem()
+                            .clipToBounds(),
+                        onClick = { onProductClick(product) },
+                        elevation = CardDefaults.cardElevation(4.dp)
                     ) {
-                        CustomAsyncImage(
-                            url = "$BASE_URL${product.imageUrl}",
-                            contentDescription = product.description,
-                            errorTint = MaterialTheme.colorScheme.surface,
-                            size = 150.dp,
-                            modifier = Modifier
-                                .sharedBounds(
-                                    sharedContentState = rememberSharedContentState(key = "image_${product.id}"),
-                                    animatedVisibilityScope = animatedVisibilityScope
-                                )
-                        )
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .align(Alignment.BottomCenter)
-                                .background(
-                                    color = MaterialTheme.colorScheme.surfaceBright.copy(
-                                        alpha = 0.7f
-                                    )
-                                )
-                                .height(70.dp)
-                                .padding(4.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
+                        var addedItem by rememberSaveable {
+                            mutableIntStateOf(
+                                cartItems[product.id] ?: 0
+                            )
+                        }
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.weight(0.7f)
                         ) {
+                            CustomAsyncImage(
+                                url = "$BASE_URL${product.imageUrl}",
+                                contentDescription = product.description,
+                                errorTint = MaterialTheme.colorScheme.surface,
+                                size = 150.dp,
+                                modifier = Modifier
+                                    .sharedElement(
+                                        sharedContentState = rememberSharedContentState(key = "image_${product.id}"),
+                                        animatedVisibilityScope = animatedVisibilityScope
+                                    )
+                                    .clip(RoundedCornerShape(10.dp))
+                            )
                             Column(
-                                modifier = Modifier.weight(0.5f)
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .align(Alignment.BottomStart)
+                                    .height(70.dp)
+                                    .sharedBounds(
+                                        sharedContentState = rememberSharedContentState(
+                                            key = "product_info${product.id}"
+                                        ),
+                                        animatedVisibilityScope = animatedVisibilityScope,
+                                    )
+                                    .graphicsLayer { alpha = 0.7f }
+                                    .background(
+                                        color = MaterialTheme.colorScheme.surfaceBright
+                                    )
+                                    .padding(4.dp),
+                                horizontalAlignment = Alignment.Start,
+                                verticalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text(
                                     product.name,
@@ -124,98 +133,79 @@ fun ProductList(
                                     style = MaterialTheme.typography.titleSmall,
                                     overflow = TextOverflow.Ellipsis,
                                     modifier = Modifier
-                                        .basicMarquee()
-                                        .sharedBounds(
-                                            sharedContentState = rememberSharedContentState(
-                                                key = "name_${product.id}"
-                                            ),
-                                            animatedVisibilityScope = animatedVisibilityScope
-                                        ),
+                                        .basicMarquee(),
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Text(
                                     text = "${product.price} $",
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier
-                                        .sharedBounds(
-                                            sharedContentState = rememberSharedContentState(
-                                                key = "price_${product.id}"
-                                            ),
-                                            animatedVisibilityScope = animatedVisibilityScope
-                                        )
                                 )
                                 Text(
                                     text = "#${product.stock}",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier
-                                        .sharedBounds(
-                                            sharedContentState = rememberSharedContentState(
-                                                key = "stock_${product.id}"
-                                            ),
-                                            animatedVisibilityScope = animatedVisibilityScope
-                                        )
                                 )
                             }
-                        }
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.End,
-                            modifier = Modifier.align(Alignment.BottomEnd)
-                        ) {
-                            if (userRole == UserRole.USER) {
-                                IconButton(
-                                    onClick = {
-                                        addedItem--
-                                        onDecreaseItem(product.id!!)
-                                    },
-                                    enabled = addedItem > 0,
-                                    modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Remove,
-                                        contentDescription = "Remove Product from Cart"
-                                    )
-                                }
-                                Text(text = "$addedItem")
-                                IconButton(
-                                    onClick = {
-                                        addedItem++
-                                        onIncreaseItem(product.id!!)
-                                    },
-                                    enabled = (addedItem < product.stock) && (product.stock > 0),
-                                    modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Add,
-                                        contentDescription = "Add Product to Cart"
-                                    )
-                                }
-                            } else if (userRole == UserRole.ADMIN) {
-                                IconButton(
-                                    onClick = {
-                                        onRemoveClick(product.id!!)
-                                    },
-                                    enabled = true,
-                                    modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Delete,
-                                        contentDescription = "Delete Product"
-                                    )
-                                }
-                                IconButton(
-                                    onClick = {
-                                        onEditClick(product)
-                                    },
-                                    enabled = true,
-                                    modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Edit,
-                                        contentDescription = "Edit Product"
-                                    )
+
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.End,
+                                modifier = Modifier.align(Alignment.BottomEnd)
+                            ) {
+                                if (userRole == UserRole.USER) {
+                                    IconButton(
+                                        onClick = {
+                                            addedItem--
+                                            onDecreaseItem(product.id!!)
+                                        },
+                                        enabled = addedItem > 0,
+                                        modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Filled.Remove,
+                                            contentDescription = "Remove Product from Cart"
+                                        )
+                                    }
+                                    Text(text = "$addedItem")
+                                    IconButton(
+                                        onClick = {
+                                            addedItem++
+                                            onIncreaseItem(product.id!!)
+                                        },
+                                        enabled = (addedItem < product.stock) && (product.stock > 0),
+                                        modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Filled.Add,
+                                            contentDescription = "Add Product to Cart"
+                                        )
+                                    }
+                                } else if (userRole == UserRole.ADMIN) {
+                                    IconButton(
+                                        onClick = {
+                                            onRemoveClick(product.id!!)
+                                        },
+                                        enabled = true,
+                                        modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Filled.Delete,
+                                            contentDescription = "Delete Product"
+                                        )
+                                    }
+                                    IconButton(
+                                        onClick = {
+                                            onEditClick(product)
+                                        },
+                                        enabled = true,
+                                        modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Filled.Edit,
+                                            contentDescription = "Edit Product"
+                                        )
+                                    }
                                 }
                             }
                         }
