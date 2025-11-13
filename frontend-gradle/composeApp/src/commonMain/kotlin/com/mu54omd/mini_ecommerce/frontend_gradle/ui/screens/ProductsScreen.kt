@@ -1,10 +1,6 @@
 package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionLayout
-import androidx.compose.animation.core.animateIntAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,6 +17,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon
@@ -36,7 +33,6 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.LoadingV
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.AddEditProductModal
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.AlertModal
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.DeleteModal
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.ProductDetails
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.ProductList
 import frontend_gradle.composeapp.generated.resources.Res
 import frontend_gradle.composeapp.generated.resources.error_alert
@@ -114,8 +110,18 @@ fun ProductsScreen(
         }
     }
     LaunchedEffect(Unit) {
-        productViewModel.getAllProducts()
+        productViewModel.refreshProducts()
         cartViewModel.getCart()
+    }
+
+    LaunchedEffect(lazyGridState) {
+        snapshotFlow { lazyGridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
+            .collect { lastVisible ->
+                val total = lazyGridState.layoutInfo.totalItemsCount
+                if (lastVisible != null && lastVisible >= total - 4) {
+                    productViewModel.loadNextPage()
+                }
+            }
     }
 
     when (productsState) {

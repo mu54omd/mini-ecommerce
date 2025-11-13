@@ -2,6 +2,7 @@ package com.mu54omd.mini_ecommerce.frontend_gradle.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mu54omd.mini_ecommerce.frontend_gradle.api.ApiResult
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.ImageUploadResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.Product
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.ProductUseCases
@@ -64,11 +65,45 @@ class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel
 
     // ============================================================
 
-    fun getAllProducts(){
+    private var currentPage = 0
+    private var isLastPage = false
+    private var isPaginating = false
+    private val pageSize = 20
+
+    private val loadedProducts = mutableListOf<Product>()
+
+    // ============================================================
+
+    fun refreshProducts(){
         viewModelScope.launch {
+            currentPage = 0
+            isLastPage = false
+            loadedProducts.clear()
             _productsState.update { UiState.Loading }
-            val result = productUseCases.getProductsUseCase()
-            _productsState.update { result.toUiState()}
+            loadNextPage()
+        }
+    }
+
+    fun loadNextPage() {
+        if (isPaginating || isLastPage) return
+
+        viewModelScope.launch {
+            isPaginating = true
+
+            val result = productUseCases.getProductsUseCase(currentPage, pageSize)
+            when (result) {
+                is ApiResult.Success -> {
+                    val newProducts = result.data
+                    if (newProducts.isEmpty()) isLastPage = true
+                    else {
+                        loadedProducts.addAll(newProducts)
+                        currentPage++
+                        _productsState.update { UiState.Success(loadedProducts.toList()) }
+                    }
+                }
+                else -> { _productsState.update { result.toUiState() }}
+            }
+            isPaginating = false
         }
     }
 
@@ -87,7 +122,7 @@ class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel
             val result = productUseCases.addProductUseCase(product)
             _addProductState.update { result.toUiState() }
             if(addProductState.value is UiState.Success){
-                getAllProducts()
+                refreshProducts()
             }
         }
     }
@@ -97,7 +132,7 @@ class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel
             _deleteProductState.update { UiState.Loading }
             val result = productUseCases.deleteProductUseCase(productId)
             _deleteProductState.update { result.toUiState() }
-            getAllProducts()
+            refreshProducts()
         }
     }
 
@@ -106,7 +141,7 @@ class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel
             _deactivateProduct.update { UiState.Loading }
             val result = productUseCases.deactivateProductUseCase(productId)
             _deactivateProduct.update { result.toUiState() }
-            getAllProducts()
+            refreshProducts()
         }
     }
 
@@ -116,7 +151,7 @@ class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel
             val result = productUseCases.editProductUseCase(product)
             _editProductState.update { result.toUiState() }
             if(editProductState.value is UiState.Success){
-                getAllProducts()
+                refreshProducts()
             }
         }
     }
@@ -127,7 +162,7 @@ class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel
             val result = productUseCases.uploadProductImageUseCase(productId, fileName, byteArray)
             _uploadProductImageState.update { result.toUiState() }
             if(uploadProductImageState.value is UiState.Success){
-                getAllProducts()
+                refreshProducts()
             }
         }
     }

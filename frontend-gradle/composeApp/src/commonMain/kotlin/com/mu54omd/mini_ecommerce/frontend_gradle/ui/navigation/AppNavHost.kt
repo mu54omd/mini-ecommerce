@@ -199,7 +199,7 @@ fun AppNavHost(
                 if (currentDestination == Screen.Products.route) {
                     ProductSearchBar(
                         onQuery = { query -> productViewModel.filterProducts(query) },
-                        onClearQuery = { productViewModel.getAllProducts() },
+                        onClearQuery = { productViewModel.refreshProducts() },
                         modifier = Modifier.weight(1f).scale(0.75f)
                     )
                 }
