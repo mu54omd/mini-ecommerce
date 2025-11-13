@@ -77,10 +77,10 @@ fun ProductCards(
                 with(sharedTransitionScope) {
                     Card(
                         modifier = Modifier
-                            .size(300.dp)
+                            .size(250.dp)
                             .padding(8.dp)
-                            .animateItem()
-                            .clipToBounds(),
+                            .clipToBounds()
+                            .animateItem(),
                         onClick = { onProductClick(product) },
                         elevation = CardDefaults.cardElevation(4.dp)
                     ) {

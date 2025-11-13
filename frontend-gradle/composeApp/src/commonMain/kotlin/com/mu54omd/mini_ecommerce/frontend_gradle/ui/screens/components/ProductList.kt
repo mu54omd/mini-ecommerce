@@ -9,6 +9,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -54,7 +55,12 @@ fun ProductList(
     var selectedProduct by remember { mutableStateOf<Product?>(null) }
 
     SharedTransitionLayout(modifier = modifier.fillMaxSize()) {
-        AnimatedContent(targetState = productListState) { state ->
+        AnimatedContent(
+            targetState = productListState,
+            transitionSpec = {
+                fadeIn(animationSpec = tween(50)) togetherWith fadeOut(animationSpec = tween(50))
+            }
+        ) { state ->
             when (state) {
                 ProductListState.Cards -> {
                     ProductCards(

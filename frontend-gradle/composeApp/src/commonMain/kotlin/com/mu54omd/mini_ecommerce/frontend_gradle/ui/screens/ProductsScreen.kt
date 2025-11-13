@@ -70,7 +70,7 @@ fun ProductsScreen(
     var showAlertModalState by remember { mutableStateOf(false) }
 
     var selectedProduct by remember {
-        mutableStateOf<Product>(
+        mutableStateOf(
             Product(
                 name = "",
                 description = "",
@@ -260,6 +260,7 @@ fun ProductsScreen(
                         is UiState.Loading -> {}
                         is UiState.Success -> {}
                         else -> {
+                            println(deleteProductState.toString())
                             showAlertModalState = true
                             if (showAlertModalState) {
                                 AlertModal(
