@@ -14,11 +14,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -37,6 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.min
 import androidx.compose.ui.zIndex
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.Product
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.Constants.BASE_URL
@@ -47,6 +50,7 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.ui.Constants.BASE_URL
 fun ProductDetails(
     product: Product,
     onDismiss: () -> Unit,
+    enableSharedTransition: Boolean = true,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope
 ) {
@@ -66,15 +70,22 @@ fun ProductDetails(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Top,
                     modifier = Modifier
-                        .width(400.dp)
-                        .height(600.dp)
+                        .widthIn(min = 350.dp, max = 450.dp)
+                        .fillMaxHeight()
                         .clip(RoundedCornerShape(10.dp))
                         .background(color = MaterialTheme.colorScheme.surfaceBright)
                         .verticalScroll(state = rememberScrollState())
-                        .sharedBounds(
-                            sharedContentState = rememberSharedContentState(key = "container_${product.id}"),
-                            animatedVisibilityScope = animatedVisibilityScope,
-                            placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize
+                        then(
+                            if(enableSharedTransition){
+                                Modifier
+                                    .sharedBounds(
+                                        sharedContentState = rememberSharedContentState(key = "container_${product.id}"),
+                                        animatedVisibilityScope = animatedVisibilityScope,
+                                        placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize
+                                    )
+                            }else{
+                                Modifier
+                            }
                         )
 
                 ) {
@@ -84,9 +95,16 @@ fun ProductDetails(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(400.dp)
-                            .sharedElement(
-                                sharedContentState = rememberSharedContentState(key = "image_${product.id}"),
-                                animatedVisibilityScope = animatedVisibilityScope,
+                            then(
+                                if(enableSharedTransition){
+                                    Modifier
+                                        .sharedElement(
+                                            sharedContentState = rememberSharedContentState(key = "image_${product.id}"),
+                                            animatedVisibilityScope = animatedVisibilityScope,
+                                        )
+                                }else{
+                                    Modifier
+                                }
                             )
                             .clip(
                                 RoundedCornerShape(
@@ -105,11 +123,17 @@ fun ProductDetails(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(start = 4.dp, end = 4.dp, top = 2.dp, bottom = 2.dp)
-                            .sharedBounds(
-                                sharedContentState = rememberSharedContentState(
-                                    key = "product_info${product.id}"
-                                ),
-                                animatedVisibilityScope = animatedVisibilityScope,
+                            then(
+                                if(enableSharedTransition){
+                                    Modifier.sharedBounds(
+                                        sharedContentState = rememberSharedContentState(
+                                            key = "product_info${product.id}"
+                                        ),
+                                        animatedVisibilityScope = animatedVisibilityScope,
+                                    )
+                                }else{
+                                    Modifier
+                                }
                             )
                     ) {
                         Text(

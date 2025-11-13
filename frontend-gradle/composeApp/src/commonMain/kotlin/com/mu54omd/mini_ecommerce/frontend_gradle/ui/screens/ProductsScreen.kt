@@ -52,6 +52,7 @@ import org.jetbrains.compose.resources.stringResource
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun ProductsScreen(
+    isWideScreen: Boolean = false,
     productViewModel: ProductViewModel,
     cartViewModel: CartViewModel,
     userRole: UserRole,
@@ -141,6 +142,7 @@ fun ProductsScreen(
                         }
                     }
                     ProductList(
+                        isWideScreen = isWideScreen,
                         lazyGridState = lazyGridState,
                         userRole = userRole,
                         products = productsState.data,

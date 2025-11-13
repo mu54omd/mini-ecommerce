@@ -1,75 +1,43 @@
 package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
-import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.background
-import androidx.compose.foundation.basicMarquee
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridCells.*
 import androidx.compose.foundation.lazy.grid.LazyGridState
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.PointerIcon
-import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalWindowInfo
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.Product
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.model.UserRole
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.Constants.BASE_URL
-import kotlin.collections.get
 
 
 enum class ProductListState {
     Cards,
     Details,
+    CardsWithDetails
 }
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun ProductList(
+    isWideScreen: Boolean = false,
     lazyGridState: LazyGridState = rememberLazyGridState(),
     userRole: UserRole,
     products: List<Product>,
@@ -80,15 +48,16 @@ fun ProductList(
     onDecreaseItem: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var productListState by remember { mutableStateOf(ProductListState.Cards) }
+    var productListState by remember(isWideScreen) {
+        mutableStateOf(if(isWideScreen) ProductListState.CardsWithDetails else ProductListState.Cards)
+    }
     var selectedProduct by remember { mutableStateOf<Product?>(null) }
 
-    SharedTransitionLayout(modifier = Modifier.fillMaxSize()) {
+    SharedTransitionLayout(modifier = modifier.fillMaxSize()) {
         AnimatedContent(targetState = productListState) { state ->
             when (state) {
                 ProductListState.Cards -> {
-                    Cards(
-                        modifier = modifier,
+                    ProductCards(
                         lazyGridState = lazyGridState,
                         products = products,
                         cartItems = cartItems,
@@ -118,175 +87,55 @@ fun ProductList(
                         )
                     }
                 }
-            }
-        }
-    }
-}
 
-@OptIn(ExperimentalSharedTransitionApi::class)
-@Composable
-fun Cards(
-    modifier: Modifier = Modifier,
-    lazyGridState: LazyGridState = rememberLazyGridState(),
-    products: List<Product>,
-    cartItems: Map<Long, Int>,
-    userRole: UserRole,
-    onProductClick: (Product) -> Unit,
-    onEditClick: (Product) -> Unit,
-    onRemoveClick: (Long) -> Unit,
-    onIncreaseItem: (Long) -> Unit,
-    onDecreaseItem: (Long) -> Unit,
-    sharedTransitionScope: SharedTransitionScope,
-    animatedVisibilityScope: AnimatedVisibilityScope
-) {
-    LazyVerticalGrid(
-        modifier = modifier,
-        columns = Adaptive(200.dp),
-        state = lazyGridState
-    ) {
-        items(items = products, key = { product -> product.id!! }) { product ->
-
-            with(animatedVisibilityScope) {
-                with(sharedTransitionScope) {
-                    Card(
-                        modifier = Modifier
-                            .size(300.dp)
-                            .padding(8.dp)
-                            .animateItem()
-                            .clipToBounds(),
-                        onClick = { onProductClick(product) },
-                        elevation = CardDefaults.cardElevation(4.dp)
+                ProductListState.CardsWithDetails -> {
+                    var isDetailsBoxVisible by remember { mutableStateOf(false) }
+                    Row(
+                        modifier = Modifier.fillMaxSize()
                     ) {
-                        var addedItem by rememberSaveable {
-                            mutableIntStateOf(
-                                cartItems[product.id] ?: 0
+                        Box(
+                            modifier = Modifier
+                                .weight(0.5f)
+                                .fillMaxHeight()
+                        ) {
+                            ProductCards(
+                                lazyGridState = lazyGridState,
+                                products = products,
+                                cartItems = cartItems,
+                                userRole = userRole,
+                                enableSharedTransition = false,
+                                onProductClick = { product ->
+                                    isDetailsBoxVisible = true
+                                    selectedProduct = product
+                                },
+                                onEditClick = onEditClick,
+                                onRemoveClick = onRemoveClick,
+                                onIncreaseItem = onIncreaseItem,
+                                onDecreaseItem = onDecreaseItem,
+                                sharedTransitionScope = this@SharedTransitionLayout,
+                                animatedVisibilityScope = this@AnimatedContent,
                             )
                         }
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier.weight(0.7f)
+                        AnimatedVisibility(
+                            visible = isDetailsBoxVisible,
+                            modifier = Modifier.weight(0.5f),
+                            enter = slideInHorizontally(
+                                animationSpec = tween(100),
+                                initialOffsetX = { it }
+                            ) + fadeIn(animationSpec = tween(100)),
+                            exit = slideOutHorizontally(
+                                animationSpec = tween(durationMillis = 50),
+                                targetOffsetX = { it }
+                            ) + fadeOut(animationSpec = tween(50))
                         ) {
-                            CustomAsyncImage(
-                                url = "$BASE_URL${product.imageUrl}",
-                                contentDescription = product.description,
-                                errorTint = MaterialTheme.colorScheme.surface,
-                                size = 150.dp,
-                                modifier = Modifier
-                                    .sharedElement(
-                                        sharedContentState = rememberSharedContentState(
-                                            key = "image_${product.id}"
-                                        ),
-                                        animatedVisibilityScope = animatedVisibilityScope
-                                    )
-                                    .clip(RoundedCornerShape(10.dp))
-                            )
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .align(Alignment.BottomStart)
-                                    .height(70.dp)
-                                    .sharedBounds(
-                                        sharedContentState = rememberSharedContentState(
-                                            key = "product_info${product.id}"
-                                        ),
-                                        animatedVisibilityScope = animatedVisibilityScope
-                                    )
-                                    .graphicsLayer { alpha = 0.7f }
-                                    .background(
-                                        color = MaterialTheme.colorScheme.surfaceBright
-                                    )
-                                    .padding(4.dp),
-                                horizontalAlignment = Alignment.Start,
-                                verticalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text(
-                                    product.name,
-                                    fontWeight = FontWeight.Bold,
-                                    style = MaterialTheme.typography.titleSmall,
-                                    overflow = TextOverflow.Ellipsis,
-                                    modifier = Modifier
-                                        .basicMarquee(),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                            selectedProduct?.let { product ->
+                                ProductDetails(
+                                    product = product,
+                                    onDismiss = { isDetailsBoxVisible = false },
+                                    enableSharedTransition = false,
+                                    sharedTransitionScope = this@SharedTransitionLayout,
+                                    animatedVisibilityScope = this@AnimatedContent,
                                 )
-                                Text(
-                                    text = "${product.price} $",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                                Text(
-                                    text = "#${product.stock}",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.End,
-                                modifier = Modifier.align(Alignment.BottomEnd)
-                            ) {
-                                if (userRole == UserRole.USER) {
-                                    IconButton(
-                                        onClick = {
-                                            addedItem--
-                                            onDecreaseItem(product.id!!)
-                                        },
-                                        enabled = addedItem > 0,
-                                        modifier = Modifier.pointerHoverIcon(
-                                            PointerIcon.Hand
-                                        )
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Filled.Remove,
-                                            contentDescription = "Remove Product from Cart"
-                                        )
-                                    }
-                                    Text(text = "$addedItem")
-                                    IconButton(
-                                        onClick = {
-                                            addedItem++
-                                            onIncreaseItem(product.id!!)
-                                        },
-                                        enabled = (addedItem < product.stock) && (product.stock > 0),
-                                        modifier = Modifier.pointerHoverIcon(
-                                            PointerIcon.Hand
-                                        )
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Filled.Add,
-                                            contentDescription = "Add Product to Cart"
-                                        )
-                                    }
-                                } else if (userRole == UserRole.ADMIN) {
-                                    IconButton(
-                                        onClick = {
-                                            onRemoveClick(product.id!!)
-                                        },
-                                        enabled = true,
-                                        modifier = Modifier.pointerHoverIcon(
-                                            PointerIcon.Hand
-                                        )
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Filled.Delete,
-                                            contentDescription = "Delete Product"
-                                        )
-                                    }
-                                    IconButton(
-                                        onClick = {
-                                            onEditClick(product)
-                                        },
-                                        enabled = true,
-                                        modifier = Modifier.pointerHoverIcon(
-                                            PointerIcon.Hand
-                                        )
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Filled.Edit,
-                                            contentDescription = "Edit Product"
-                                        )
-                                    }
-                                }
                             }
                         }
                     }

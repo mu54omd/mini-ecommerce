@@ -114,17 +114,20 @@ fun AppNavHost(
     LaunchedEffect(tokenState) {
         if (tokenState is UiState.Error || tokenState is UiState.Unauthorized) {
             navController.navigate(Screen.Login.route) {
-                popUpTo(0)
+                popUpTo(Screen.Login.route) { inclusive = true }
+                launchSingleTop = true
             }
         }
     }
     Scaffold(
         bottomBar = {
             BoxWithConstraints {
-                val isDesktop = maxWidth > 840.dp
+                val isWideScreen by remember(maxWidth) {
+                    derivedStateOf { maxWidth > 840.dp }
+                }
                 val isLogin = currentDestination == Screen.Login.route
                 AnimatedContent(
-                    targetState = !isDesktop,
+                    targetState = !isWideScreen,
                     transitionSpec = {
                         slideIntoContainer(
                             towards = AnimatedContentTransitionScope.SlideDirection.Up) togetherWith slideOutOfContainer(
@@ -145,7 +148,7 @@ fun AppNavHost(
                                             navController.navigate(route = destination.route) {
                                                 launchSingleTop = true
                                                 restoreState = true
-                                                popUpTo(navController.graph.startDestinationId) {
+                                                popUpTo(navigationDestination.first().route) {
                                                     saveState = true
                                                 }
                                             }
@@ -204,7 +207,10 @@ fun AppNavHost(
                     onClick = {
                         authViewModel.logout()
                         navController.navigate(Screen.Login.route) {
-                            popUpTo(0)
+                            popUpTo(navController.graph.id) {
+                                inclusive = true
+                            }
+                            launchSingleTop = true
                         }
                         selectedDestination = navigationDestination.indices.first
                     },
@@ -222,13 +228,15 @@ fun AppNavHost(
         }
     ) { contentPadding ->
         BoxWithConstraints {
-            val isDesktop = maxWidth > 840.dp
+            val isWideScreen by remember(maxWidth) {
+                derivedStateOf { maxWidth > 840.dp }
+            }
             val isLogin = currentDestination == Screen.Login.route
             Row(
                 modifier = Modifier.padding(contentPadding)
             ) {
                 AnimatedContent(
-                    targetState = isDesktop,
+                    targetState = isWideScreen,
                     transitionSpec = {
                         slideIntoContainer(towards = AnimatedContentTransitionScope.SlideDirection.End) togetherWith slideOutOfContainer(
                             towards = AnimatedContentTransitionScope.SlideDirection.Start
@@ -247,7 +255,7 @@ fun AppNavHost(
                                             navController.navigate(destination.route) {
                                                 launchSingleTop = true
                                                 restoreState = true
-                                                popUpTo(navController.graph.startDestinationId) {
+                                                popUpTo(navigationDestination.first().route) {
                                                     saveState = true
                                                 }
                                             }
@@ -305,13 +313,19 @@ fun AppNavHost(
                                 orderViewModel.resetAllStates()
                                 cartViewModel.getCart()
                                 navController.navigate(navigationDestination.first().route) {
-                                    popUpTo(Screen.Login.route) { inclusive = true }
+                                    popUpTo(navController.graph.id) {
+                                        inclusive = true
+                                    }
+                                    launchSingleTop = true
                                 }
                             },
                             onLoginAsGuest = {
                                 authViewModel.clearToken()
                                 navController.navigate(Screen.Products.route) {
-                                    popUpTo(Screen.Login.route) { inclusive = true }
+                                    popUpTo(navController.graph.id) {
+                                        inclusive = true
+                                    }
+                                    launchSingleTop = true
                                 }
                             }
                         )
@@ -343,6 +357,7 @@ fun AppNavHost(
 
                     composable(Screen.Products.route) {
                         ProductsScreen(
+                            isWideScreen = isWideScreen,
                             productViewModel = productViewModel,
                             cartViewModel = cartViewModel,
                             userRole = userState.role,
