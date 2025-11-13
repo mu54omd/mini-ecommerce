@@ -58,4 +58,6 @@ class ProductRepositoryImpl(private val api: ApiClient): ProductRepository {
         api.put("/products/$id/stock?stock=$stock", "")
 
     override suspend fun deleteProduct(id: Long): ApiResult<Unit> = api.delete("/products?productId=$id")
+    override suspend fun deactivateProduct(id: Long): ApiResult<Unit> = api.patch("/products?productId=$id")
+
 }

@@ -33,9 +33,14 @@ public class ProductRestController {
         return ResponseEntity.ok(savedProduct);
     }
 
+//    @GetMapping
+//    public ResponseEntity<Page<Product>> getAllProducts(Pageable pageable) {
+//        return ResponseEntity.ok(productService.getAllProducts(pageable));
+//    }
+
     @GetMapping
-    public ResponseEntity<Page<Product>> getAllProducts(Pageable pageable) {
-        return ResponseEntity.ok(productService.getAllProducts(pageable));
+    public ResponseEntity<Page<Product>> getAllActiveProducts(Pageable pageable) {
+        return ResponseEntity.ok(productService.getAllActiveProducts(pageable));
     }
 
     @GetMapping("/search")
@@ -68,6 +73,12 @@ public class ProductRestController {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping
+    public ResponseEntity<?> deactivateProduct(@RequestParam Long productId) {
+        productService.deactivateProduct(productId);
         return ResponseEntity.noContent().build();
     }
 

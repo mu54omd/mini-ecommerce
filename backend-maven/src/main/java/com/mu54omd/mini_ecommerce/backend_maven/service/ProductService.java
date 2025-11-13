@@ -28,6 +28,17 @@ public class ProductService {
         return productRepository.findAll(pageable);
     }
 
+    public Page<Product> getAllActiveProducts(Pageable pageable){
+        return productRepository.findByIsActiveTrue(pageable);
+    }
+
+    public void deactivateProduct(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+        product.setIsActive(false);
+        productRepository.save(product);
+    }
+
     public List<Product> getAllProductsList(){
         return productRepository.findAll();
     }

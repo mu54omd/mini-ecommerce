@@ -31,6 +31,9 @@ public class Product {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    @Column(name = "isActive", nullable = false)
+    private boolean isActive = true;
+
     public Product() {}
 
     public Product(Long id, String name, String description, Double price, Integer stock) {
@@ -94,5 +97,12 @@ public class Product {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public boolean getIsActive() {
+        return isActive;
+    }
+    public void setIsActive(boolean isActive) {
+        this.isActive = isActive;
     }
 }

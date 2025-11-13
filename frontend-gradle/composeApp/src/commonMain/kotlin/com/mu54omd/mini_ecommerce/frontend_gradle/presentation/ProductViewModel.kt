@@ -23,6 +23,9 @@ class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel
     private val _deleteProductState = MutableStateFlow<UiState<Unit>>(UiState.Idle)
     val deleteProductState = _deleteProductState.asStateFlow()
 
+    private val _deactivateProduct = MutableStateFlow<UiState<Unit>>(UiState.Idle)
+    val deactivateProduct = _deactivateProduct.asStateFlow()
+
     private val _editProductState = MutableStateFlow<UiState<Product>>(UiState.Idle)
     val editProductState = _editProductState.asStateFlow()
 
@@ -94,6 +97,15 @@ class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel
             _deleteProductState.update { UiState.Loading }
             val result = productUseCases.deleteProductUseCase(productId)
             _deleteProductState.update { result.toUiState() }
+            getAllProducts()
+        }
+    }
+
+    fun deactivateProduct(productId: Long){
+        viewModelScope.launch {
+            _deactivateProduct.update { UiState.Loading }
+            val result = productUseCases.deactivateProductUseCase(productId)
+            _deactivateProduct.update { result.toUiState() }
             getAllProducts()
         }
     }

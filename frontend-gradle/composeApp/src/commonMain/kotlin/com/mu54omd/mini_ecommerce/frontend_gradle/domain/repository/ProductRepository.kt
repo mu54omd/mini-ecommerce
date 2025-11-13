@@ -25,4 +25,5 @@ interface ProductRepository {
 
     suspend fun updateProductStock(id: Long, stock: Int): ApiResult<Product>
     suspend fun deleteProduct(id: Long): ApiResult<Unit>
+    suspend fun deactivateProduct(id: Long): ApiResult<Unit>
 }

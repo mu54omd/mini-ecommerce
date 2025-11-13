@@ -8,6 +8,7 @@ import io.ktor.client.request.delete
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
@@ -128,16 +129,30 @@ class ApiClient(
         put(path, body, serializer(), serializer())
     // endregion
 
+    // region PATCH
+    suspend fun patch(path: String): ApiResult<Unit> {
+        return try {
+            val response = client.patch("$BASE_URL_API_CLIENT$path") { authHeader() }
+            when (response.status.value) {
+                in 200..299 -> ApiResult.Success(Unit)
+                401 -> ApiResult.Unauthorized()
+                else -> ApiResult.Error("Patch failed: ${response.status}")
+            }
+        } catch (e: Exception) {
+            e.toApiError()
+        }
+    }
+    // endregion
+
     // region DELETE
     suspend fun delete(path: String): ApiResult<Unit> {
         return try {
             val response = client.delete("$BASE_URL_API_CLIENT$path") { authHeader() }
-            if (response.status.value in 200..299)
-                ApiResult.Success(Unit)
-            else if (response.status.value == 401)
-                ApiResult.Unauthorized()
-            else
-                ApiResult.Error("Delete failed: ${response.status}")
+            when (response.status.value) {
+                in 200..299 -> ApiResult.Success(Unit)
+                401 -> ApiResult.Unauthorized()
+                else -> ApiResult.Error("Delete failed: ${response.status}")
+            }
         } catch (e: Exception) {
             e.toApiError()
         }

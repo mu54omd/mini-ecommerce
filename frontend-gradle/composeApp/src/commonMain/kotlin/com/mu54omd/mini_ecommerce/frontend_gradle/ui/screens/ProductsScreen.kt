@@ -61,7 +61,7 @@ fun ProductsScreen(
     val productsState = productViewModel.productsState.collectAsState().value
     val addProductState = productViewModel.addProductState.collectAsState().value
     val editProductState = productViewModel.editProductState.collectAsState().value
-    val deleteProductState = productViewModel.deleteProductState.collectAsState().value
+    val deactivateProduct = productViewModel.deactivateProduct.collectAsState().value
     val uploadProductImageState = productViewModel.uploadProductImageState.collectAsState().value
 
     var addProductModalState by remember { mutableStateOf(false) }
@@ -216,7 +216,7 @@ fun ProductsScreen(
                             },
                             onConfirmClick = { productId ->
                                 deleteProductModalState = false
-                                productViewModel.deleteProduct(productId)
+                                productViewModel.deactivateProduct(productId)
                                 selectedProductIdForDelete = -1
                             }
                         )
@@ -255,12 +255,12 @@ fun ProductsScreen(
                             }
                         }
                     }
-                    when (deleteProductState) {
+                    when (deactivateProduct) {
                         is UiState.Idle -> {}
                         is UiState.Loading -> {}
                         is UiState.Success -> {}
                         else -> {
-                            println(deleteProductState.toString())
+                            println(deactivateProduct.toString())
                             showAlertModalState = true
                             if (showAlertModalState) {
                                 AlertModal(
