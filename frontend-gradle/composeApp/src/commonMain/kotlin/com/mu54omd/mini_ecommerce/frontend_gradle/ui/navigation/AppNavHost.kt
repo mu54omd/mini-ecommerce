@@ -112,10 +112,12 @@ fun AppNavHost(
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination?.route
 
     LaunchedEffect(tokenState) {
-        if (tokenState is UiState.Error || tokenState is UiState.Unauthorized) {
-            navController.navigate(Screen.Login.route) {
-                popUpTo(Screen.Login.route) { inclusive = true }
-                launchSingleTop = true
+        if (tokenState is UiState.Error) {
+            if(currentDestination != Screen.Login.route) {
+                navController.navigate(Screen.Login.route) {
+                    popUpTo(Screen.Login.route) { inclusive = true }
+                    launchSingleTop = true
+                }
             }
         }
     }

@@ -20,6 +20,8 @@ import io.ktor.http.contentType
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.serializer
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -49,9 +51,44 @@ class ApiClient(
                 val data = json.decodeFromString(deserializer, text)
                 ApiResult.Success(data)
             }
-            401 -> ApiResult.Unauthorized("Unauthorized request")
-            403 -> ApiResult.Forbidden("Forbidden request")
-            else -> ApiResult.Error( message = "HTTP ${response.status.value}: $text", code = response.status.value)
+            400 -> {
+                // Validation / Bad Request
+                try {
+                    val jsonObj = json.parseToJsonElement(text).jsonObject
+                    val message = jsonObj["message"]?.jsonPrimitive?.content ?: "Validation failed"
+                    val fields = jsonObj["fields"]?.jsonObject?.mapValues { it.value.jsonPrimitive.content }
+                    ApiResult.ValidationError(message = message, fields = fields)
+                } catch (e: Exception) {
+                    ApiResult.Error(message = "Validation failed", code = 400)
+                }
+            }
+            401 -> {
+                try {
+                    val jsonObj = json.parseToJsonElement(text).jsonObject
+                    val message = jsonObj["message"]?.jsonPrimitive?.content ?: "Unauthorized Request"
+                    ApiResult.Unauthorized(message = message)
+                } catch (e: Exception) {
+                    ApiResult.Unauthorized(message = "Unauthorized")
+                }
+            }
+            403 -> {
+                try {
+                    val jsonObj = json.parseToJsonElement(text).jsonObject
+                    val message = jsonObj["message"]?.jsonPrimitive?.content ?: "Forbidden Request"
+                    ApiResult.Forbidden(message = message)
+                } catch (e: Exception) {
+                    ApiResult.Forbidden(message = "Forbidden")
+                }
+            }
+            else -> {
+                try {
+                    val jsonObj = json.parseToJsonElement(text).jsonObject
+                    val message = jsonObj["message"]?.jsonPrimitive?.content ?: "HTTP ${response.status.value}"
+                    ApiResult.Error(message = message, code = response.status.value)
+                } catch (e: Exception) {
+                    ApiResult.Error(message = "HTTP ${response.status.value}: $text", code = response.status.value)
+                }
+            }
         }
     }
 

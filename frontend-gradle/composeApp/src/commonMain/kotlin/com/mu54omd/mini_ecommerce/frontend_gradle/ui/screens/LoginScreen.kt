@@ -1,5 +1,7 @@
 package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,7 +28,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.RegisterResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.AuthViewModel
@@ -43,6 +49,15 @@ fun LoginScreen(
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
+
+    var isUsernameWrong by remember { mutableStateOf(false)}
+    var isPasswordWrong by remember { mutableStateOf(false)}
+    var isEmailWrong by remember { mutableStateOf(false)}
+
+    var usernameWrongMessage by remember { mutableStateOf("") }
+    var passwordWrongMessage by remember { mutableStateOf("") }
+    var emailWrongMessage by remember { mutableStateOf("") }
+
     val loginState by authViewModel.tokenState.collectAsState()
     val registerState by authViewModel.registerState.collectAsState()
     var haveAnAccount by remember { mutableStateOf(true)}
@@ -67,7 +82,17 @@ fun LoginScreen(
                 onValueChange = { username = it },
                 label = { Text("Username") },
                 singleLine = true,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                isError = isUsernameWrong,
+                supportingText = {
+                    if(isUsernameWrong){
+                        Text(
+                            text = usernameWrongMessage,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.Red
+                        )
+                    }
+                }
             )
             Spacer(Modifier.height(8.dp))
             OutlinedTextField(
@@ -76,16 +101,36 @@ fun LoginScreen(
                 label = { Text("Password") },
                 visualTransformation = PasswordVisualTransformation(),
                 singleLine = true,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                isError = isPasswordWrong,
+                supportingText = {
+                    if(isPasswordWrong){
+                        Text(
+                            text = passwordWrongMessage,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.Red
+                        )
+                    }
+                }
             )
-            if(!haveAnAccount) {
+            AnimatedVisibility(!haveAnAccount) {
                 Spacer(Modifier.height(8.dp))
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
                     label = { Text("Email") },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    isError = isEmailWrong,
+                    supportingText = {
+                        if(isEmailWrong){
+                            Text(
+                                text = emailWrongMessage,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.Red
+                            )
+                        }
+                    }
                 )
             }
             Spacer(Modifier.height(16.dp))
@@ -97,6 +142,12 @@ fun LoginScreen(
                 Button(
                     enabled = loginState !is UiState.Loading,
                     onClick = {
+                        isEmailWrong = false
+                        isUsernameWrong = false
+                        isPasswordWrong = false
+                        usernameWrongMessage = ""
+                        passwordWrongMessage = ""
+                        emailWrongMessage = ""
                         authViewModel.resetAllStates()
                         if(haveAnAccount) {
                             authViewModel.login(username, password)
@@ -106,7 +157,12 @@ fun LoginScreen(
                     },
                     modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
                 ) {
-                    if(haveAnAccount) Text("Login") else Text("Register")
+                    AnimatedContent(targetState = haveAnAccount){ state ->
+                        when(state){
+                            true -> Text("Login")
+                            false -> Text("Register")
+                        }
+                    }
                 }
                 TextButton(
                     onClick = {
@@ -115,7 +171,12 @@ fun LoginScreen(
                     },
                     modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
                 ) {
-                    if(!haveAnAccount) Text("I have an account!") else Text("Don't have an account!")
+                    AnimatedContent(targetState = haveAnAccount) { state ->
+                        when (state) {
+                            false -> Text("I have an account!")
+                            true -> Text("Don't have an account!")
+                        }
+                    }
                 }
             }
             TextButton(
@@ -130,7 +191,7 @@ fun LoginScreen(
                 is UiState.Loading -> CircularProgressIndicator()
                 is UiState.Error -> {
                     Text(
-                        text = "Error: ${(loginState as UiState.Error).message}",
+                        text = (loginState as UiState.Error).message,
                         color = Color.Red,
                     )
                 }
@@ -141,17 +202,53 @@ fun LoginScreen(
                         onLoginSuccess()
                     }
                 }
-
-                is UiState.Unauthorized -> Text("Invalid credentials", color = Color.Red)
             }
             when (registerState) {
                 is UiState.Idle -> {}
                 is UiState.Loading -> CircularProgressIndicator()
                 is UiState.Error -> {
-                    Text(
-                        text = "Error: ${(registerState as UiState.Error).message}",
-                        color = Color.Red,
-                    )
+                    (registerState as UiState.Error).let { (message, fields) ->
+                        when(message) {
+                            "Username already exists" -> {
+                                isUsernameWrong = true
+                                usernameWrongMessage = message
+                            }
+                            "Email already exists" -> {
+                                isEmailWrong = true
+                                emailWrongMessage = message
+                            }
+                            else -> {
+                                Text(
+                                    text = message,
+                                    color = Color.Red,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                fields?.forEach { (key, value) ->
+                                    when (key) {
+                                        "password" -> {
+                                            isPasswordWrong = true
+                                            passwordWrongMessage = value
+                                        }
+
+                                        "email" -> {
+                                            isEmailWrong = true
+                                            emailWrongMessage = value
+                                        }
+
+                                        else -> {
+                                            Text(
+                                                text = "${key}: $value",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = Color.Red,
+                                                fontWeight = FontWeight.Bold,
+                                                modifier = Modifier.fillMaxWidth()
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
 
                 is UiState.Success -> {
@@ -164,8 +261,6 @@ fun LoginScreen(
                         authViewModel.resetAllStates()
                     }
                 }
-
-                is UiState.Unauthorized -> Text("Invalid credentials", color = Color.Red)
             }
         }
     }

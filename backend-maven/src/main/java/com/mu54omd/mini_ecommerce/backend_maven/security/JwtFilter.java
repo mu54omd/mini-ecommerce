@@ -26,11 +26,6 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-//        String path = request.getRequestURI();
-//        if (path.startsWith("/uploads/")) {
-//            filterChain.doFilter(request, response);
-//            return;
-//        }
 
         final String authHeader = request.getHeader("Authorization");
         String username = null;
@@ -41,7 +36,8 @@ public class JwtFilter extends OncePerRequestFilter {
             try {
                 username = jwtUtil.extractUsername(token);
             } catch (Exception e) {
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid token");
+                SecurityContextHolder.clearContext();
+                filterChain.doFilter(request, response);
                 return;
             }
         }
@@ -58,13 +54,7 @@ public class JwtFilter extends OncePerRequestFilter {
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                 SecurityContextHolder.getContext().setAuthentication(authToken);
-            }else{
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token expired or invalid");
-                return;
             }
-        }else if(username == null && token != null){
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid token");
-            return;
         }
         filterChain.doFilter(request, response);
     }

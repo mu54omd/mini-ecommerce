@@ -2,8 +2,8 @@ package com.mu54omd.mini_ecommerce.backend_maven.controller;
 
 import com.mu54omd.mini_ecommerce.backend_maven.dto.AuthRequest;
 import com.mu54omd.mini_ecommerce.backend_maven.dto.LoginResponse;
+import com.mu54omd.mini_ecommerce.backend_maven.dto.RegisterRequest;
 import com.mu54omd.mini_ecommerce.backend_maven.dto.RegisterResponse;
-import com.mu54omd.mini_ecommerce.backend_maven.entity.User;
 import com.mu54omd.mini_ecommerce.backend_maven.service.CustomUserDetailsService;
 import com.mu54omd.mini_ecommerce.backend_maven.security.JwtUtil;
 import com.mu54omd.mini_ecommerce.backend_maven.service.UserService;
@@ -11,7 +11,9 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,25 +37,28 @@ public class AuthRestController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AuthRequest request){
+    public ResponseEntity<?> login(@RequestBody AuthRequest request) {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
             final UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
             final String token = jwtUtil.generateToken(userDetails.getUsername(), userDetails.getAuthorities().toString());
             return ResponseEntity.ok(new LoginResponse(token));
-        }catch (Exception e){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginResponse("Invalid username or password"));
+        }catch (BadCredentialsException e){
+            throw new RuntimeException("Invalid username or password");
         }
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@Valid @RequestBody User user){
-        try {
-            user.setRole(User.Role.USER);
-            userService.createUser(user);
-            return ResponseEntity.status(HttpStatus.CREATED).body(new RegisterResponse("User registered successfully"));
-        }catch (Exception e){
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(new RegisterResponse(e.getMessage()));
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest){
+
+        if(userService.findByUsername(registerRequest.getUsername()).isPresent()){
+            throw new RuntimeException("Username already exists");
         }
+        if(userService.findByEmail(registerRequest.getEmail()).isPresent()){
+            throw new RuntimeException("Email already exists");
+        }
+        userService.registerUser(registerRequest);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new RegisterResponse("User registered successfully"));
     }
 }

@@ -170,13 +170,13 @@ fun ProductDetails(
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                         Text(
-                            text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, " +
-                                    "sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. " +
-                                    "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris " +
-                                    "nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in " +
-                                    "reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla " +
-                                    "pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa" +
-                                    " qui officia deserunt mollit anim id est laborum.",
+                            text = """
+                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam dapibus erat ac magna ultricies facilisis. Fusce lectus dolor, scelerisque et porta sit amet, molestie et purus. Phasellus hendrerit leo ac urna finibus, sit amet vestibulum risus tincidunt. Cras pellentesque vehicula dui sit amet pellentesque. Sed ultricies orci vitae hendrerit pellentesque. Cras et elit massa. Fusce id tempor nibh. Vestibulum scelerisque vestibulum risus, non auctor eros iaculis eu. Mauris a enim a dui lacinia euismod quis in metus. Quisque porttitor interdum maximus. Donec accumsan, mauris non convallis sodales, leo elit consectetur mauris, nec laoreet sapien quam a dui.
+                                Quisque faucibus eget velit commodo bibendum. Nullam ut enim sodales, sagittis metus sed, fringilla ex. Maecenas tempor lectus sed lacus feugiat, ut venenatis nulla tincidunt. Etiam facilisis justo vel auctor tempor. In tincidunt augue quis tincidunt scelerisque. Ut et nisl id massa venenatis tincidunt. Proin mattis varius libero. Aliquam in eros in lacus feugiat aliquet. In eleifend consequat tortor nec sodales. Vestibulum molestie diam quis imperdiet imperdiet. Aliquam euismod eros a turpis aliquet, et malesuada dolor commodo.
+                                Donec fringilla felis a justo egestas posuere. Etiam bibendum, quam in iaculis tristique, mauris nisl fringilla purus, aliquet sollicitudin urna augue vitae diam. In tincidunt nisl id arcu aliquet, a semper leo auctor. Vivamus sed est nisi. Fusce molestie laoreet tortor, sit amet ornare tortor egestas eget. Vivamus faucibus ex mauris, eu aliquam odio viverra at. Pellentesque fermentum nisi at mi tincidunt laoreet. Vivamus eu bibendum nulla. In posuere tortor sit amet metus posuere viverra. Duis eu tincidunt nunc.
+                                Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Donec quis eros varius, imperdiet ipsum nec, viverra ex. Etiam purus sem, tempus eu dui in, semper ultrices quam. Etiam tincidunt risus eleifend, placerat massa id, condimentum magna. Fusce a lacus leo. Pellentesque metus sem, ornare non odio et, bibendum pretium ipsum. Pellentesque lacus mauris, interdum eu laoreet eu, suscipit id ante.
+                                Vestibulum et elit lectus. Nullam id tellus arcu. Vestibulum commodo ante id nulla interdum dapibus. Curabitur velit arcu, rutrum eu massa nec, scelerisque volutpat leo. Cras fermentum lectus nisl, eget viverra sapien condimentum et. Interdum et malesuada fames ac ante ipsum primis in faucibus. Quisque ut rhoncus magna. Nullam posuere est ut arcu sagittis volutpat.
+                            """.trimIndent(),
                             style = MaterialTheme.typography.bodyMedium,
                             fontStyle = FontStyle.Italic,
                             textAlign = TextAlign.Justify,
