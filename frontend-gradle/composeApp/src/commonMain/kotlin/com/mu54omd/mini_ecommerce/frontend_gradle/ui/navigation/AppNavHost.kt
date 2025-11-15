@@ -322,8 +322,10 @@ fun AppNavHost(
                                 }
                             },
                             onLoginAsGuest = {
+                                productViewModel.resetAllStates()
+                                authViewModel.resetAllStates()
                                 authViewModel.clearToken()
-                                navController.navigate(Screen.Products.route) {
+                                navController.navigate(navigationDestination.first().route) {
                                     popUpTo(navController.graph.id) {
                                         inclusive = true
                                     }

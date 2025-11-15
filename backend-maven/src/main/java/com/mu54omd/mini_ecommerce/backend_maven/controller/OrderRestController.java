@@ -66,7 +66,7 @@ public class OrderRestController {
         try{
             s = Order.Status.valueOf(status.toUpperCase());
         }catch (IllegalArgumentException e){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid order status: " + status);
+            throw new RuntimeException("Invalid order status: " + status);
         }
         List<Order> orders = orderService.getOrdersByStatus(s);
         return ResponseEntity.ok(OrderMapper.toDtoList(orders));
@@ -78,7 +78,7 @@ public class OrderRestController {
         try{
             s = Order.Status.valueOf(status.toUpperCase());
         }catch (IllegalArgumentException e){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid order status: " + status);
+            throw new RuntimeException("Invalid order status: " + status);
         }
         return ResponseEntity.ok(OrderMapper.toDto(orderService.updateOrderStatus(orderId, s)));
     }

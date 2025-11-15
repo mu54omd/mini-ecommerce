@@ -1,5 +1,6 @@
 package com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase
 
+import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.auth.CheckHealthUseCase
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.auth.ClearTokenUseCase
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.auth.GetUserInfoUseCase
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.auth.LoginUseCase
@@ -8,6 +9,7 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.auth.RegisterUs
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.auth.ValidateTokenUseCase
 
 data class AuthUseCases(
+    val checkHealthUseCase: CheckHealthUseCase,
     val loginUseCase: LoginUseCase,
     val registerUseCase: RegisterUseCase,
     val logoutUseCase: LogoutUseCase,

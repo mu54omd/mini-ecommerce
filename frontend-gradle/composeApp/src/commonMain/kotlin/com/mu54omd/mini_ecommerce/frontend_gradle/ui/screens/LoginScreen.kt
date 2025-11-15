@@ -28,11 +28,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.RegisterResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.AuthViewModel
@@ -50,18 +47,28 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
 
-    var isUsernameWrong by remember { mutableStateOf(false)}
-    var isPasswordWrong by remember { mutableStateOf(false)}
-    var isEmailWrong by remember { mutableStateOf(false)}
+    var isUsernameWrong by remember { mutableStateOf(false) }
+    var isPasswordWrong by remember { mutableStateOf(false) }
+    var isEmailWrong by remember { mutableStateOf(false) }
 
     var usernameWrongMessage by remember { mutableStateOf("") }
     var passwordWrongMessage by remember { mutableStateOf("") }
     var emailWrongMessage by remember { mutableStateOf("") }
 
+    val healthStatus by authViewModel.healthState.collectAsState()
     val loginState by authViewModel.tokenState.collectAsState()
     val registerState by authViewModel.registerState.collectAsState()
-    var haveAnAccount by remember { mutableStateOf(true)}
+    var haveAnAccount by remember { mutableStateOf(true) }
     val scope = rememberCoroutineScope()
+
+    fun resetLoginScreenTextField() {
+        isEmailWrong = false
+        isUsernameWrong = false
+        isPasswordWrong = false
+        usernameWrongMessage = ""
+        passwordWrongMessage = ""
+        emailWrongMessage = ""
+    }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -85,7 +92,7 @@ fun LoginScreen(
                 modifier = Modifier.fillMaxWidth(),
                 isError = isUsernameWrong,
                 supportingText = {
-                    if(isUsernameWrong){
+                    if (isUsernameWrong) {
                         Text(
                             text = usernameWrongMessage,
                             style = MaterialTheme.typography.bodySmall,
@@ -104,7 +111,7 @@ fun LoginScreen(
                 modifier = Modifier.fillMaxWidth(),
                 isError = isPasswordWrong,
                 supportingText = {
-                    if(isPasswordWrong){
+                    if (isPasswordWrong) {
                         Text(
                             text = passwordWrongMessage,
                             style = MaterialTheme.typography.bodySmall,
@@ -123,7 +130,7 @@ fun LoginScreen(
                     modifier = Modifier.fillMaxWidth(),
                     isError = isEmailWrong,
                     supportingText = {
-                        if(isEmailWrong){
+                        if (isEmailWrong) {
                             Text(
                                 text = emailWrongMessage,
                                 style = MaterialTheme.typography.bodySmall,
@@ -140,32 +147,29 @@ fun LoginScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Button(
-                    enabled = loginState !is UiState.Loading,
+                    enabled = loginState !is UiState.Loading && healthStatus !is UiState.Loading && registerState !is UiState.Loading,
                     onClick = {
-                        isEmailWrong = false
-                        isUsernameWrong = false
-                        isPasswordWrong = false
-                        usernameWrongMessage = ""
-                        passwordWrongMessage = ""
-                        emailWrongMessage = ""
+                        resetLoginScreenTextField()
                         authViewModel.resetAllStates()
-                        if(haveAnAccount) {
+                        if (haveAnAccount) {
                             authViewModel.login(username, password)
-                        }else {
+                        } else {
                             authViewModel.register(username, password, email)
                         }
                     },
                     modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
                 ) {
-                    AnimatedContent(targetState = haveAnAccount){ state ->
-                        when(state){
+                    AnimatedContent(targetState = haveAnAccount) { state ->
+                        when (state) {
                             true -> Text("Login")
                             false -> Text("Register")
                         }
                     }
                 }
                 TextButton(
+                    enabled = loginState !is UiState.Loading && healthStatus !is UiState.Loading && registerState !is UiState.Loading,
                     onClick = {
+                        resetLoginScreenTextField()
                         authViewModel.resetAllStates()
                         haveAnAccount = !haveAnAccount
                     },
@@ -180,12 +184,36 @@ fun LoginScreen(
                 }
             }
             TextButton(
+                enabled = loginState !is UiState.Loading && healthStatus !is UiState.Loading && registerState !is UiState.Loading,
                 modifier = Modifier.fillMaxWidth().pointerHoverIcon(PointerIcon.Hand),
-                onClick = onLoginAsGuest
+                onClick = {
+                    resetLoginScreenTextField()
+                    authViewModel.resetAllStates()
+                    authViewModel.checkHealth()
+                }
             ) {
                 Text("Login as guest!")
             }
             Spacer(Modifier.height(8.dp))
+
+            when(healthStatus){
+                is UiState.Idle -> {}
+                is UiState.Loading -> CircularProgressIndicator()
+                is UiState.Error -> {
+                    Text(
+                        text = (healthStatus as UiState.Error).message,
+                        color = Color.Red,
+                    )
+                }
+                is UiState.Success -> {
+                    Text(text = "Welcome!")
+                    scope.launch {
+                        delay(1000)
+                        onLoginAsGuest()
+                    }
+
+                }
+            }
             when (loginState) {
                 is UiState.Idle -> {}
                 is UiState.Loading -> CircularProgressIndicator()
@@ -195,10 +223,11 @@ fun LoginScreen(
                         color = Color.Red,
                     )
                 }
+
                 is UiState.Success -> {
                     Text(text = "Welcome!")
                     scope.launch {
-                        delay(500)
+                        delay(1000)
                         onLoginSuccess()
                     }
                 }
@@ -208,15 +237,17 @@ fun LoginScreen(
                 is UiState.Loading -> CircularProgressIndicator()
                 is UiState.Error -> {
                     (registerState as UiState.Error).let { (message, fields) ->
-                        when(message) {
+                        when (message) {
                             "Username already exists" -> {
                                 isUsernameWrong = true
                                 usernameWrongMessage = message
                             }
+
                             "Email already exists" -> {
                                 isEmailWrong = true
                                 emailWrongMessage = message
                             }
+
                             else -> {
                                 Text(
                                     text = message,
@@ -233,6 +264,11 @@ fun LoginScreen(
                                         "email" -> {
                                             isEmailWrong = true
                                             emailWrongMessage = value
+                                        }
+
+                                        "username" -> {
+                                            isUsernameWrong = true
+                                            usernameWrongMessage = value
                                         }
 
                                         else -> {

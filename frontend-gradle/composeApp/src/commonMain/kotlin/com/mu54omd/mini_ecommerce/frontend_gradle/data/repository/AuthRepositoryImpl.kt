@@ -4,6 +4,7 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.api.ApiClient
 import com.mu54omd.mini_ecommerce.frontend_gradle.api.ApiResult
 import com.mu54omd.mini_ecommerce.frontend_gradle.api.map
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.AuthRequest
+import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.HealthResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.LoginResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.RegisterResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.model.User
@@ -15,6 +16,9 @@ class AuthRepositoryImpl(
     private val api: ApiClient,
     private val sessionManager: SessionManager
 ): AuthRepository {
+    override suspend fun checkHealth(): ApiResult<HealthResponse> {
+        return api.get<HealthResponse>("/health")
+    }
     override suspend fun login(username: String, password: String): ApiResult<LoginResponse> {
         var result = api.post<AuthRequest, LoginResponse>("/auth/login", AuthRequest(username, password))
             .map(

@@ -2,6 +2,7 @@ package com.mu54omd.mini_ecommerce.frontend_gradle.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.HealthResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.LoginResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.RegisterResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.model.User
@@ -25,6 +26,9 @@ class AuthViewModel(private val authUseCases: AuthUseCases): ViewModel() {
             initialValue = UiState.Idle
         )
 
+    private val _healthState: MutableStateFlow<UiState<HealthResponse>> = MutableStateFlow(UiState.Idle)
+    val healthState = _healthState.asStateFlow()
+
     private val _userState: MutableStateFlow<User> = MutableStateFlow(User())
     val userState: StateFlow<User> = _userState.asStateFlow()
 
@@ -41,11 +45,15 @@ class AuthViewModel(private val authUseCases: AuthUseCases): ViewModel() {
     // ===========================================================================
 
     fun resetAllStates(){
+        resetHealthState()
         resetTokenState()
         resetUserState()
         resetRegisterState()
     }
 
+    fun resetHealthState(){
+        _healthState.update { UiState.Idle }
+    }
     fun resetTokenState(){
         _tokenState.update { UiState.Idle }
     }
@@ -59,6 +67,14 @@ class AuthViewModel(private val authUseCases: AuthUseCases): ViewModel() {
     }
 
     // ===========================================================================
+
+    fun checkHealth(){
+        viewModelScope.launch {
+            _healthState.update { UiState.Loading }
+            val result = authUseCases.checkHealthUseCase()
+            _healthState.update { result.toUiState() }
+        }
+    }
 
     fun login(username: String, password: String){
         viewModelScope.launch {

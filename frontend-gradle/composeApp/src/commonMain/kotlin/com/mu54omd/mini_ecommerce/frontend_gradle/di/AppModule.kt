@@ -17,6 +17,7 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.CartUseCases
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.OrderUseCases
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.ProductUseCases
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.UserUseCases
+import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.auth.CheckHealthUseCase
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.auth.ClearTokenUseCase
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.auth.GetUserInfoUseCase
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.auth.LoginUseCase
@@ -70,13 +71,14 @@ val appModule = module {
 
     // Auth Use Cases
     single { ClearTokenUseCase(get()) }
+    single { CheckHealthUseCase(get()) }
     single { GetUserInfoUseCase(get()) }
     single { LoginUseCase(get()) }
     single { LogoutUseCase(get()) }
     single { RegisterUseCase(get()) }
     single { ValidateTokenUseCase(get()) }
 
-    single { AuthUseCases(get(), get(), get(), get(), get(), get()) }
+    single { AuthUseCases(get(), get(),get(), get(), get(), get(), get()) }
 
     // Cart Use Cases
     single { AddToCartUseCase(get(), get(), get()) }
