@@ -1,4 +1,4 @@
-package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components
+package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.products.components
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility

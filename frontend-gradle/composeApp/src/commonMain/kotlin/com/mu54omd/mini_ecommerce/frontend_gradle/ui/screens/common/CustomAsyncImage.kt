@@ -1,4 +1,4 @@
-package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components
+package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box

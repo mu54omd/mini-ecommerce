@@ -1,4 +1,4 @@
-package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens
+package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.cart
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
@@ -18,10 +18,10 @@ import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.CartResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.CartViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.CartList
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.CheckoutModal
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.EmptyPage
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.LoadingView
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.cart.components.CartList
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.cart.components.CheckoutModal
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.EmptyPage
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.LoadingView
 
 @Composable
 fun CartScreen(

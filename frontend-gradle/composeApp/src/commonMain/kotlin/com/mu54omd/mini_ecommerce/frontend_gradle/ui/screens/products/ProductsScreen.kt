@@ -1,4 +1,4 @@
-package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens
+package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.products
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.layout.Arrangement
@@ -28,12 +28,12 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.domain.model.UserRole
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.CartViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.ProductViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.EmptyPage
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.LoadingView
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.AddEditProductModal
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.AlertModal
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.DeleteModal
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.ProductList
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.EmptyPage
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.LoadingView
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.AlertModal
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.DeleteModal
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.products.components.AddEditProductModal
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.products.components.ProductList
 import frontend_gradle.composeapp.generated.resources.Res
 import frontend_gradle.composeapp.generated.resources.error_alert
 import frontend_gradle.composeapp.generated.resources.upload_image_successful_alert

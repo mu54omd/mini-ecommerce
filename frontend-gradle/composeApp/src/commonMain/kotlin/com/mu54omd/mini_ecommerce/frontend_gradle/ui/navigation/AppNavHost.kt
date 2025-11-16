@@ -59,14 +59,13 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.CartViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.OrderViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.ProductViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.AdminPanelScreen
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.CartScreen
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.LoginScreen
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.MyOrdersScreen
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.OrdersScreen
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.ProductsScreen
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.UsersScreen
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.ProductSearchBar
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.admin.AdminPanelScreen
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.cart.CartScreen
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.login.LoginScreen
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.orders.OrdersScreen
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.products.ProductsScreen
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.users.UsersScreen
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.SearchBar
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -86,7 +85,7 @@ fun AppNavHost(
 
     val navigationDestination = when (userState.role) {
         UserRole.ADMIN -> listOf(Screen.Products, Screen.Users, Screen.Orders, Screen.Admin)
-        UserRole.USER -> listOf(Screen.Products, Screen.Cart, Screen.MyOrders)
+        UserRole.USER -> listOf(Screen.Products, Screen.Cart, Screen.Orders)
         else -> listOf(Screen.Products)
     }
 
@@ -199,7 +198,7 @@ fun AppNavHost(
                     modifier = Modifier.width(100.dp).padding(end = 2.dp),
                 )
                 if (currentDestination == Screen.Products.route) {
-                    ProductSearchBar(
+                    SearchBar(
                         onQuery = { query -> productViewModel.filterProducts(query) },
                         onClearQuery = { productViewModel.refreshProducts() },
                         modifier = Modifier.weight(1f).scale(0.75f)
@@ -352,6 +351,7 @@ fun AppNavHost(
                     composable(Screen.Orders.route) {
                         OrdersScreen(
                             orderViewModel = orderViewModel,
+                            userRole = userState.role,
                             onExit = { state ->
                                 authViewModel.logout(state)
                                 orderViewModel.resetAllStates()
@@ -383,19 +383,9 @@ fun AppNavHost(
                                 cartViewModel.checkout()
                                 orderViewModel.getUserOrders()
                                 selectedDestination = 2
-                                navController.navigate(Screen.MyOrders.route) {
+                                navController.navigate(Screen.Orders.route) {
                                     popUpTo(Screen.Products.route)
                                 }
-                            }
-                        )
-                    }
-
-                    composable(Screen.MyOrders.route) {
-                        MyOrdersScreen(
-                            orderViewModel = orderViewModel,
-                            onExit = { state ->
-                                authViewModel.logout(state)
-                                orderViewModel.resetAllStates()
                             }
                         )
                     }

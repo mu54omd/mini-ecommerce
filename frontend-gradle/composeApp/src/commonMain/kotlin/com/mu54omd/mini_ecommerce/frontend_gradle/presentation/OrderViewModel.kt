@@ -46,6 +46,9 @@ class OrderViewModel(private val orderUseCases: OrderUseCases): ViewModel() {
     fun resetGroupedOrders(){
         _groupedOrders.update { UiState.Idle }
     }
+    fun resetUpdateStatusSummary(){
+        _updateStatusSummary.update { emptyList() }
+    }
 
     // ==============================================================================
 

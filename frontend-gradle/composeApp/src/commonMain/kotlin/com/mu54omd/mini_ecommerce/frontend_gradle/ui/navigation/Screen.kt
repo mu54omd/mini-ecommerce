@@ -24,7 +24,6 @@ enum class Screen(
 
     Login("login", "Login", Icons.AutoMirrored.Filled.Login, "Login Screen"),
     Cart("cart", "My Cart", Icons.Default.ShoppingCart, "User Cart Screen"),
-    MyOrders("myOrders", "My Orders", Icons.Default.ShoppingCart, "My Orders Cart Screen"),
     Users("users", "Users", Icons.Default.SwitchAccount, "Admin Users Screen"),
     Orders("orders", "Orders", Icons.Default.ShoppingBasket, "Orders Screen"),
     Admin("admin", "Admin", Icons.Default.AdminPanelSettings, "Admin Panel Screen"),

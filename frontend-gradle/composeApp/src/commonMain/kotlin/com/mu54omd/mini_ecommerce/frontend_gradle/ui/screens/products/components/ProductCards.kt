@@ -1,4 +1,4 @@
-package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components
+package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.products.components
 
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
@@ -13,9 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -28,7 +26,6 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -50,8 +47,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.Product
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.model.UserRole
-import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.ProductViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.Constants.BASE_URL
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.CustomAsyncImage
+import kotlin.collections.get
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -83,7 +81,6 @@ fun ProductCards(
                         modifier = Modifier
                             .size(250.dp)
                             .padding(8.dp)
-                            .clipToBounds()
                             .animateItem(),
                         onClick = { onProductClick(product) },
                         elevation = CardDefaults.cardElevation(4.dp)
@@ -104,7 +101,7 @@ fun ProductCards(
                                 size = 150.dp,
                                 modifier = Modifier
                                     .then(
-                                        if(enableSharedTransition){
+                                        if (enableSharedTransition) {
                                             Modifier.sharedElement(
                                                 sharedContentState = rememberSharedContentState(
                                                     key = "image_${product.id}"
@@ -112,7 +109,7 @@ fun ProductCards(
                                                 animatedVisibilityScope = animatedVisibilityScope
                                             )
                                         } else {
-                                        Modifier
+                                            Modifier
                                         }
                                     )
                                     .clip(RoundedCornerShape(10.dp))

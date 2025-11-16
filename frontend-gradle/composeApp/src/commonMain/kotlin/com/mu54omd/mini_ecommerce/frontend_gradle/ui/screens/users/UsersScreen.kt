@@ -1,4 +1,4 @@
-package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens
+package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.users
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -39,10 +39,11 @@ import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.UserResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.UserViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.EditUserModal
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.LoadingView
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.AlertModal
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components.DeleteModal
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.LoadingView
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.AlertModal
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.DeleteModal
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.users.components.EditUserModal
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.users.components.UserCart
 import frontend_gradle.composeapp.generated.resources.Res
 import frontend_gradle.composeapp.generated.resources.delete_user_successful_alert
 import frontend_gradle.composeapp.generated.resources.edit_user_successful_alert
@@ -76,102 +77,17 @@ fun UsersScreen(
             Column(Modifier.fillMaxSize().padding(16.dp)) {
                 LazyColumn {
                     items(items = usersState.data, key = { user -> user.id }) { user ->
-                        Card(
-                            modifier = Modifier.padding(4.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = if (user.role == "ADMIN") MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.tertiaryContainer
-                            )
-                        ) {
-                            Box(
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Column(modifier = Modifier.padding(12.dp).align(Alignment.TopCenter)) {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(
-                                            text = "User ID: ${user.id}",
-                                            style = MaterialTheme.typography.titleSmall,
-                                            fontWeight = FontWeight.Bold,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                        Text(
-                                            text = user.role,
-                                            style = MaterialTheme.typography.titleSmall,
-                                            fontWeight = FontWeight.Bold,
-                                            modifier = Modifier.background(
-                                                color = MaterialTheme.colorScheme.surface,
-                                                shape = RoundedCornerShape(20)
-                                            ).padding(4.dp),
-                                            color = if (user.role == "ADMIN") MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.tertiary,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                    }
-                                    Text(
-                                        text = "Username: ${user.username}",
-                                        style = MaterialTheme.typography.titleSmall,
-                                        fontStyle = FontStyle.Italic,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                    Text(
-                                        text = "Email: ${user.email}",
-                                        style = MaterialTheme.typography.titleSmall,
-                                        fontStyle = FontStyle.Italic,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                    Text(
-                                        text = "Creation date: ${user.createdAt.split("T").first()}",
-                                        style = MaterialTheme.typography.titleSmall,
-                                        fontStyle = FontStyle.Italic,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                    Text(
-                                        text = "Creation Time: ${user.createdAt.split("T").last()}",
-                                        style = MaterialTheme.typography.titleSmall,
-                                        fontStyle = FontStyle.Italic,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                }
-                                Row(
-                                    modifier = Modifier.fillMaxWidth().padding(2.dp).align(Alignment.BottomEnd),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.End
-                                ) {
-                                    IconButton(
-                                        onClick = {
-                                            editUserRequest = user
-                                            editUserModalState = true
-                                        },
-                                        modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Edit,
-                                            contentDescription = "Edit User Icon"
-                                        )
-                                    }
-                                    IconButton(
-                                        onClick = {
-                                            deleteUserModalState = true
-                                            selectedUserForDelete = user.id
-                                        },
-                                        modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Delete,
-                                            contentDescription = "Delete User Icon"
-                                        )
-                                    }
-                                }
+                        UserCart(
+                            user = user,
+                            onEditUserClick = {
+                                editUserRequest = user
+                                editUserModalState = true
+                            },
+                            onDeleteUserClick = {
+                                deleteUserModalState = true
+                                selectedUserForDelete = user.id
                             }
-                        }
+                        )
                     }
                 }
                 if(editUserModalState) {

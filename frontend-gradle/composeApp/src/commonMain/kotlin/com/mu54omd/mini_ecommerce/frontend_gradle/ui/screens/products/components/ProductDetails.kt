@@ -1,4 +1,4 @@
-package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.components
+package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.products.components
 
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
@@ -13,27 +13,16 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -42,16 +31,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.min
-import androidx.compose.ui.zIndex
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.Product
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.Constants.BASE_URL
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.CustomAsyncImage
 
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -104,17 +91,17 @@ fun ProductDetails(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(400.dp)
-                            then(
-                                if(enableSharedTransition){
+                                then (
+                                if (enableSharedTransition) {
                                     Modifier
                                         .sharedElement(
                                             sharedContentState = rememberSharedContentState(key = "image_${product.id}"),
                                             animatedVisibilityScope = animatedVisibilityScope,
                                         )
-                                }else{
+                                } else {
                                     Modifier
                                 }
-                            )
+                                )
                             .clip(
                                 RoundedCornerShape(
                                     topStart = 10.dp,
@@ -125,7 +112,7 @@ fun ProductDetails(
                             ),
                         errorTint = MaterialTheme.colorScheme.surface,
                         size = 250.dp,
-                        )
+                    )
                     Column(
                         horizontalAlignment = Alignment.Start,
                         verticalArrangement = Arrangement.Center,
@@ -169,8 +156,8 @@ fun ProductDetails(
                             .fillMaxWidth()
                             .skipToLookaheadSize()
                             .animateEnterExit(
-                                enter = fadeIn() + slideInVertically(),
-                                exit = fadeOut() + slideOutVertically()
+                                enter = fadeIn() + slideInVertically(initialOffsetY = {it}),
+                                exit = fadeOut() + slideOutVertically(targetOffsetY = {it})
                             )
                     ) {
                         Text(
