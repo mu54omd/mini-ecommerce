@@ -7,9 +7,9 @@ import androidx.compose.ui.graphics.Color
 @Composable
 fun getOrderStatusColor(status: String): Color {
     return when (status) {
-        "PAID" -> MaterialTheme.colorScheme.secondary
-        "SHIPPED" -> MaterialTheme.colorScheme.tertiary
-        "CANCELLED" -> MaterialTheme.colorScheme.error
-        else -> MaterialTheme.colorScheme.inverseSurface
+        "PAID" -> MaterialTheme.colorScheme.secondaryContainer
+        "SHIPPED" -> MaterialTheme.colorScheme.tertiaryContainer
+        "CANCELLED" -> MaterialTheme.colorScheme.errorContainer
+        else -> MaterialTheme.colorScheme.surfaceContainer
     }
 }

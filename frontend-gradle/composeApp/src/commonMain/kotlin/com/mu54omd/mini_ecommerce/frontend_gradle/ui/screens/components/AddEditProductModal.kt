@@ -89,7 +89,7 @@ fun AddEditProductModal(
             when (currentStep) {
                 ProductModalStep.FORM -> {
                     Column(
-                        verticalArrangement = Arrangement.Center,
+                        verticalArrangement = Arrangement.SpaceBetween,
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
                             .statusBarsPadding()
@@ -148,7 +148,6 @@ fun AddEditProductModal(
                                 singleLine = true,
                                 modifier = Modifier.width(170.dp)
                             )
-
                             OutlinedTextField(
                                 value = productStocks,
                                 onValueChange = { newValue ->
@@ -167,7 +166,6 @@ fun AddEditProductModal(
                                 modifier = Modifier.width(120.dp)
                             )
                         }
-                        Spacer(modifier = Modifier.height(30.dp))
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.Center,

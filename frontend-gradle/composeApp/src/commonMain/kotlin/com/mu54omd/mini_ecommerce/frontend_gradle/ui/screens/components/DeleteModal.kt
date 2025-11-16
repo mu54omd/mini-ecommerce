@@ -25,8 +25,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.style.TextAlign
@@ -66,10 +68,11 @@ fun DeleteModal(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .statusBarsPadding()
+                    .padding(start = 10.dp, end = 10.dp)
                     .width(350.dp)
                     .background(
                         color = MaterialTheme.colorScheme.surfaceBright,
-                        shape = RoundedCornerShape(5)
+                        shape = RoundedCornerShape(20)
                     )
                     .padding(10.dp)
             ) {

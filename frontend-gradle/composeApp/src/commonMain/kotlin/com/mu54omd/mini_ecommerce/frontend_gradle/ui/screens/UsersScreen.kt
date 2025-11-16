@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -77,6 +78,9 @@ fun UsersScreen(
                     items(items = usersState.data, key = { user -> user.id }) { user ->
                         Card(
                             modifier = Modifier.padding(4.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = if (user.role == "ADMIN") MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.tertiaryContainer
+                            )
                         ) {
                             Box(
                                 contentAlignment = Alignment.Center
