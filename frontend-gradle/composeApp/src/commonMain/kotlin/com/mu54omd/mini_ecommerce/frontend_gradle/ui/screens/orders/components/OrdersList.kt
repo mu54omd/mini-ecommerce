@@ -30,17 +30,22 @@ import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -109,57 +114,15 @@ fun OrdersList(
         groupedOrders.forEach { (username, orderItems) ->
             val isExpanded = expandedGroups[username] ?: false
             stickyHeader(key = "header_${username}") {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 2.dp)
-                        .clip(shape = RoundedCornerShape(10))
-                        .background(MaterialTheme.colorScheme.tertiaryContainer)
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            onClick = {
-                                onExpandedChange(
-                                    expandedGroups.toMutableMap().also { it[username] = !isExpanded }
-                                )
-                            }
+                OrderListHeader(
+                    isExpanded = isExpanded,
+                    title = username,
+                    onItemClick = {
+                        onExpandedChange(
+                            expandedGroups.toMutableMap().also { it[username] = !isExpanded }
                         )
-                        .padding(8.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = username.uppercase(),
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onTertiaryContainer
-                        )
-                        AnimatedContent(targetState = isExpanded){ state ->
-                            when(state){
-                                true -> {
-                                    Icon(
-                                        imageVector = Icons.Default.ExpandLess,
-                                        contentDescription = "Collapse Order List",
-                                        modifier = Modifier.background(
-                                            color = MaterialTheme.colorScheme.surface,
-                                            shape = RoundedCornerShape(100)
-                                        )
-                                    )
-                                }
-                                false -> {
-                                    Icon(
-                                        imageVector = Icons.Default.ExpandMore,
-                                        contentDescription = "Expand Order List",
-                                        modifier = Modifier.background(
-                                            color = MaterialTheme.colorScheme.surface,
-                                            shape = RoundedCornerShape(100)
-                                        )
-                                    )
-                                }
-                            }
-                        }
                     }
-                }
+                )
             }
             if(isExpanded){
                 items(items = orderItems, key = { order -> order.id}) { order ->
@@ -185,5 +148,63 @@ fun OrdersList(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun OrderListHeader(
+    isExpanded: Boolean,
+    title: String,
+    onItemClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 2.dp)
+            .background(MaterialTheme.colorScheme.background)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                onClick = { onItemClick() }
+            )
+            .padding(8.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = title.uppercase(),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onTertiaryContainer
+            )
+            AnimatedContent(targetState = isExpanded){ state ->
+                when(state){
+                    true -> {
+                        Icon(
+                            imageVector = Icons.Default.ExpandLess,
+                            contentDescription = "Collapse Order List",
+                            modifier = Modifier.background(
+                                color = MaterialTheme.colorScheme.surface,
+                                shape = RoundedCornerShape(100)
+                            )
+                        )
+                    }
+                    false -> {
+                        Icon(
+                            imageVector = Icons.Default.ExpandMore,
+                            contentDescription = "Expand Order List",
+                            modifier = Modifier.background(
+                                color = MaterialTheme.colorScheme.surface,
+                                shape = RoundedCornerShape(100)
+                            )
+                        )
+                    }
+                }
+            }
+        }
+        HorizontalDivider(
+            thickness = 2.dp,
+            color = MaterialTheme.colorScheme.tertiaryContainer,
+        )
     }
 }

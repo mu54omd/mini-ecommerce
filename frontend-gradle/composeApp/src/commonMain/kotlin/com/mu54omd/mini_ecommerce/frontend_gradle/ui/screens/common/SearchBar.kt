@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun SearchBar(
+    placeHolderText: String = "Search",
     onQuery: (String) -> Unit,
     onClearQuery: () -> Unit,
     modifier: Modifier = Modifier
@@ -63,7 +64,7 @@ fun SearchBar(
         maxLines = 1,
         placeholder = {
             Text(
-                "Search Products",
+                text = placeHolderText,
                 color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
                 overflow = TextOverflow.Ellipsis
             )

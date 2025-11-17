@@ -98,7 +98,7 @@ fun ProductList(
                     ) {
                         Box(
                             modifier = Modifier
-                                .weight(0.5f)
+                                .weight(0.6f)
                                 .fillMaxHeight()
                         ) {
                             ProductCards(
@@ -121,7 +121,7 @@ fun ProductList(
                         }
                         AnimatedVisibility(
                             visible = isDetailsBoxVisible,
-                            modifier = Modifier.weight(0.5f),
+                            modifier = Modifier.weight(0.4f),
                             enter = slideInHorizontally(
                                 animationSpec = tween(100),
                                 initialOffsetX = { it }

@@ -1,11 +1,13 @@
 package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BrokenImage
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -64,12 +66,26 @@ fun CustomAsyncImage(
             }
 
             is AsyncImagePainter.State.Loading -> {
-                CircularProgressIndicator(modifier = Modifier.size(64.dp))
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.fillMaxSize()
+                ){
+                    Icon(
+                        imageVector = Icons.Default.Image,
+                        contentDescription = contentDescription,
+                        modifier = Modifier.size(size)
+                    )
+                    Box(
+                        modifier = Modifier.fillMaxSize()
+                            .shimmerEffect(
+                                isLoadingCompleted = state is AsyncImagePainter.State.Success,
+                                isLightModeActive = !isSystemInDarkTheme()
+                            )
+                    )
+                }
             }
 
-            else -> {
-
-            }
+            else -> Unit
         }
     }
 }

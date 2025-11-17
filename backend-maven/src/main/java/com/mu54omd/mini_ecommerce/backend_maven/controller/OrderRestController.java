@@ -58,6 +58,20 @@ public class OrderRestController {
         return ResponseEntity.ok(OrderMapper.toDtoList(orders));
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<OrderResponse>> searchOrders(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String productName
+    ) {
+        Order.Status s;
+        try{
+            s = (status != null) ? Order.Status.valueOf(status.toUpperCase()): null;
+        }catch (IllegalArgumentException e){
+            throw new RuntimeException("Invalid order status: " + status);
+        }
+        return ResponseEntity.ok(OrderMapper.toDtoList(orderService.searchOrders(s, productName)));
+    }
+
 
 
     @GetMapping("/status/{status}")

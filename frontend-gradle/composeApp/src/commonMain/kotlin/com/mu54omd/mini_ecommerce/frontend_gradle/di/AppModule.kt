@@ -31,6 +31,7 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.cart.GetCartUse
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.cart.RemoveFromCartUseCase
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.order.GetOrdersUseCase
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.order.GetUserOrderUseCase
+import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.order.SearchOrdersUseCase
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.order.UpdateOrderStatusUseCase
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.product.AddProductUseCase
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.product.DeactivateProductUseCase
@@ -93,8 +94,9 @@ val appModule = module {
     single { GetOrdersUseCase(get(), get(), get()) }
     single { GetUserOrderUseCase(get(), get(), get()) }
     single { UpdateOrderStatusUseCase(get(), get(), get()) }
+    single { SearchOrdersUseCase(get(), get(), get()) }
 
-    single { OrderUseCases(get(), get(), get()) }
+    single { OrderUseCases(get(), get(), get(), get()) }
 
     // Product Use Cases
     single { AddProductUseCase(get(), get(), get()) }

@@ -6,5 +6,6 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.OrderResponse
 interface OrderRepository {
     suspend fun getOrders(): ApiResult<List<OrderResponse>>
     suspend fun getUserOrders(): ApiResult<List<OrderResponse>>
+    suspend fun searchOrders(status: String?, productName: String?): ApiResult<List<OrderResponse>>
     suspend fun updateOrderStatus(orderId: Long, status: String): ApiResult<OrderResponse>
 }

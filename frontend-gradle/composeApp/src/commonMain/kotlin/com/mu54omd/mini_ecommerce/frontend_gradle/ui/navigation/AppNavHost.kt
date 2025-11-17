@@ -197,12 +197,23 @@ fun AppNavHost(
                     fontWeight = FontWeight.ExtraBold,
                     modifier = Modifier.width(100.dp).padding(end = 2.dp),
                 )
-                if (currentDestination == Screen.Products.route) {
-                    SearchBar(
-                        onQuery = { query -> productViewModel.filterProducts(query) },
-                        onClearQuery = { productViewModel.refreshProducts() },
-                        modifier = Modifier.weight(1f).scale(0.75f)
-                    )
+                when(currentDestination){
+                    Screen.Products.route -> {
+                        SearchBar(
+                            placeHolderText = "Search Products",
+                            onQuery = { query -> productViewModel.filterProducts(query) },
+                            onClearQuery = { productViewModel.refreshProducts() },
+                            modifier = Modifier.weight(1f).scale(0.75f)
+                        )
+                    }
+                    Screen.Orders.route -> {
+                        SearchBar(
+                            placeHolderText = "Search Orders",
+                            onQuery = { query -> orderViewModel.searchOrders(productName = query) },
+                            onClearQuery = { orderViewModel.getGroupedOrders() },
+                            modifier = Modifier.weight(1f).scale(0.75f)
+                        )
+                    }
                 }
                 TextButton(
                     onClick = {

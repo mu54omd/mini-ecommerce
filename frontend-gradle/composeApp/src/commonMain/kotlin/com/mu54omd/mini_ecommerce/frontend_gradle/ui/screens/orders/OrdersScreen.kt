@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -20,6 +21,7 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.AlertModal
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.EmptyPage
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.LoadingView
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.orders.components.OrdersFilterChips
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.orders.components.UserOrdersList
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.orders.components.OrdersList
 
@@ -34,6 +36,7 @@ fun OrdersScreen(
     val userOrdersState = orderViewModel.userOrdersState.collectAsState().value
     val lazyListState = rememberLazyListState()
     var expandedGroups by rememberSaveable { mutableStateOf<Map<String, Boolean>>(emptyMap()) }
+    var selectedChip by rememberSaveable { mutableIntStateOf(0) }
 
 
     LaunchedEffect(Unit) {
@@ -58,6 +61,19 @@ fun OrdersScreen(
                                 expandedGroups = groupedOrders.data.keys.associateWith { false }
                             }
                         }
+                        OrdersFilterChips(
+                            selectedChip = selectedChip,
+                            onChipSelected = { index ->
+                                selectedChip = index
+                                when(index) {
+                                    0 -> { orderViewModel.getGroupedOrders() }
+                                    1 -> { orderViewModel.searchOrders("CREATED") }
+                                    2 -> { orderViewModel.searchOrders("PAID") }
+                                    3 -> { orderViewModel.searchOrders("SHIPPED") }
+                                    4 -> { orderViewModel.searchOrders("CANCELLED") }
+                                }
+                            }
+                        )
                         OrdersList(
                             lazyListState = lazyListState,
                             groupedOrders = groupedOrders.data,

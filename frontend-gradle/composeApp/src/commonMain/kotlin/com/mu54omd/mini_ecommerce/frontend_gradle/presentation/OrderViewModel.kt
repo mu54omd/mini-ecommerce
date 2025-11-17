@@ -79,6 +79,17 @@ class OrderViewModel(private val orderUseCases: OrderUseCases): ViewModel() {
         }
     }
 
+    fun searchOrders(status: String? = null, productName: String? = null){
+        viewModelScope.launch {
+            _groupedOrders.update { UiState.Loading }
+            val result = orderUseCases.searchOrdersUseCase(status, productName)
+                .map(
+                    onSuccess = { list -> list.groupBy { it.username }}
+                )
+            _groupedOrders.update { result.toUiState() }
+        }
+    }
+
     fun updateAllStatusesAndRefresh(changed: Map<Long, String>) {
         viewModelScope.launch {
             val results = mutableListOf<UpdateOrderStatusResult>()

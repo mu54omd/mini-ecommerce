@@ -8,6 +8,7 @@ import com.mu54omd.mini_ecommerce.backend_maven.repository.OrderItemRepository;
 import com.mu54omd.mini_ecommerce.backend_maven.repository.OrderRepository;
 import com.mu54omd.mini_ecommerce.backend_maven.repository.ProductRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -75,5 +76,14 @@ public class OrderService {
                 .orElseThrow(() -> new RuntimeException("Order not found."));
         order.setStatus(newStatus);
         return orderRepository.save(order);
+    }
+
+    public List<Order> searchOrders(Order.Status status, String productName) {
+        Specification<Order> spec = Specification
+                .allOf(
+                        OrderSpecifications.hasStatus(status),
+                        OrderSpecifications.hasProductName(productName)
+                );
+        return orderRepository.findAll(spec);
     }
 }
