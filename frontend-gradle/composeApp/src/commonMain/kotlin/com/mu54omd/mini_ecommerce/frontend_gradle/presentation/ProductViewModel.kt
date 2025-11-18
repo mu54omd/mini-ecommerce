@@ -138,7 +138,6 @@ class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel
             isPaginating = false
             val result = productUseCases.searchProductsUseCase(query)
             _productsState.value = result.toUiState()
-            println("state in filterProducts(): ${_productsState.value}")
         }
     }
     fun setSearchQuery(query: String?){
