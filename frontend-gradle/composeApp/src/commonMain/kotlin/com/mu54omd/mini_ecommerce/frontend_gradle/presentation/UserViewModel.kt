@@ -61,7 +61,6 @@ class UserViewModel(
             _deleteUserState.update { UiState.Loading }
             val result = userUseCases.deleteUserUseCase(userId)
             _deleteUserState.update { result.toUiState() }
-            println(deleteUserState.value)
         }
     }
 

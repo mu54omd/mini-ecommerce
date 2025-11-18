@@ -266,7 +266,6 @@ fun ProductsScreen(
                         is UiState.Loading -> {}
                         is UiState.Success -> {}
                         else -> {
-                            println(deactivateProduct.toString())
                             showAlertModalState = true
                             if (showAlertModalState) {
                                 AlertModal(

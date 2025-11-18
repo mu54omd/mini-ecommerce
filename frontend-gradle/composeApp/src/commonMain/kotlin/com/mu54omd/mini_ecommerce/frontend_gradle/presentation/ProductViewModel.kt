@@ -8,11 +8,15 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.Product
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.ProductUseCases
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.toUiState
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+@OptIn(FlowPreview::class)
 class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel() {
 
     private val _productsState = MutableStateFlow<UiState<List<Product>>>(UiState.Idle)
@@ -33,9 +37,29 @@ class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel
     private val _uploadProductImageState = MutableStateFlow<UiState<ImageUploadResponse>>(UiState.Idle)
     val uploadProductImageState = _uploadProductImageState.asStateFlow()
 
+    private val _searchQuery = MutableStateFlow<String?>(null)
 
     // ============================================================
-    fun resetAllStates(){
+    private var currentPage = 0
+    private var isLastPage = false
+    private var isPaginating = false
+    private val pageSize = 20
+
+    private val loadedProducts = mutableListOf<Product>()
+
+    init {
+        viewModelScope.launch {
+            _searchQuery
+                .debounce(300)
+                .distinctUntilChanged()
+                .collect { query ->
+                    filterProducts(query =  query)
+                }
+        }
+    }
+
+    // ============================================================
+        fun resetAllStates(){
         resetProductsState()
         resetAddProductState()
         resetEditProductState()
@@ -63,14 +87,13 @@ class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel
         _uploadProductImageState.update { UiState.Idle }
     }
 
-    // ============================================================
-
-    private var currentPage = 0
-    private var isLastPage = false
-    private var isPaginating = false
-    private val pageSize = 20
-
-    private val loadedProducts = mutableListOf<Product>()
+    private fun resetPagination() {
+        currentPage = 0
+        isLastPage = false
+        isPaginating = false
+        loadedProducts.clear()
+        _productsState.value = UiState.Loading
+    }
 
     // ============================================================
 
@@ -86,12 +109,10 @@ class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel
 
     fun loadNextPage() {
         if (isPaginating || isLastPage) return
-
         viewModelScope.launch {
             isPaginating = true
 
-            val result = productUseCases.getProductsUseCase(currentPage, pageSize)
-            when (result) {
+            when (val result = productUseCases.getProductsUseCase(currentPage, pageSize)) {
                 is ApiResult.Success -> {
                     val newProducts = result.data
                     if (newProducts.isEmpty()) isLastPage = true
@@ -107,13 +128,21 @@ class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel
         }
     }
 
-    fun filterProducts(query: String){
+    fun filterProducts(query: String?){
         viewModelScope.launch {
-            if(!query.isBlank()) {
-                val result = productUseCases.searchProductsUseCase(query)
-                _productsState.update { result.toUiState() }
+            if (query.isNullOrBlank()) {
+                refreshProducts()
+                return@launch
             }
+            isLastPage = true
+            isPaginating = false
+            val result = productUseCases.searchProductsUseCase(query)
+            _productsState.value = result.toUiState()
+            println("state in filterProducts(): ${_productsState.value}")
         }
+    }
+    fun setSearchQuery(query: String?){
+        _searchQuery.update { query }
     }
 
     fun addProduct(product: Product){

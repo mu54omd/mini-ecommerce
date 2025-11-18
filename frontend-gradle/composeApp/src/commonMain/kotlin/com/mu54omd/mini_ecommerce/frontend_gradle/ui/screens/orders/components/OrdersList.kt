@@ -141,7 +141,6 @@ fun OrdersList(
                             changedOrder[order.id] = filteredStatus
                             isStatusChanged = true
                             isOrderStatusExpanded = false
-                            println(changedOrder)
                         },
                         onOrderStatusMenuDismiss = { isOrderStatusExpanded = false }
                     )

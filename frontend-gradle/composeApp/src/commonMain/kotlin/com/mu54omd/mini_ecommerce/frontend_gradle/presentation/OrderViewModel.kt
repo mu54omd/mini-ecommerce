@@ -8,13 +8,17 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.OrderResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.OrderUseCases
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.toUiState
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+@OptIn(FlowPreview::class)
 class OrderViewModel(private val orderUseCases: OrderUseCases): ViewModel() {
     private val _userOrderState = MutableStateFlow<UiState<List<OrderResponse>>>(UiState.Idle)
     val userOrdersState = _userOrderState.asStateFlow()
@@ -29,7 +33,24 @@ class OrderViewModel(private val orderUseCases: OrderUseCases): ViewModel() {
     private val _updateStatusSummary = MutableStateFlow<List<UpdateOrderStatusResult>>(emptyList())
     val updateStatusSummary = _updateStatusSummary.asStateFlow()
 
+    private val _statusFilter = MutableStateFlow<String?>(null)
+    val statusFilter = _statusFilter.asStateFlow()
+
+    private val _searchQuery = MutableStateFlow<String?>(null)
+
     // ==============================================================================
+
+    init {
+        viewModelScope.launch {
+            _searchQuery
+                .debounce(300)
+                .distinctUntilChanged()
+                .collect { query ->
+                    searchOrders(status = statusFilter.value, productName = query)
+                }
+        }
+    }
+
     fun resetAllStates(){
         resetUserOrderState()
         resetOrdersState()
@@ -90,6 +111,14 @@ class OrderViewModel(private val orderUseCases: OrderUseCases): ViewModel() {
         }
     }
 
+    fun setStatusFilter(status: OrderStatus?){
+        _statusFilter.update { status?.name }
+    }
+
+    fun setSearchQuery(query: String?){
+        _searchQuery.update { query }
+    }
+
     fun updateAllStatusesAndRefresh(changed: Map<Long, String>) {
         viewModelScope.launch {
             val results = mutableListOf<UpdateOrderStatusResult>()
@@ -101,10 +130,11 @@ class OrderViewModel(private val orderUseCases: OrderUseCases): ViewModel() {
             }
             jobs.awaitAll()
             _updateStatusSummary.update { results }
-            println(updateStatusSummary.value)
             getGroupedOrders()
         }
     }
+
+
     private suspend fun updateOrderStatusSuspended(
         orderId: Long, newStatus: String
     ): ApiResult<OrderResponse>{
@@ -116,3 +146,10 @@ data class UpdateOrderStatusResult(
     val orderId: Long,
     val result: UiState<OrderResponse>,
 )
+
+enum class OrderStatus{
+    CREATED,
+    PAID,
+    SHIPPED,
+    CANCELLED
+}

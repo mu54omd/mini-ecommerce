@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.OrderResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.model.UserRole
+import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.OrderStatus
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.OrderViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.AlertModal
@@ -66,11 +67,26 @@ fun OrdersScreen(
                             onChipSelected = { index ->
                                 selectedChip = index
                                 when(index) {
-                                    0 -> { orderViewModel.getGroupedOrders() }
-                                    1 -> { orderViewModel.searchOrders("CREATED") }
-                                    2 -> { orderViewModel.searchOrders("PAID") }
-                                    3 -> { orderViewModel.searchOrders("SHIPPED") }
-                                    4 -> { orderViewModel.searchOrders("CANCELLED") }
+                                    0 -> {
+                                        orderViewModel.setStatusFilter(null)
+                                        orderViewModel.getGroupedOrders()
+                                    }
+                                    1 -> {
+                                        orderViewModel.setStatusFilter(OrderStatus.CREATED)
+                                        orderViewModel.searchOrders(OrderStatus.CREATED.name)
+                                    }
+                                    2 -> {
+                                        orderViewModel.setStatusFilter(OrderStatus.PAID)
+                                        orderViewModel.searchOrders(OrderStatus.PAID.name)
+                                    }
+                                    3 -> {
+                                        orderViewModel.setStatusFilter(OrderStatus.SHIPPED)
+                                        orderViewModel.searchOrders(OrderStatus.SHIPPED.name)
+                                    }
+                                    4 -> {
+                                        orderViewModel.setStatusFilter(OrderStatus.CANCELLED)
+                                        orderViewModel.searchOrders(OrderStatus.CANCELLED.name)
+                                    }
                                 }
                             }
                         )
@@ -82,6 +98,7 @@ fun OrdersScreen(
                             onCancelChangesClick = { orderViewModel.getGroupedOrders() },
                             onConfirmChangesClick = { changedOrders ->
                                 orderViewModel.updateAllStatusesAndRefresh(changedOrders)
+                                selectedChip = 0
                             }
                         )
                         if (updateStatusSummary.isNotEmpty()) {

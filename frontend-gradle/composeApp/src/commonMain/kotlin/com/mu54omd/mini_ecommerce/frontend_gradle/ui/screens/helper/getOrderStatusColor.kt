@@ -10,6 +10,7 @@ fun getOrderStatusColor(status: String): Color {
         "PAID" -> MaterialTheme.colorScheme.secondaryContainer
         "SHIPPED" -> MaterialTheme.colorScheme.tertiaryContainer
         "CANCELLED" -> MaterialTheme.colorScheme.errorContainer
-        else -> MaterialTheme.colorScheme.surfaceContainer
+        "CREATED" -> MaterialTheme.colorScheme.primaryContainer
+        else -> MaterialTheme.colorScheme.surfaceVariant
     }
 }

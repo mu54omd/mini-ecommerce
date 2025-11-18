@@ -82,7 +82,6 @@ fun AppNavHost(
     val userState = authViewModel.userState.collectAsState().value
     val cartState = cartViewModel.cartState.collectAsState().value
     val cartItemCount by remember(cartState) { derivedStateOf { if (cartState is UiState.Success) cartState.data.items.size else 0 } }
-
     val navigationDestination = when (userState.role) {
         UserRole.ADMIN -> listOf(Screen.Products, Screen.Users, Screen.Orders, Screen.Admin)
         UserRole.USER -> listOf(Screen.Products, Screen.Cart, Screen.Orders)
@@ -201,16 +200,16 @@ fun AppNavHost(
                     Screen.Products.route -> {
                         SearchBar(
                             placeHolderText = "Search Products",
-                            onQuery = { query -> productViewModel.filterProducts(query) },
-                            onClearQuery = { productViewModel.refreshProducts() },
+                            onQuery = { query -> productViewModel.setSearchQuery(query.ifBlank { null }) },
+                            onClearQuery = { productViewModel.setSearchQuery(null) },
                             modifier = Modifier.weight(1f).scale(0.75f)
                         )
                     }
                     Screen.Orders.route -> {
                         SearchBar(
                             placeHolderText = "Search Orders",
-                            onQuery = { query -> orderViewModel.searchOrders(productName = query) },
-                            onClearQuery = { orderViewModel.getGroupedOrders() },
+                            onQuery = { query -> orderViewModel.setSearchQuery(query = query) },
+                            onClearQuery = { orderViewModel.setSearchQuery(query = null) },
                             modifier = Modifier.weight(1f).scale(0.75f)
                         )
                     }
