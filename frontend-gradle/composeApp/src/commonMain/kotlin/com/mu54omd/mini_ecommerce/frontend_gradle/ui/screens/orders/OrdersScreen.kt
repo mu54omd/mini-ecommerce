@@ -28,6 +28,7 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.orders.components.O
 
 @Composable
 fun OrdersScreen(
+    isCompact: Boolean = false,
     orderViewModel: OrderViewModel,
     userRole: UserRole,
     onExit: (UiState<*>) -> Unit
@@ -63,6 +64,7 @@ fun OrdersScreen(
                             }
                         }
                         OrdersFilterChips(
+                            isCompact = isCompact,
                             selectedChip = selectedChip,
                             onChipSelected = { index ->
                                 selectedChip = index

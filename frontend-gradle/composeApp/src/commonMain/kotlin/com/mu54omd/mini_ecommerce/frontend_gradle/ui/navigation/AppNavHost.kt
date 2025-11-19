@@ -43,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.font.FontWeight
@@ -109,9 +110,11 @@ fun AppNavHost(
     }
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination?.route
 
+    val isLogin = currentDestination == Screen.Login.route
+
     LaunchedEffect(tokenState) {
         if (tokenState is UiState.Error) {
-            if(currentDestination != Screen.Login.route) {
+            if (currentDestination != Screen.Login.route) {
                 navController.navigate(Screen.Login.route) {
                     popUpTo(Screen.Login.route) { inclusive = true }
                     launchSingleTop = true
@@ -119,18 +122,21 @@ fun AppNavHost(
             }
         }
     }
-    Scaffold(
-        bottomBar = {
-            BoxWithConstraints {
-                val isWideScreen by remember(maxWidth) {
-                    derivedStateOf { maxWidth > 840.dp }
-                }
-                val isLogin = currentDestination == Screen.Login.route
+    BoxWithConstraints {
+        val isWideScreen by remember(maxWidth) {
+            derivedStateOf { maxWidth > 840.dp }
+        }
+        val isCompactScreen by remember(maxWidth) {
+            derivedStateOf { maxWidth < 450.dp }
+        }
+        Scaffold(
+            bottomBar = {
                 AnimatedContent(
                     targetState = !isWideScreen,
                     transitionSpec = {
                         slideIntoContainer(
-                            towards = AnimatedContentTransitionScope.SlideDirection.Up) togetherWith slideOutOfContainer(
+                            towards = AnimatedContentTransitionScope.SlideDirection.Up
+                        ) togetherWith slideOutOfContainer(
                             towards = AnimatedContentTransitionScope.SlideDirection.Down
                         )
                     },
@@ -173,76 +179,82 @@ fun AppNavHost(
                                             tint = iconColor
                                         )
                                     },
-                                    modifier = Modifier.pointerHoverIcon(if(!isLogin) PointerIcon.Hand else PointerIcon.Default),
+                                    modifier = Modifier.pointerHoverIcon(if (!isLogin) PointerIcon.Hand else PointerIcon.Default),
                                     enabled = !isLogin
                                 )
                             }
                         }
                     }
                 }
-            }
-        },
-        topBar = {
-            val isLogin = currentDestination == Screen.Login.route
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 30.dp).height(64.dp)
-                    .alpha(if (isLogin) 0f else 1f),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = currentDestination?.uppercase() ?: "",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.ExtraBold,
-                    modifier = Modifier.width(100.dp).padding(end = 2.dp),
-                )
-                when(currentDestination){
-                    Screen.Products.route -> {
-                        SearchBar(
-                            placeHolderText = "Search Products",
-                            onQuery = { query -> productViewModel.setSearchQuery(query.ifBlank { null }) },
-                            onClearQuery = { productViewModel.setSearchQuery(null) },
-                            modifier = Modifier.weight(1f).scale(0.75f)
-                        )
-                    }
-                    Screen.Orders.route -> {
-                        SearchBar(
-                            placeHolderText = "Search Orders",
-                            onQuery = { query -> orderViewModel.setSearchQuery(query = query) },
-                            onClearQuery = { orderViewModel.setSearchQuery(query = null) },
-                            modifier = Modifier.weight(1f).scale(0.75f)
-                        )
-                    }
-                }
-                TextButton(
-                    onClick = {
-                        authViewModel.logout()
-                        navController.navigate(Screen.Login.route) {
-                            popUpTo(navController.graph.id) {
-                                inclusive = true
-                            }
-                            launchSingleTop = true
-                        }
-                        selectedDestination = navigationDestination.indices.first
-                    },
-                    modifier = Modifier.pointerHoverIcon(if(!isLogin) PointerIcon.Hand else PointerIcon.Default),
-                    enabled = !isLogin
+
+            },
+            topBar = {
+                Row(
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(start = 20.dp, end = 20.dp, top = 30.dp).height(64.dp)
+                        .graphicsLayer{
+                            alpha = if (isLogin) 0f else 1f
+                        },
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.Logout,
-                        contentDescription = "Logout",
+                    Text(
+                        text = currentDestination?.uppercase() ?: "",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.ExtraBold,
+                        modifier = Modifier.width(100.dp),
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = "Logout", overflow = TextOverflow.Ellipsis, maxLines = 1)
+                    when (currentDestination) {
+                        Screen.Products.route -> {
+                            SearchBar(
+                                placeHolderText = "Search Products",
+                                onQuery = { query -> productViewModel.setSearchQuery(query.ifBlank { null }) },
+                                onClearQuery = { productViewModel.setSearchQuery(null) },
+                                modifier = Modifier.weight(1f).scale(0.75f)
+                            )
+                        }
+                        Screen.Orders.route -> {
+                            SearchBar(
+                                placeHolderText = "Search Orders",
+                                onQuery = { query -> orderViewModel.setSearchQuery(query = query) },
+                                onClearQuery = { orderViewModel.setSearchQuery(query = null) },
+                                modifier = Modifier.weight(1f).scale(0.75f)
+                            )
+                        }
+                    }
+                    TextButton(
+                        onClick = {
+                            authViewModel.logout()
+                            navController.navigate(Screen.Login.route) {
+                                popUpTo(navController.graph.id) {
+                                    inclusive = true
+                                }
+                                launchSingleTop = true
+                            }
+                            selectedDestination = navigationDestination.indices.first
+                        },
+                        modifier = Modifier.pointerHoverIcon(if (!isLogin) PointerIcon.Hand else PointerIcon.Default),
+                        enabled = !isLogin
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.Logout,
+                            contentDescription = "Logout",
+                        )
+                        AnimatedContent(targetState = isCompactScreen) { state ->
+                            if(!state) {
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "Logout",
+                                    overflow = TextOverflow.Ellipsis,
+                                    maxLines = 1
+                                )
+                            }
+                        }
+                    }
                 }
             }
-        }
-    ) { contentPadding ->
-        BoxWithConstraints {
-            val isWideScreen by remember(maxWidth) {
-                derivedStateOf { maxWidth > 840.dp }
-            }
-            val isLogin = currentDestination == Screen.Login.route
+        ) { contentPadding ->
+
             Row(
                 modifier = Modifier.padding(contentPadding)
             ) {
@@ -291,8 +303,9 @@ fun AppNavHost(
                                             tint = iconColor
                                         )
                                     },
-                                    modifier = Modifier.pointerHoverIcon(if(!isLogin) PointerIcon.Hand else PointerIcon.Default),
-                                    enabled = !isLogin                                )
+                                    modifier = Modifier.pointerHoverIcon(if (!isLogin) PointerIcon.Hand else PointerIcon.Default),
+                                    enabled = !isLogin
+                                )
                             }
                         }
                     }
@@ -360,6 +373,7 @@ fun AppNavHost(
 
                     composable(Screen.Orders.route) {
                         OrdersScreen(
+                            isCompact = isCompactScreen,
                             orderViewModel = orderViewModel,
                             userRole = userState.role,
                             onExit = { state ->
@@ -403,6 +417,7 @@ fun AppNavHost(
             }
         }
     }
+
 }
 
 

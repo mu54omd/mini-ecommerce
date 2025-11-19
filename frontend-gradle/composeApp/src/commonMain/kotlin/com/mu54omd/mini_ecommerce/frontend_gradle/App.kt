@@ -1,13 +1,12 @@
 package com.mu54omd.mini_ecommerce.frontend_gradle
 
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.navigation.AppNavHost
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.MiniECommerceTheme
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.navigation.AppNavHost
 
 @Composable
 fun App() {
-    MiniECommerceTheme() {
+    MiniECommerceTheme(darkTheme = false) {
         AppNavHost()
     }
 }

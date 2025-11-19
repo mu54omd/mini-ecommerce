@@ -1,11 +1,17 @@
 package com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
+
+@Immutable
+data class ExtendedColorScheme(
+    val quaternary: ColorFamily,
+    val quinary: ColorFamily,
+)
 
 private val lightScheme = lightColorScheme(
     primary = primaryLight,
@@ -235,6 +241,96 @@ private val highContrastDarkColorScheme = darkColorScheme(
     surfaceContainerHighest = surfaceContainerHighestDarkHighContrast,
 )
 
+val extendedLight = ExtendedColorScheme(
+  quaternary = ColorFamily(
+      quaternaryLight,
+      onQuaternaryLight,
+      quaternaryContainerLight,
+      onQuaternaryContainerLight,
+  ),
+  quinary = ColorFamily(
+      quinaryLight,
+      onQuinaryLight,
+      quinaryContainerLight,
+      onQuinaryContainerLight,
+  ),
+)
+
+val extendedDark = ExtendedColorScheme(
+  quaternary = ColorFamily(
+      quaternaryDark,
+      onQuaternaryDark,
+      quaternaryContainerDark,
+      onQuaternaryContainerDark,
+  ),
+  quinary = ColorFamily(
+      quinaryDark,
+      onQuinaryDark,
+      quinaryContainerDark,
+      onQuinaryContainerDark,
+  ),
+)
+
+val extendedLightMediumContrast = ExtendedColorScheme(
+  quaternary = ColorFamily(
+      quaternaryLightMediumContrast,
+      onQuaternaryLightMediumContrast,
+      quaternaryContainerLightMediumContrast,
+      onQuaternaryContainerLightMediumContrast,
+  ),
+  quinary = ColorFamily(
+      quinaryLightMediumContrast,
+      onQuinaryLightMediumContrast,
+      quinaryContainerLightMediumContrast,
+      onQuinaryContainerLightMediumContrast,
+  ),
+)
+
+val extendedLightHighContrast = ExtendedColorScheme(
+  quaternary = ColorFamily(
+      quaternaryLightHighContrast,
+      onQuaternaryLightHighContrast,
+      quaternaryContainerLightHighContrast,
+      onQuaternaryContainerLightHighContrast,
+  ),
+  quinary = ColorFamily(
+      quinaryLightHighContrast,
+      onQuinaryLightHighContrast,
+      quinaryContainerLightHighContrast,
+      onQuinaryContainerLightHighContrast,
+  ),
+)
+
+val extendedDarkMediumContrast = ExtendedColorScheme(
+  quaternary = ColorFamily(
+      quaternaryDarkMediumContrast,
+      onQuaternaryDarkMediumContrast,
+      quaternaryContainerDarkMediumContrast,
+      onQuaternaryContainerDarkMediumContrast,
+  ),
+  quinary = ColorFamily(
+      quinaryDarkMediumContrast,
+      onQuinaryDarkMediumContrast,
+      quinaryContainerDarkMediumContrast,
+      onQuinaryContainerDarkMediumContrast,
+  ),
+)
+
+val extendedDarkHighContrast = ExtendedColorScheme(
+  quaternary = ColorFamily(
+      quaternaryDarkHighContrast,
+      onQuaternaryDarkHighContrast,
+      quaternaryContainerDarkHighContrast,
+      onQuaternaryContainerDarkHighContrast,
+  ),
+  quinary = ColorFamily(
+      quinaryDarkHighContrast,
+      onQuinaryDarkHighContrast,
+      quinaryContainerDarkHighContrast,
+      onQuinaryContainerDarkHighContrast,
+  ),
+)
+
 @Immutable
 data class ColorFamily(
     val color: Color,
@@ -255,7 +351,11 @@ fun MiniECommerceTheme(
     content: @Composable() () -> Unit
 ) {
   val colorScheme = when {
-
+//      dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+//          val context = LocalContext.current
+//          if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+//      }
+      
       darkTheme -> darkScheme
       else -> lightScheme
   }
