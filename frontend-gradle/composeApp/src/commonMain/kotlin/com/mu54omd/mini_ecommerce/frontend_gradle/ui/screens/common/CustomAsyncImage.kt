@@ -84,7 +84,6 @@ fun CustomAsyncImage(
                     )
                 }
             }
-
             else -> Unit
         }
     }

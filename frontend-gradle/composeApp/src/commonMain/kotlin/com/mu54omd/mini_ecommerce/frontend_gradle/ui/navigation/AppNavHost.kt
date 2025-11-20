@@ -67,6 +67,8 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.orders.OrdersScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.products.ProductsScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.users.UsersScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.SearchBar
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.MiniECommerceTheme
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.extendedLight
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -144,7 +146,7 @@ fun AppNavHost(
                     if (state) {
                         NavigationBar(
                             modifier = Modifier.alpha(if (isLogin) 0f else 1f),
-                            windowInsets = NavigationBarDefaults.windowInsets
+                            windowInsets = NavigationBarDefaults.windowInsets,
                         ) {
                             navigationDestination.forEachIndexed { index, destination ->
                                 NavigationBarItem(

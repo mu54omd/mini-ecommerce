@@ -6,8 +6,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -16,6 +18,7 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -37,6 +40,7 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.products.components
 import frontend_gradle.composeapp.generated.resources.Res
 import frontend_gradle.composeapp.generated.resources.error_alert
 import frontend_gradle.composeapp.generated.resources.upload_image_successful_alert
+import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.dialogs.FileKitMode
 import io.github.vinceglb.filekit.dialogs.FileKitType
 import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
@@ -45,7 +49,7 @@ import io.github.vinceglb.filekit.readBytes
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 
-@OptIn(ExperimentalSharedTransitionApi::class)
+@OptIn(ExperimentalSharedTransitionApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ProductsScreen(
     isWideScreen: Boolean = false,
@@ -75,6 +79,7 @@ fun ProductsScreen(
             )
         )
     }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     var selectedProductIdForDelete by remember { mutableLongStateOf(-1) }
 
@@ -86,27 +91,26 @@ fun ProductsScreen(
     val scope = rememberCoroutineScope()
     val lazyGridState = rememberLazyGridState()
 
-    val launcher = rememberFilePickerLauncher(
+    var tempImageFile by remember{mutableStateOf<PlatformFile?>(null)}
+
+    val addProductLauncher = rememberFilePickerLauncher(
         type = FileKitType.Image,
-        mode = FileKitMode.Single
+        mode = FileKitMode.Single,
+        title = "Add Product Image"
     ) { file ->
+        addProductModalState = true
         file?.let {
-            scope.launch {
-                if (addProductState is UiState.Success) {
-                    productViewModel.uploadProductImage(
-                        productId = addProductState.data.id!!,
-                        fileName = file.name,
-                        byteArray = file.readBytes()
-                    )
-                }
-                if (editProductState is UiState.Success) {
-                    productViewModel.uploadProductImage(
-                        productId = editProductState.data.id!!,
-                        fileName = file.name,
-                        byteArray = file.readBytes()
-                    )
-                }
-            }
+            tempImageFile = file
+        }
+    }
+    val editProductLauncher = rememberFilePickerLauncher(
+        type = FileKitType.Image,
+        mode = FileKitMode.Single,
+        title = "Edit Product Image"
+    ) { file ->
+        editProductModalState = true
+        file?.let {
+            tempImageFile = file
         }
     }
     LaunchedEffect(Unit) {
@@ -131,7 +135,6 @@ fun ProductsScreen(
             if (productsState.data.isEmpty()) {
                 EmptyPage("Oops!", "No product found!")
             } else {
-
                 Column(
                     verticalArrangement = Arrangement.Top,
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -167,10 +170,22 @@ fun ProductsScreen(
                     )
                     if (addProductModalState) {
                         AddEditProductModal(
-                            productState = addProductState,
+                            productImage = tempImageFile,
+                            sheetState = sheetState,
+                            product = selectedProduct,
                             onCancelClick = {
-                                addProductModalState = false
-                                productViewModel.resetAddProductState()
+                                scope.launch {
+                                    sheetState.hide()
+                                    tempImageFile = null
+                                    selectedProduct = Product(
+                                        name = "",
+                                        description = "",
+                                        price = 0.0,
+                                        stock = 0
+                                    )
+                                    addProductModalState = false
+                                    productViewModel.resetAddProductState()
+                                }
                             },
                             onConfirmClick = { name, description, price, stocks ->
                                 productViewModel.addProduct(
@@ -181,20 +196,41 @@ fun ProductsScreen(
                                         stock = stocks
                                     )
                                 )
-                            },
-                            onUploadImageClick = {
                                 addProductModalState = false
-                                launcher.launch()
+                            },
+                            onUploadImageClick = { name, description, price, stocks ->
+                                scope.launch {
+                                    sheetState.hide()
+                                    addProductModalState = false
+                                    selectedProduct = Product(
+                                        name = name,
+                                        description = description,
+                                        price = price,
+                                        stock = stocks
+                                    )
+                                }
+                                addProductLauncher.launch()
                             }
                         )
                     }
                     if (editProductModalState) {
                         AddEditProductModal(
+                            productImage = tempImageFile,
                             product = selectedProduct,
-                            productState = editProductState,
+                            sheetState = sheetState,
                             onCancelClick = {
-                                editProductModalState = false
-                                productViewModel.resetEditProductState()
+                                scope.launch {
+                                    sheetState.hide()
+                                    editProductModalState = false
+                                    tempImageFile = null
+                                    selectedProduct = Product(
+                                        name = "",
+                                        description = "",
+                                        price = 0.0,
+                                        stock = 0
+                                    )
+                                    productViewModel.resetEditProductState()
+                                }
                             },
                             onConfirmClick = { name, description, price, stocks ->
                                 productViewModel.editProduct(
@@ -206,10 +242,20 @@ fun ProductsScreen(
                                         stock = stocks
                                     )
                                 )
-                            },
-                            onUploadImageClick = {
                                 editProductModalState = false
-                                launcher.launch()
+                            },
+                            onUploadImageClick = { name, description, price, stocks ->
+                                scope.launch {
+                                    sheetState.hide()
+                                    editProductModalState = false
+                                    selectedProduct = Product(
+                                        name = name,
+                                        description = description,
+                                        price = price,
+                                        stock = stocks
+                                    )
+                                }
+                                editProductLauncher.launch()
                             }
                         )
                     }
@@ -230,7 +276,17 @@ fun ProductsScreen(
                     when (addProductState) {
                         is UiState.Idle -> {}
                         is UiState.Loading -> {}
-                        is UiState.Success -> {}
+                        is UiState.Success -> {
+                            scope.launch {
+                                tempImageFile?.let {
+                                    productViewModel.uploadProductImage(
+                                        productId = addProductState.data.id!!,
+                                        fileName = it.name,
+                                        byteArray = it.readBytes()
+                                    )
+                                }
+                            }
+                        }
                         else -> {
                             showAlertModalState = true
                             if (showAlertModalState) {
@@ -247,7 +303,17 @@ fun ProductsScreen(
                     when (editProductState) {
                         is UiState.Idle -> {}
                         is UiState.Loading -> {}
-                        is UiState.Success -> {}
+                        is UiState.Success -> {
+                            scope.launch {
+                                tempImageFile?.let {
+                                    productViewModel.uploadProductImage(
+                                        productId = editProductState.data.id!!,
+                                        fileName = it.name,
+                                        byteArray = it.readBytes()
+                                    )
+                                }
+                            }
+                        }
                         else -> {
                             showAlertModalState = true
                             if (showAlertModalState) {
@@ -295,7 +361,6 @@ fun ProductsScreen(
                                 )
                             }
                         }
-
                         else -> {
                             showAlertModalState = true
                             if (showAlertModalState) {
@@ -312,7 +377,6 @@ fun ProductsScreen(
                 }
             }
         }
-
         else -> onExit(productsState)
     }
 }

@@ -99,10 +99,7 @@ class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel
 
     fun refreshProducts(){
         viewModelScope.launch {
-            currentPage = 0
-            isLastPage = false
-            loadedProducts.clear()
-            _productsState.update { UiState.Loading }
+            resetPagination()
             loadNextPage()
         }
     }
@@ -111,7 +108,6 @@ class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel
         if (isPaginating || isLastPage) return
         viewModelScope.launch {
             isPaginating = true
-
             when (val result = productUseCases.getProductsUseCase(currentPage, pageSize)) {
                 is ApiResult.Success -> {
                     val newProducts = result.data
@@ -128,6 +124,9 @@ class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel
         }
     }
 
+    fun setSearchQuery(query: String?){
+        _searchQuery.update { query }
+    }
     fun filterProducts(query: String?){
         viewModelScope.launch {
             if (query.isNullOrBlank()) {
@@ -140,20 +139,31 @@ class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel
             _productsState.value = result.toUiState()
         }
     }
-    fun setSearchQuery(query: String?){
-        _searchQuery.update { query }
-    }
 
     fun addProduct(product: Product){
         viewModelScope.launch {
             _addProductState.update { UiState.Loading }
             val result = productUseCases.addProductUseCase(product)
             _addProductState.update { result.toUiState() }
-            if(addProductState.value is UiState.Success){
-                refreshProducts()
-            }
         }
     }
+
+    fun editProduct(product: Product){
+        viewModelScope.launch {
+            _editProductState.update { UiState.Loading }
+            val result = productUseCases.editProductUseCase(product)
+            _editProductState.update { result.toUiState() }
+        }
+    }
+
+    fun uploadProductImage(productId: Long, fileName: String, byteArray: ByteArray){
+        viewModelScope.launch {
+            _uploadProductImageState.update { UiState.Loading }
+            val result = productUseCases.uploadProductImageUseCase(productId, fileName, byteArray)
+            _uploadProductImageState.update { result.toUiState() }
+        }
+    }
+
 
     fun deleteProduct(productId: Long){
         viewModelScope.launch {
@@ -170,28 +180,6 @@ class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel
             val result = productUseCases.deactivateProductUseCase(productId)
             _deactivateProduct.update { result.toUiState() }
             refreshProducts()
-        }
-    }
-
-    fun editProduct(product: Product){
-        viewModelScope.launch {
-            _editProductState.update { UiState.Loading }
-            val result = productUseCases.editProductUseCase(product)
-            _editProductState.update { result.toUiState() }
-            if(editProductState.value is UiState.Success){
-                refreshProducts()
-            }
-        }
-    }
-
-    fun uploadProductImage(productId: Long, fileName: String, byteArray: ByteArray){
-        viewModelScope.launch {
-            _uploadProductImageState.update { UiState.Loading }
-            val result = productUseCases.uploadProductImageUseCase(productId, fileName, byteArray)
-            _uploadProductImageState.update { result.toUiState() }
-            if(uploadProductImageState.value is UiState.Success){
-                refreshProducts()
-            }
         }
     }
 
