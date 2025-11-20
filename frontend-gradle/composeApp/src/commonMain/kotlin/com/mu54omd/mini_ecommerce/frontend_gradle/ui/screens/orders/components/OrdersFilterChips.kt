@@ -18,6 +18,8 @@ import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.LocalShipping
 import androidx.compose.material.icons.filled.Paid
 import androidx.compose.material.icons.filled.SelectAll
+import androidx.compose.material.icons.filled.Shop
+import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
@@ -44,7 +46,7 @@ fun OrdersFilterChips(
 ) {
     val labels = listOf(
         FilterChipItem( "ALL",Icons.Default.SelectAll, "Show All Orders"),
-        FilterChipItem( "CREATED",Icons.Default.Create,"Show Created Orders") ,
+        FilterChipItem( "CREATED",Icons.Default.ShoppingBag,"Show Created Orders") ,
         FilterChipItem("PAID", Icons.Default.Paid,"Show Paid Orders"),
         FilterChipItem("SHIPPED",Icons.Default.LocalShipping,"Show Shipped Orders"),
         FilterChipItem("CANCELLED",Icons.Default.Cancel,"Show Cancelled Orders")

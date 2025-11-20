@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -153,11 +154,11 @@ fun EditUserModal(
 
                     ) {
                         Icon(
-                            imageVector = Icons.Default.CheckCircle,
+                            imageVector = Icons.Default.Save,
                             contentDescription = "Confirm Edit"
                         )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text(text = "Confirm")
+                        Text(text = "Save")
                     }
                 }
             }
