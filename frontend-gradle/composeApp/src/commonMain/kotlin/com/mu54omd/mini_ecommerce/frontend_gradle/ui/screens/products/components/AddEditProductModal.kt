@@ -1,8 +1,7 @@
 package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.products.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,7 +17,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,26 +30,27 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.Product
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.ExtendedColorScheme
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.ExtendedTheme
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.LocalExtendedColorScheme
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.name
-import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -69,6 +68,20 @@ fun AddEditProductModal(
     var productDescription by rememberSaveable { mutableStateOf(product.description) }
     var productPrice by rememberSaveable { mutableStateOf(product.price.toString()) }
     var productStocks by rememberSaveable { mutableStateOf(product.stock.toString()) }
+
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val secondaryColor = MaterialTheme.colorScheme.secondary
+    val tertiaryColor = MaterialTheme.colorScheme.tertiary
+    val errorColor = MaterialTheme.colorScheme.error
+    val inversePrimaryColor = MaterialTheme.colorScheme.inversePrimary
+    val quaternaryColor = ExtendedTheme.colorScheme.quaternary.color
+    val quinaryColor = ExtendedTheme.colorScheme.quinary.color
+
+    val lineBrush = remember {
+        Brush.linearGradient(
+            colors = listOf(primaryColor, secondaryColor, tertiaryColor, errorColor, inversePrimaryColor, quinaryColor, quaternaryColor).shuffled()
+        )
+    }
 
     ModalBottomSheet(
         onDismissRequest = onCancelClick,
@@ -92,6 +105,7 @@ fun AddEditProductModal(
                     .statusBarsPadding()
                     .width(350.dp)
                     .height(500.dp)
+                    .border(width = 2.dp, brush = lineBrush, shape = RoundedCornerShape(5))
                     .background(
                         color = MaterialTheme.colorScheme.surfaceBright,
                         shape = RoundedCornerShape(5)
@@ -109,7 +123,8 @@ fun AddEditProductModal(
                     },
                     singleLine = true,
                     shape = RoundedCornerShape(30),
-                    modifier = Modifier.width(300.dp)
+                    modifier = Modifier.width(300.dp),
+                    textStyle = TextStyle(brush = lineBrush)
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 OutlinedTextField(
@@ -125,6 +140,7 @@ fun AddEditProductModal(
                     shape = RoundedCornerShape(10),
                     maxLines = 5,
                     singleLine = false,
+                    textStyle = TextStyle(brush = lineBrush)
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Row(
@@ -148,7 +164,8 @@ fun AddEditProductModal(
                         },
                         singleLine = true,
                         shape = RoundedCornerShape(30),
-                        modifier = Modifier.width(170.dp)
+                        modifier = Modifier.width(170.dp),
+                        textStyle = TextStyle(brush = lineBrush)
                     )
                     OutlinedTextField(
                         value = productStocks,
@@ -166,7 +183,8 @@ fun AddEditProductModal(
                         },
                         singleLine = true,
                         modifier = Modifier.width(120.dp),
-                        shape = RoundedCornerShape(30)
+                        shape = RoundedCornerShape(30),
+                        textStyle = TextStyle(brush = lineBrush)
                     )
                 }
                 Spacer(modifier = Modifier.height(12.dp))
@@ -195,7 +213,8 @@ fun AddEditProductModal(
                             )
                         }
                     },
-                    shape = RoundedCornerShape(30)
+                    shape = RoundedCornerShape(30),
+                    textStyle = TextStyle(brush = lineBrush)
                 )
                 Row(
                     verticalAlignment = Alignment.CenterVertically,

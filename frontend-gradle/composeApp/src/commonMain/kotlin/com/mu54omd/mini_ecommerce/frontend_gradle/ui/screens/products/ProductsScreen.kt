@@ -248,12 +248,6 @@ fun ProductsScreen(
                                 scope.launch {
                                     sheetState.hide()
                                     editProductModalState = false
-                                    selectedProduct = Product(
-                                        name = name,
-                                        description = description,
-                                        price = price,
-                                        stock = stocks
-                                    )
                                 }
                                 editProductLauncher.launch()
                             }

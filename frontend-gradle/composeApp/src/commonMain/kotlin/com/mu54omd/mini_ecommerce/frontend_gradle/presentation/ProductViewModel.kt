@@ -145,6 +145,9 @@ class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel
             _addProductState.update { UiState.Loading }
             val result = productUseCases.addProductUseCase(product)
             _addProductState.update { result.toUiState() }
+            if(result is ApiResult.Success){
+                refreshProducts()
+            }
         }
     }
 
@@ -153,6 +156,9 @@ class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel
             _editProductState.update { UiState.Loading }
             val result = productUseCases.editProductUseCase(product)
             _editProductState.update { result.toUiState() }
+            if(result is ApiResult.Success){
+                refreshProducts()
+            }
         }
     }
 
@@ -165,14 +171,14 @@ class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel
     }
 
 
-    fun deleteProduct(productId: Long){
-        viewModelScope.launch {
-            _deleteProductState.update { UiState.Loading }
-            val result = productUseCases.deleteProductUseCase(productId)
-            _deleteProductState.update { result.toUiState() }
-            refreshProducts()
-        }
-    }
+//    fun deleteProduct(productId: Long){
+//        viewModelScope.launch {
+//            _deleteProductState.update { UiState.Loading }
+//            val result = productUseCases.deleteProductUseCase(productId)
+//            _deleteProductState.update { result.toUiState() }
+//            refreshProducts()
+//        }
+//    }
 
     fun deactivateProduct(productId: Long){
         viewModelScope.launch {

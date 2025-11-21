@@ -7,7 +7,9 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -43,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
@@ -192,36 +195,48 @@ fun AppNavHost(
             },
             topBar = {
                 Row(
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(start = 20.dp, end = 20.dp, top = 30.dp).height(64.dp)
-                        .graphicsLayer{
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 20.dp, end = 20.dp, top = 30.dp)
+                        .height(64.dp)
+                        .graphicsLayer {
                             alpha = if (isLogin) 0f else 1f
                         },
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = currentDestination?.uppercase() ?: "",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.ExtraBold,
-                        modifier = Modifier.width(100.dp),
-                    )
-                    when (currentDestination) {
-                        Screen.Products.route -> {
-                            SearchBar(
-                                placeHolderText = "Search Products",
-                                onQuery = { query -> productViewModel.setSearchQuery(query.ifBlank { null }) },
-                                onClearQuery = { productViewModel.setSearchQuery(null) },
-                                modifier = Modifier.weight(1f).scale(0.75f)
-                            )
-                        }
-                        Screen.Orders.route -> {
-                            SearchBar(
-                                placeHolderText = "Search Orders",
-                                onQuery = { query -> orderViewModel.setSearchQuery(query = query) },
-                                onClearQuery = { orderViewModel.setSearchQuery(query = null) },
-                                modifier = Modifier.weight(1f).scale(0.75f)
-                            )
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.width(100.dp)
+                    ) {
+                        Text(
+                            text = currentDestination?.uppercase() ?: "",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.ExtraBold,
+                        )
+                    }
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        when (currentDestination) {
+                            Screen.Products.route -> {
+                                SearchBar(
+                                    placeHolderText = "Search Products",
+                                    onQuery = { query -> productViewModel.setSearchQuery(query.ifBlank { null }) },
+                                    onClearQuery = { productViewModel.setSearchQuery(null) },
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+
+                            Screen.Orders.route -> {
+                                SearchBar(
+                                    placeHolderText = "Search Orders",
+                                    onQuery = { query -> orderViewModel.setSearchQuery(query = query) },
+                                    onClearQuery = { orderViewModel.setSearchQuery(query = null) },
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
                         }
                     }
                     TextButton(
@@ -243,7 +258,7 @@ fun AppNavHost(
                             contentDescription = "Logout",
                         )
                         AnimatedContent(targetState = isCompactScreen) { state ->
-                            if(!state) {
+                            if (!state) {
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     text = "Logout",

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -34,16 +35,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.UserEditRequest
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.UserResponse
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.ExtendedTheme
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -60,6 +64,20 @@ fun EditUserModal(
     var role by remember { mutableStateOf(user.role) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
+
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val secondaryColor = MaterialTheme.colorScheme.secondary
+    val tertiaryColor = MaterialTheme.colorScheme.tertiary
+    val errorColor = MaterialTheme.colorScheme.error
+    val inversePrimaryColor = MaterialTheme.colorScheme.inversePrimary
+    val quaternaryColor = ExtendedTheme.colorScheme.quaternary.color
+    val quinaryColor = ExtendedTheme.colorScheme.quinary.color
+
+    val lineBrush = remember {
+        Brush.linearGradient(
+            colors = listOf(primaryColor, secondaryColor, tertiaryColor, errorColor, inversePrimaryColor, quinaryColor, quaternaryColor).shuffled()
+        )
+    }
 
     val userColor = MaterialTheme.colorScheme.tertiaryContainer
     val adminColor = MaterialTheme.colorScheme.errorContainer
@@ -83,10 +101,20 @@ fun EditUserModal(
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
-                modifier = Modifier.background(
-                    color = MaterialTheme.colorScheme.surfaceBright,
-                    shape = RoundedCornerShape(5)
-                ).width(350.dp).height(400.dp).padding(8.dp)
+                modifier = Modifier
+                    .statusBarsPadding()
+                    .border(
+                        width = 2.dp,
+                        brush = lineBrush,
+                        shape = RoundedCornerShape(5)
+                    )
+                    .width(350.dp)
+                    .height(400.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceBright,
+                        shape = RoundedCornerShape(5)
+                    )
+                    .padding(8.dp)
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -140,17 +168,19 @@ fun EditUserModal(
                     singleLine = true,
                     modifier = Modifier.width(300.dp),
                     shape = RoundedCornerShape(30),
+                    textStyle = TextStyle(brush = lineBrush)
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
                     label = { Text(text = "Password") },
-                    placeholder = { Text(text = "Type Your New Password") },
+                    placeholder = { Text(text = "Please type new password") },
                     visualTransformation = PasswordVisualTransformation(),
                     singleLine = true,
                     modifier = Modifier.width(300.dp),
-                    shape = RoundedCornerShape(30)
+                    shape = RoundedCornerShape(30),
+                    textStyle = TextStyle(brush = lineBrush)
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 OutlinedTextField(
@@ -159,7 +189,8 @@ fun EditUserModal(
                     label = { Text(text = "Email") },
                     singleLine = true,
                     modifier = Modifier.width(300.dp),
-                    shape = RoundedCornerShape(30)
+                    shape = RoundedCornerShape(30),
+                    textStyle = TextStyle(brush = lineBrush)
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Row(
