@@ -122,8 +122,8 @@ fun AddEditProductModal(
                         )
                     },
                     singleLine = true,
-                    shape = RoundedCornerShape(30),
                     modifier = Modifier.width(300.dp),
+                    shape = RoundedCornerShape(30),
                     textStyle = TextStyle(brush = lineBrush)
                 )
                 Spacer(modifier = Modifier.height(4.dp))

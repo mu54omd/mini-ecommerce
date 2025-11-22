@@ -2,10 +2,13 @@ package com.mu54omd.mini_ecommerce.frontend_gradle.ui.navigation
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideIn
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -16,7 +19,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.ShoppingCart
@@ -194,7 +199,7 @@ fun AppNavHost(
 
             },
             topBar = {
-                Row(
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 20.dp, end = 20.dp, top = 30.dp)
@@ -202,12 +207,11 @@ fun AppNavHost(
                         .graphicsLayer {
                             alpha = if (isLogin) 0f else 1f
                         },
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    contentAlignment = Alignment.Center
                 ) {
                     Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier.width(100.dp)
+                        contentAlignment = Alignment.CenterStart,
+                        modifier = Modifier.width(100.dp).align(Alignment.CenterStart)
                     ) {
                         Text(
                             text = currentDestination?.uppercase() ?: "",
@@ -215,9 +219,10 @@ fun AppNavHost(
                             fontWeight = FontWeight.ExtraBold,
                         )
                     }
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier.weight(1f)
+                    Row(
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.align(Alignment.CenterEnd)
                     ) {
                         when (currentDestination) {
                             Screen.Products.route -> {
@@ -225,7 +230,6 @@ fun AppNavHost(
                                     placeHolderText = "Search Products",
                                     onQuery = { query -> productViewModel.setSearchQuery(query.ifBlank { null }) },
                                     onClearQuery = { productViewModel.setSearchQuery(null) },
-                                    modifier = Modifier.fillMaxWidth()
                                 )
                             }
 
@@ -234,37 +238,36 @@ fun AppNavHost(
                                     placeHolderText = "Search Orders",
                                     onQuery = { query -> orderViewModel.setSearchQuery(query = query) },
                                     onClearQuery = { orderViewModel.setSearchQuery(query = null) },
-                                    modifier = Modifier.fillMaxWidth()
                                 )
                             }
                         }
-                    }
-                    TextButton(
-                        onClick = {
-                            authViewModel.logout()
-                            navController.navigate(Screen.Login.route) {
-                                popUpTo(navController.graph.id) {
-                                    inclusive = true
+                        TextButton(
+                            onClick = {
+                                authViewModel.logout()
+                                navController.navigate(Screen.Login.route) {
+                                    popUpTo(navController.graph.id) {
+                                        inclusive = true
+                                    }
+                                    launchSingleTop = true
                                 }
-                                launchSingleTop = true
-                            }
-                            selectedDestination = navigationDestination.indices.first
-                        },
-                        modifier = Modifier.pointerHoverIcon(if (!isLogin) PointerIcon.Hand else PointerIcon.Default),
-                        enabled = !isLogin
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.Logout,
-                            contentDescription = "Logout",
-                        )
-                        AnimatedContent(targetState = isCompactScreen) { state ->
-                            if (!state) {
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = "Logout",
-                                    overflow = TextOverflow.Ellipsis,
-                                    maxLines = 1
-                                )
+                                selectedDestination = navigationDestination.indices.first
+                            },
+                            modifier = Modifier.pointerHoverIcon(if (!isLogin) PointerIcon.Hand else PointerIcon.Default),
+                            enabled = !isLogin
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.Logout,
+                                contentDescription = "Logout",
+                            )
+                            AnimatedContent(targetState = isCompactScreen) { state ->
+                                if (!state) {
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = "Logout",
+                                        overflow = TextOverflow.Ellipsis,
+                                        maxLines = 1
+                                    )
+                                }
                             }
                         }
                     }
