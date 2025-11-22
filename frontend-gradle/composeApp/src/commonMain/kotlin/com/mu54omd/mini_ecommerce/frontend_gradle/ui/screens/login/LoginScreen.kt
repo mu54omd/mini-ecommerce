@@ -2,6 +2,7 @@ package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.login
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,10 +10,17 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -26,12 +34,16 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.RegisterResponse
@@ -79,6 +91,10 @@ fun LoginScreen(
         )
     }
 
+    val usernameFocusRequester = remember { FocusRequester() }
+    val passwordFocusRequester = remember { FocusRequester() }
+    val emailFocusRequester = remember { FocusRequester() }
+
     fun resetLoginScreenTextField() {
         isEmailWrong = false
         isUsernameWrong = false
@@ -107,8 +123,27 @@ fun LoginScreen(
                 onValueChange = { username = it },
                 label = { Text("Username") },
                 singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(usernameFocusRequester),
                 isError = isUsernameWrong,
+                trailingIcon = {
+                    if (username.isNotBlank()) {
+                        IconButton(
+                            onClick = {
+                                username = ""
+                            },
+                            modifier = Modifier
+                                .size(25.dp)
+                                .pointerHoverIcon(PointerIcon.Hand)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Clear,
+                                contentDescription = "Clear Username Icon",
+                            )
+                        }
+                    }
+                },
                 supportingText = {
                     if (isUsernameWrong) {
                         Text(
@@ -119,7 +154,13 @@ fun LoginScreen(
                     }
                 },
                 shape = RoundedCornerShape(30),
-                textStyle = TextStyle(brush = lineBrush)
+                textStyle = TextStyle(brush = lineBrush),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                keyboardActions = KeyboardActions(
+                    onNext = {
+                        passwordFocusRequester.requestFocus()
+                    }
+                )
             )
             Spacer(Modifier.height(8.dp))
             OutlinedTextField(
@@ -128,8 +169,27 @@ fun LoginScreen(
                 label = { Text("Password") },
                 visualTransformation = PasswordVisualTransformation(),
                 singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(passwordFocusRequester),
                 isError = isPasswordWrong,
+                trailingIcon = {
+                    if (password.isNotBlank()) {
+                        IconButton(
+                            onClick = {
+                                password = ""
+                            },
+                            modifier = Modifier
+                                .size(25.dp)
+                                .pointerHoverIcon(PointerIcon.Hand)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Clear,
+                                contentDescription = "Clear Password Icon",
+                            )
+                        }
+                    }
+                },
                 supportingText = {
                     if (isPasswordWrong) {
                         Text(
@@ -140,7 +200,22 @@ fun LoginScreen(
                     }
                 },
                 shape = RoundedCornerShape(30),
-                textStyle = TextStyle(brush = lineBrush)
+                textStyle = TextStyle(brush = lineBrush),
+                keyboardOptions = KeyboardOptions(imeAction = if(haveAnAccount) ImeAction.Done else ImeAction.Next),
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        if (username.isNotBlank() && password.isNotBlank()) {
+                            resetLoginScreenTextField()
+                            authViewModel.resetAllStates()
+                            if (haveAnAccount) {
+                                authViewModel.login(username, password)
+                            }
+                        }
+                    },
+                    onNext = {
+                        emailFocusRequester.requestFocus()
+                    }
+                )
             )
             AnimatedVisibility(!haveAnAccount) {
                 Spacer(Modifier.height(8.dp))
@@ -149,8 +224,29 @@ fun LoginScreen(
                     onValueChange = { email = it },
                     label = { Text("Email") },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(emailFocusRequester),
                     isError = isEmailWrong,
+                    trailingIcon = {
+                        if (email.isNotBlank()) {
+                            IconButton(
+                                onClick = {
+                                    email = ""
+                                },
+                                modifier = Modifier
+                                    .size(25.dp)
+                                    .pointerHoverIcon(PointerIcon.Hand)
+                                    .focusable(false)
+
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Clear,
+                                    contentDescription = "Clear Email Icon",
+                                )
+                            }
+                        }
+                    },
                     supportingText = {
                         if (isEmailWrong) {
                             Text(
@@ -161,7 +257,19 @@ fun LoginScreen(
                         }
                     },
                     shape = RoundedCornerShape(30),
-                    textStyle = TextStyle(brush = lineBrush)
+                    textStyle = TextStyle(brush = lineBrush),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            if (username.isNotBlank() && password.isNotBlank() && email.isNotBlank()) {
+                                resetLoginScreenTextField()
+                                authViewModel.resetAllStates()
+                                if (!haveAnAccount) {
+                                    authViewModel.register(username, password,email)
+                                }
+                            }
+                        }
+                    )
                 )
             }
             Spacer(Modifier.height(16.dp))

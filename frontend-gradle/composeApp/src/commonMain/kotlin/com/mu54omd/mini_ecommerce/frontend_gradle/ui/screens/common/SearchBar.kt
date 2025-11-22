@@ -43,6 +43,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -84,7 +86,10 @@ fun SearchBar(
         )
     }
 
+    val searchBarFocusRequester = remember { FocusRequester() }
+
     BasicTextField(
+        modifier = Modifier.focusRequester(searchBarFocusRequester),
         value = searchBarText,
         onValueChange = {
             searchBarText = it
@@ -116,6 +121,9 @@ fun SearchBar(
                 IconButton(
                     onClick = {
                         isCompact = !isCompact
+                        if(!isCompact) {
+                            searchBarFocusRequester.requestFocus()
+                        }
                     },
                     modifier = Modifier
                         .size(40.dp)

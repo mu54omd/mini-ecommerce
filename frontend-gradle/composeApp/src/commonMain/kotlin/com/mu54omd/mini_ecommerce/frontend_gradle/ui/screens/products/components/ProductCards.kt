@@ -4,8 +4,18 @@ import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.animateBounds
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,6 +44,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -43,6 +54,7 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -69,6 +81,7 @@ fun ProductCards(
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope
 ) {
+
     LazyVerticalGrid(
         modifier = modifier,
         columns = GridCells.Adaptive(200.dp),
@@ -76,12 +89,25 @@ fun ProductCards(
     ) {
         items(items = products, key = { product -> product.id!! }) { product ->
 
+            val interaction = remember { MutableInteractionSource() }
+            val isHovered by interaction.collectIsHoveredAsState()
+            val isPressed by interaction.collectIsPressedAsState()
+
+            val isActive = isHovered || isPressed
+
+            val scale by animateFloatAsState(
+                targetValue = if (isActive) 1.1f else 1f,
+                animationSpec = tween(durationMillis = 150),
+                label = ""
+            )
+
             with(sharedTransitionScope) {
                 Card(
                     modifier = Modifier
                         .size(250.dp)
                         .padding(8.dp)
                         .animateItem(),
+                    interactionSource = interaction,
                     onClick = { onProductClick(product) },
                     elevation = CardDefaults.cardElevation(4.dp)
                 ) {
@@ -100,6 +126,10 @@ fun ProductCards(
                             errorTint = MaterialTheme.colorScheme.error,
                             size = 150.dp,
                             modifier = Modifier
+                                .graphicsLayer{
+                                    scaleX = scale
+                                    scaleY = scale
+                                }
                                 .then(
                                     if (enableSharedTransition) {
                                         Modifier.sharedElement(
