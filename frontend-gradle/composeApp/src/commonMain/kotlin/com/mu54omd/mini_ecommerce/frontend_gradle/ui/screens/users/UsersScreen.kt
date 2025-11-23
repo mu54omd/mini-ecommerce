@@ -1,25 +1,10 @@
 package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.users
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -27,14 +12,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.PointerIcon
-import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.UserResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.UserViewModel
@@ -43,7 +23,7 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.LoadingView
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.AlertModal
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.DeleteModal
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.users.components.EditUserModal
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.users.components.UserCart
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.users.components.UserCard
 import frontend_gradle.composeapp.generated.resources.Res
 import frontend_gradle.composeapp.generated.resources.delete_user_successful_alert
 import frontend_gradle.composeapp.generated.resources.edit_user_successful_alert
@@ -66,6 +46,8 @@ fun UsersScreen(
     var editUserRequest by remember { mutableStateOf(UserResponse()) }
     var selectedUserForDelete by remember { mutableLongStateOf(-1) }
 
+    var expandedUsers by rememberSaveable { mutableStateOf<Map<Long, Boolean>>(emptyMap()) }
+
     LaunchedEffect(Unit) {
         userViewModel.getAllUsers()
     }
@@ -75,10 +57,19 @@ fun UsersScreen(
         is UiState.Loading -> LoadingView()
         is UiState.Success -> {
             Column(Modifier.fillMaxSize().padding(16.dp)) {
-                LazyColumn {
+                LazyColumn(
+                ) {
                     items(items = usersState.data, key = { user -> user.id }) { user ->
-                        UserCart(
+                        val isExpanded = expandedUsers[user.id] ?: false
+                        UserCard(
+                            isExpanded = isExpanded,
                             user = user,
+                            onCardClick = {
+                                expandedUsers = expandedUsers.toMutableMap().also{
+                                    val current = it[user.id] ?: false
+                                    it[user.id] = !current
+                                }
+                                          },
                             onEditUserClick = {
                                 editUserRequest = user
                                 editUserModalState = true

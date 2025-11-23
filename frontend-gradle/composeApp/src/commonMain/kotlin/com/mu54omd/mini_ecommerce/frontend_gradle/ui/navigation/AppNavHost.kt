@@ -288,7 +288,9 @@ fun AppNavHost(
                 ) { state ->
                     if (state) {
                         NavigationRail(
-                            modifier = Modifier.alpha(if (isLogin) 0f else 1f)
+                            modifier = Modifier
+                                .alpha(if (isLogin) 0f else 1f)
+                                .width(100.dp),
                         ) {
                             navigationDestination.forEachIndexed { index, destination ->
                                 NavigationRailItem(
