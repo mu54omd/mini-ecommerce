@@ -1,8 +1,7 @@
 package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.users.components
 
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,17 +9,22 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Mail
 import androidx.compose.material.icons.filled.SupervisorAccount
+import androidx.compose.material.icons.filled.Timelapse
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,10 +33,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -102,34 +108,42 @@ fun UserCardContent(
     user: UserResponse,
     isExpanded: Boolean,
     shapeColor: Color,
-){
+) {
     val animatedHeight by animateDpAsState(
         targetValue = if (isExpanded) 140.dp else 52.dp
     )
-    Row(
+    val iconScale by animateFloatAsState(
+        targetValue = if(isExpanded) 1f else 0.9f
+    )
+    val createdDate = user.createdAt.split("T").first()
+    val createdTime = "${user.createdAt.split("T").last().subSequence(0, 8)}"
+    Column(
         modifier = Modifier
-            .padding(2.dp),
-        verticalAlignment = Alignment.Top,
-        horizontalArrangement = Arrangement.Center
+            .height(animatedHeight)
     ) {
-        Box(
+        Row(
             modifier = Modifier
-                .padding(5.dp)
-                .drawBehind {
-                    drawCircle(color = shapeColor)
-                }
-                .padding(4.dp)
+                .padding(2.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
         ) {
-            Icon(
-                imageVector = if (user.role == "USER") Icons.Default.AccountCircle else Icons.Default.SupervisorAccount,
-                contentDescription = "User Icon",
-            )
-        }
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .height(animatedHeight)
-        ) {
+            Box(
+                modifier = Modifier
+                    .padding(5.dp)
+                    .graphicsLayer{
+                        scaleX = iconScale
+                        scaleY = iconScale
+                    }
+                    .drawBehind {
+                        drawCircle(color = shapeColor)
+                    }
+                    .padding(4.dp)
+            ) {
+                Icon(
+                    imageVector = if (user.role == "USER") Icons.Default.AccountCircle else Icons.Default.SupervisorAccount,
+                    contentDescription = "User Icon",
+                )
+            }
             Text(
                 text = "${user.username} #${user.id}",
                 style = MaterialTheme.typography.bodySmall,
@@ -138,7 +152,7 @@ fun UserCardContent(
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(2.dp)
+                    .padding(4.dp)
                     .drawBehind {
                         drawRoundRect(
                             color = shapeColor,
@@ -147,37 +161,66 @@ fun UserCardContent(
                     }
                     .padding(12.dp),
             )
-            Text(
+        }
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 4.dp, end = 6.dp)
+                .drawBehind {
+                    drawRoundRect(
+                        color = shapeColor,
+                        cornerRadius = CornerRadius(x = 10.dp.toPx())
+                    )
+                }
+        ) {
+            DetailsUserCardItem(
                 text = user.email,
-                style = MaterialTheme.typography.bodySmall,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier
-                    .width(150.dp)
-                    .padding(4.dp)
+                icon = Icons.Default.Mail,
+                description = "User Email Address"
             )
-            Text(
-                text = user.createdAt.split("T").first(),
-                style = MaterialTheme.typography.bodySmall,
-                fontStyle = FontStyle.Italic,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier
-                    .width(150.dp)
-                    .padding(4.dp)
+            DetailsUserCardItem(
+                text = createdDate,
+                icon = Icons.Default.DateRange,
+                description = "User Creation Date"
             )
-            Text(
-                text = "${user.createdAt.split("T").last().subSequence(0, 8)}",
-                style = MaterialTheme.typography.bodySmall,
-                fontStyle = FontStyle.Italic,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier
-                    .width(150.dp)
-                    .padding(4.dp)
+            DetailsUserCardItem(
+                text = createdTime,
+                icon = Icons.Default.Timelapse,
+                description = "User Creation Time"
             )
         }
+    }
+}
 
+@Composable
+fun DetailsUserCardItem(
+    text: String,
+    icon: ImageVector,
+    description: String,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = description,
+            modifier = Modifier.padding(start = 10.dp, end = 10.dp),
+        )
+        VerticalDivider(
+            thickness = 4.dp,
+            color = MaterialTheme.colorScheme.background,
+            modifier = Modifier.height(25.dp)
+        )
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodySmall,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier
+                .width(150.dp)
+                .padding(4.dp)
+        )
     }
 }
 

@@ -6,7 +6,7 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.ui.navigation.AppNavHost
 
 @Composable
 fun App() {
-    MiniECommerceTheme(darkTheme = true) {
+    MiniECommerceTheme(darkTheme = false) {
         AppNavHost()
     }
 }

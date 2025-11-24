@@ -161,6 +161,7 @@ fun OrderListHeader(
             .fillMaxWidth()
             .padding(bottom = 2.dp)
             .background(MaterialTheme.colorScheme.background)
+            .pointerHoverIcon(icon = PointerIcon.Hand)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 onClick = { onItemClick() }
