@@ -65,7 +65,6 @@ fun SearchBar(
     val secondaryColor = MaterialTheme.colorScheme.secondary
     val tertiaryColor = MaterialTheme.colorScheme.tertiary
     val errorColor = MaterialTheme.colorScheme.error
-    val inversePrimaryColor = MaterialTheme.colorScheme.inversePrimary
     val quaternaryColor = ExtendedTheme.colorScheme.quaternary.color
     val quinaryColor = ExtendedTheme.colorScheme.quinary.color
     var isCompact by remember { mutableStateOf(true) }
@@ -79,7 +78,6 @@ fun SearchBar(
                 secondaryColor,
                 tertiaryColor,
                 errorColor,
-                inversePrimaryColor,
                 quinaryColor,
                 quaternaryColor
             ).shuffled()

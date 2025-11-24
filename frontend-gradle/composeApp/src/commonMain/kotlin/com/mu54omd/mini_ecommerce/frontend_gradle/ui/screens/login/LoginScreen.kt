@@ -81,13 +81,12 @@ fun LoginScreen(
     val secondaryColor = MaterialTheme.colorScheme.secondary
     val tertiaryColor = MaterialTheme.colorScheme.tertiary
     val errorColor = MaterialTheme.colorScheme.error
-    val inversePrimaryColor = MaterialTheme.colorScheme.inversePrimary
     val quaternaryColor = ExtendedTheme.colorScheme.quaternary.color
     val quinaryColor = ExtendedTheme.colorScheme.quinary.color
 
     val lineBrush = remember {
         Brush.linearGradient(
-            colors = listOf(primaryColor, secondaryColor, tertiaryColor, errorColor, inversePrimaryColor, quinaryColor, quaternaryColor).shuffled()
+            colors = listOf(primaryColor, secondaryColor, tertiaryColor, errorColor, quinaryColor, quaternaryColor).shuffled()
         )
     }
 

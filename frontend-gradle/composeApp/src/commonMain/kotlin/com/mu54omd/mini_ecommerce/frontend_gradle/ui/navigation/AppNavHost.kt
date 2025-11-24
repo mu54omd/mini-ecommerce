@@ -57,6 +57,7 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -70,11 +71,14 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.ProductViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.admin.AdminPanelScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.cart.CartScreen
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.AnimatedNavigationBar
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.AnimatedNavigationRail
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.login.LoginScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.orders.OrdersScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.products.ProductsScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.users.UsersScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.SearchBar
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.ExtendedTheme
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.MiniECommerceTheme
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.extendedLight
 import org.koin.compose.viewmodel.koinViewModel
@@ -142,6 +146,7 @@ fun AppNavHost(
         Scaffold(
             bottomBar = {
                 AnimatedContent(
+                    modifier = Modifier.zIndex(100f),
                     targetState = !isWideScreen,
                     transitionSpec = {
                         slideIntoContainer(
@@ -152,48 +157,70 @@ fun AppNavHost(
                     },
                 ) { state ->
                     if (state) {
-                        NavigationBar(
-                            modifier = Modifier.alpha(if (isLogin) 0f else 1f),
-                            windowInsets = NavigationBarDefaults.windowInsets,
-                        ) {
-                            navigationDestination.forEachIndexed { index, destination ->
-                                NavigationBarItem(
-                                    selected = selectedDestination == index,
-                                    onClick = {
-                                        if (currentDestination != destination.route) {
-                                            navController.navigate(route = destination.route) {
-                                                launchSingleTop = true
-                                                restoreState = true
-                                                popUpTo(navigationDestination.first().route) {
-                                                    saveState = true
-                                                }
-                                            }
-                                            selectedDestination = index
+                        AnimatedNavigationBar(
+                            modifier = Modifier.zIndex(1f).alpha(if (isLogin) 0f else 1f).height(100.dp),
+                            buttons = navigationDestination,
+                            enabled = !isLogin,
+                            selectedItem = selectedDestination,
+                            onClick = { index, destination ->
+                                if (currentDestination != destination.route) {
+                                    navController.navigate(route = destination.route) {
+                                        launchSingleTop = true
+                                        restoreState = true
+                                        popUpTo(navigationDestination.first().route) {
+                                            saveState = true
                                         }
-                                    },
-                                    label = {
-                                        Text(
-                                            text = destination.label,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                    },
-                                    icon = {
-                                        val iconToShow =
-                                            if (destination == Screen.Cart) cartIcon else destination.icon
-                                        val iconColor =
-                                            if (destination == Screen.Cart) cartIconColor else MaterialTheme.colorScheme.onSurface
-                                        Icon(
-                                            imageVector = iconToShow,
-                                            contentDescription = destination.contentDescription,
-                                            tint = iconColor
-                                        )
-                                    },
-                                    modifier = Modifier.pointerHoverIcon(if (!isLogin) PointerIcon.Hand else PointerIcon.Default),
-                                    enabled = !isLogin
-                                )
-                            }
-                        }
+                                    }
+                                    selectedDestination = index
+                                }
+                            },
+                            barColor = MaterialTheme.colorScheme.primaryContainer,
+                            circleColor = ExtendedTheme.colorScheme.quaternary.colorContainer,
+                            selectedColor = ExtendedTheme.colorScheme.quaternary.color,
+                            unselectedColor = MaterialTheme.colorScheme.secondary
+                        )
+//                        NavigationBar(
+//                            modifier = Modifier.alpha(if (isLogin) 0f else 1f),
+//                            windowInsets = NavigationBarDefaults.windowInsets,
+//                        ) {
+//                            navigationDestination.forEachIndexed { index, destination ->
+//                                NavigationBarItem(
+//                                    selected = selectedDestination == index,
+//                                    onClick = {
+//                                        if (currentDestination != destination.route) {
+//                                            navController.navigate(route = destination.route) {
+//                                                launchSingleTop = true
+//                                                restoreState = true
+//                                                popUpTo(navigationDestination.first().route) {
+//                                                    saveState = true
+//                                                }
+//                                            }
+//                                            selectedDestination = index
+//                                        }
+//                                    },
+//                                    label = {
+//                                        Text(
+//                                            text = destination.label,
+//                                            maxLines = 1,
+//                                            overflow = TextOverflow.Ellipsis
+//                                        )
+//                                    },
+//                                    icon = {
+//                                        val iconToShow =
+//                                            if (destination == Screen.Cart) cartIcon else destination.icon
+//                                        val iconColor =
+//                                            if (destination == Screen.Cart) cartIconColor else MaterialTheme.colorScheme.onSurface
+//                                        Icon(
+//                                            imageVector = iconToShow,
+//                                            contentDescription = destination.contentDescription,
+//                                            tint = iconColor
+//                                        )
+//                                    },
+//                                    modifier = Modifier.pointerHoverIcon(if (!isLogin) PointerIcon.Hand else PointerIcon.Default),
+//                                    enabled = !isLogin
+//                                )
+//                            }
+//                        }
                     }
                 }
 
@@ -287,49 +314,74 @@ fun AppNavHost(
                     }
                 ) { state ->
                     if (state) {
-                        NavigationRail(
+                        AnimatedNavigationRail(
                             modifier = Modifier
+                                .zIndex(1f)
                                 .alpha(if (isLogin) 0f else 1f)
                                 .width(100.dp),
-                        ) {
-                            navigationDestination.forEachIndexed { index, destination ->
-                                NavigationRailItem(
-                                    selected = selectedDestination == index,
-                                    onClick = {
-                                        if (currentDestination != destination.route) {
-                                            navController.navigate(destination.route) {
-                                                launchSingleTop = true
-                                                restoreState = true
-                                                popUpTo(navigationDestination.first().route) {
-                                                    saveState = true
-                                                }
-                                            }
-                                            selectedDestination = index
+                            enabled = !isLogin,
+                            buttons = navigationDestination,
+                            selectedItem = selectedDestination,
+                            onClick = { index, destination ->
+                                if (currentDestination != destination.route) {
+                                    navController.navigate(route = destination.route) {
+                                        launchSingleTop = true
+                                        restoreState = true
+                                        popUpTo(navigationDestination.first().route) {
+                                            saveState = true
                                         }
-                                    },
-                                    label = {
-                                        Text(
-                                            text = destination.label,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                    },
-                                    icon = {
-                                        val iconToShow =
-                                            if (destination == Screen.Cart) cartIcon else destination.icon
-                                        val iconColor =
-                                            if (destination == Screen.Cart) cartIconColor else MaterialTheme.colorScheme.onSurface
-                                        Icon(
-                                            imageVector = iconToShow,
-                                            contentDescription = destination.contentDescription,
-                                            tint = iconColor
-                                        )
-                                    },
-                                    modifier = Modifier.pointerHoverIcon(if (!isLogin) PointerIcon.Hand else PointerIcon.Default),
-                                    enabled = !isLogin
-                                )
-                            }
-                        }
+                                    }
+                                    selectedDestination = index
+                                }
+                            },
+                            barColor = MaterialTheme.colorScheme.primaryContainer,
+                            circleColor = ExtendedTheme.colorScheme.quaternary.colorContainer,
+                            selectedColor = ExtendedTheme.colorScheme.quaternary.color,
+                            unselectedColor = MaterialTheme.colorScheme.secondary
+                        )
+//                        NavigationRail(
+//                            modifier = Modifier
+//                                .alpha(if (isLogin) 0f else 1f)
+//                                .width(100.dp),
+//                        ) {
+//                            navigationDestination.forEachIndexed { index, destination ->
+//                                NavigationRailItem(
+//                                    selected = selectedDestination == index,
+//                                    onClick = {
+//                                        if (currentDestination != destination.route) {
+//                                            navController.navigate(destination.route) {
+//                                                launchSingleTop = true
+//                                                restoreState = true
+//                                                popUpTo(navigationDestination.first().route) {
+//                                                    saveState = true
+//                                                }
+//                                            }
+//                                            selectedDestination = index
+//                                        }
+//                                    },
+//                                    label = {
+//                                        Text(
+//                                            text = destination.label,
+//                                            maxLines = 1,
+//                                            overflow = TextOverflow.Ellipsis
+//                                        )
+//                                    },
+//                                    icon = {
+//                                        val iconToShow =
+//                                            if (destination == Screen.Cart) cartIcon else destination.icon
+//                                        val iconColor =
+//                                            if (destination == Screen.Cart) cartIconColor else MaterialTheme.colorScheme.onSurface
+//                                        Icon(
+//                                            imageVector = iconToShow,
+//                                            contentDescription = destination.contentDescription,
+//                                            tint = iconColor
+//                                        )
+//                                    },
+//                                    modifier = Modifier.pointerHoverIcon(if (!isLogin) PointerIcon.Hand else PointerIcon.Default),
+//                                    enabled = !isLogin
+//                                )
+//                            }
+//                        }
                     }
                 }
                 NavHost(
