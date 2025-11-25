@@ -1,6 +1,7 @@
 package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.users
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -58,7 +59,8 @@ fun UsersScreen(
         is UiState.Success -> {
             Column(Modifier.fillMaxSize().padding(16.dp)) {
                 LazyColumn(
-                ) {
+                    contentPadding = PaddingValues(bottom = 50.dp),
+                    ) {
                     items(items = usersState.data, key = { user -> user.id }) { user ->
                         val isExpanded = expandedUsers[user.id] ?: false
                         UserCard(

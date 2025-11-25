@@ -19,6 +19,7 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -85,6 +86,7 @@ fun ProductCards(
     LazyVerticalGrid(
         modifier = modifier,
         columns = GridCells.Adaptive(200.dp),
+        contentPadding = PaddingValues(bottom = 50.dp),
         state = lazyGridState
     ) {
         items(items = products, key = { product -> product.id!! }) { product ->

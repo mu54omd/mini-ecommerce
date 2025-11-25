@@ -10,6 +10,9 @@ import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -63,8 +66,10 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
@@ -79,6 +84,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 
 private class BarShape(
+    private val isVertical: Boolean,
     private val offset: Float,
     private val circleRadius: Dp,
     private val cornerRadius: Dp,
@@ -93,80 +99,148 @@ private class BarShape(
         return Outline.Generic(getPath(size, density))
 
     }
-
     private fun getPath(size: Size, density: Density): Path {
-        val cutoutCenterX = offset
-        val cutoutRadius = density.run { (circleRadius + circleGap).toPx() }
-        val cornerRadiusPx = density.run { cornerRadius.toPx() }
-        val cornerDiameter = cornerRadiusPx * 2
-        return Path().apply {
-            val cutoutEdgeOffset = cutoutRadius * 1.5f
-            val cutoutLeftX = cutoutCenterX - cutoutEdgeOffset
-            val cutoutRightX = cutoutCenterX + cutoutEdgeOffset
+        if(isVertical){
+            val cutoutCenterY = offset
+            val cutoutRadius = density.run { (circleRadius + circleGap).toPx() }
+            val cornerRadiusPx = density.run { cornerRadius.toPx() }
+            val cornerDiameter = cornerRadiusPx * 2
+            return Path().apply {
+                val cutoutEdgeOffset = cutoutRadius * 1.5f
+                val cutoutTopY = cutoutCenterY - cutoutEdgeOffset
+                val cutoutBottomY = cutoutCenterY + cutoutEdgeOffset
 
-            // bottom left
-            moveTo(x = 0F, y = size.height)
-            // top left
-            if (cutoutLeftX > 0) {
-                val realLeftCornerDiameter = if (cutoutLeftX >= cornerRadiusPx) {
-                    // there is a space between rounded corner and cutout
-                    cornerDiameter
-                } else {
-                    // rounded corner and cutout overlap
-                    cutoutLeftX * 2
-                }
+                // start at top-left (no radius)
+                moveTo(0f, 0f)
+
+                // top-right (rounded)
                 arcTo(
                     rect = Rect(
-                        left = 0f,
-                        top = 0f,
-                        right = realLeftCornerDiameter,
-                        bottom = realLeftCornerDiameter
-                    ),
-                    startAngleDegrees = 180.0f,
-                    sweepAngleDegrees = 90.0f,
-                    forceMoveTo = false
-                )
-            }
-            lineTo(cutoutLeftX, 0f)
-            // cutout
-            cubicTo(
-                x1 = cutoutCenterX - cutoutRadius,
-                y1 = 0f,
-                x2 = cutoutCenterX - cutoutRadius,
-                y2 = cutoutRadius,
-                x3 = cutoutCenterX,
-                y3 = cutoutRadius,
-            )
-            cubicTo(
-                x1 = cutoutCenterX + cutoutRadius,
-                y1 = cutoutRadius,
-                x2 = cutoutCenterX + cutoutRadius,
-                y2 = 0f,
-                x3 = cutoutRightX,
-                y3 = 0f,
-            )
-            // top right
-            if (cutoutRightX < size.width) {
-                val realRightCornerDiameter = if (cutoutRightX <= size.width - cornerRadiusPx) {
-                    cornerDiameter
-                } else {
-                    (size.width - cutoutRightX) * 2
-                }
-                arcTo(
-                    rect = Rect(
-                        left = size.width - realRightCornerDiameter,
+                        left = size.width - cornerDiameter,
                         top = 0f,
                         right = size.width,
-                        bottom = realRightCornerDiameter
+                        bottom = cornerDiameter,
                     ),
-                    startAngleDegrees = -90.0f,
-                    sweepAngleDegrees = 90.0f,
+                    startAngleDegrees = -90f,
+                    sweepAngleDegrees = 90f,
                     forceMoveTo = false
                 )
+
+                // right side, going down until cutout
+                lineTo(size.width, cutoutTopY)
+
+                // --- CUTOUT ---
+                cubicTo(
+                    x1 = size.width,
+                    y1 = cutoutCenterY - cutoutRadius,
+                    x2 = size.width - cutoutRadius,
+                    y2 = cutoutCenterY - cutoutRadius,
+                    x3 = size.width - cutoutRadius,
+                    y3 = cutoutCenterY
+                )
+                cubicTo(
+                    x1 = size.width - cutoutRadius,
+                    y1 = cutoutCenterY + cutoutRadius,
+                    x2 = size.width,
+                    y2 = cutoutCenterY + cutoutRadius,
+                    x3 = size.width,
+                    y3 = cutoutBottomY
+                )
+                // --- END CUTOUT ---
+
+                // bottom-right (rounded)
+                arcTo(
+                    rect = Rect(
+                        left = size.width - cornerDiameter,
+                        top = size.height - cornerDiameter,
+                        right = size.width,
+                        bottom = size.height,
+                    ),
+                    startAngleDegrees = 0f,
+                    sweepAngleDegrees = 90f,
+                    forceMoveTo = false
+                )
+
+                // bottom-left (straight)
+                lineTo(0f, size.height)
+
+                close()
             }
-            // bottom right
-            lineTo(x = size.width, y = size.height)
-            close()
+        }else {
+            val cutoutCenterX = offset
+            val cutoutRadius = density.run { (circleRadius + circleGap).toPx() }
+            val cornerRadiusPx = density.run { cornerRadius.toPx() }
+            val cornerDiameter = cornerRadiusPx * 2
+
+            return Path().apply {
+                val cutoutEdgeOffset = cutoutRadius * 1.5f
+                val cutoutLeftX = cutoutCenterX - cutoutEdgeOffset
+                val cutoutRightX = cutoutCenterX + cutoutEdgeOffset
+
+                // bottom left
+                moveTo(x = 0F, y = size.height)
+                // top left
+                if (cutoutLeftX > 0) {
+                    val realLeftCornerDiameter = if (cutoutLeftX >= cornerRadiusPx) {
+                        // there is a space between rounded corner and cutout
+                        cornerDiameter
+                    } else {
+                        // rounded corner and cutout overlap
+                        cutoutLeftX * 2
+                    }
+                    arcTo(
+                        rect = Rect(
+                            left = 0f,
+                            top = 0f,
+                            right = realLeftCornerDiameter,
+                            bottom = realLeftCornerDiameter
+                        ),
+                        startAngleDegrees = 180.0f,
+                        sweepAngleDegrees = 90.0f,
+                        forceMoveTo = false
+                    )
+                }
+                lineTo(cutoutLeftX, 0f)
+                // cutout
+                cubicTo(
+                    x1 = cutoutCenterX - cutoutRadius,
+                    y1 = 0f,
+                    x2 = cutoutCenterX - cutoutRadius,
+                    y2 = cutoutRadius,
+                    x3 = cutoutCenterX,
+                    y3 = cutoutRadius,
+                )
+                cubicTo(
+                    x1 = cutoutCenterX + cutoutRadius,
+                    y1 = cutoutRadius,
+                    x2 = cutoutCenterX + cutoutRadius,
+                    y2 = 0f,
+                    x3 = cutoutRightX,
+                    y3 = 0f,
+                )
+                // top right
+                if (cutoutRightX < size.width) {
+                    val realRightCornerDiameter = if (cutoutRightX <= size.width - cornerRadiusPx) {
+                        cornerDiameter
+                    } else {
+                        (size.width - cutoutRightX) * 2
+                    }
+                    arcTo(
+                        rect = Rect(
+                            left = size.width - realRightCornerDiameter,
+                            top = 0f,
+                            right = size.width,
+                            bottom = realRightCornerDiameter
+                        ),
+                        startAngleDegrees = -90.0f,
+                        sweepAngleDegrees = 90.0f,
+                        forceMoveTo = false
+                    )
+                }
+                // bottom right
+                lineTo(x = size.width, y = size.height)
+                close()
+            }
         }
     }
 }
@@ -190,7 +264,10 @@ private fun Circle(
         AnimatedContent(
             targetState = button.icon,
             label = "Bottom bar circle icon",
-            modifier = Modifier.size(28.dp)
+            modifier = Modifier.size(30.dp),
+            transitionSpec = {
+                scaleIn() togetherWith scaleOut()
+            }
         ) { targetIcon ->
             Icon(
                 imageVector = targetIcon,
@@ -250,6 +327,7 @@ fun AnimatedNavigationBar(
     }
     val barShape = remember(cutoutOffset) {
         BarShape(
+            isVertical = false,
             offset = cutoutOffset,
             circleRadius = circleRadius,
             cornerRadius = 25.dp,
@@ -283,7 +361,134 @@ fun AnimatedNavigationBar(
             buttons.forEachIndexed { index, button ->
                 key(button.route) {
                     val isSelected = index == selectedItem
-                    AnimatedNavigationBarItem(
+                    AnimatedNavigationItem(
+                        isVertical = false,
+                        selected = isSelected,
+                        enabled = enabled,
+                        onClick = { onClick(index, button) },
+                        icon = {
+                            val iconAlpha by animateFloatAsState(
+                                targetValue = if (isSelected) 0f else 1f,
+                                label = "Navbar item icon"
+                            )
+                            Icon(
+                                imageVector = button.icon,
+                                contentDescription = button.contentDescription,
+                                modifier = Modifier.alpha(iconAlpha)
+                            )
+                        },
+                        label = {
+                            Text(button.label)
+                        },
+                        selectedColor = selectedColor,
+                        unselectedColor = unselectedColor
+                    )
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+fun AnimatedNavigationRail(
+    modifier: Modifier = Modifier,
+    buttons: List<Screen>,
+    selectedItem: Int,
+    onClick: (Int, Screen) -> Unit,
+    enabled: Boolean,
+    barColor: Color,
+    circleColor: Color,
+    selectedColor: Color,
+    unselectedColor: Color,
+) {
+
+    val circleRadius = 26.dp
+    var railHeight by remember { mutableStateOf(0) }
+    var itemHeight by remember { mutableStateOf(0) }
+    var barSize by remember { mutableStateOf(IntSize(0, 0)) }
+
+    val offset = remember(railHeight, itemHeight, selectedItem, buttons) {
+        if (railHeight == 0 || itemHeight == 0) 0f
+        else {
+            val totalItemsHeight = itemHeight * buttons.size
+            val topPadding = (railHeight - totalItemsHeight) / 2f
+
+            topPadding + itemHeight * selectedItem + itemHeight / 2f
+        }
+    }
+    val circleRadiusPx = LocalDensity.current.run { circleRadius.toPx().toInt() }
+    val offsetTransition = updateTransition(offset, "offset transition")
+    val animation = tween<Float>(durationMillis = 100)
+    val cutoutOffset by offsetTransition.animateFloat(
+        transitionSpec = {
+            if (this.initialState == 0f) {
+                snap()
+            } else {
+                animation
+            }
+        },
+        label = "cutout offset"
+    ) { it }
+    val circleOffset by offsetTransition.animateIntOffset(
+        transitionSpec = {
+            if (this.initialState == 0f) {
+                snap()
+            } else {
+                tween (animation.durationMillis, animation.delay)
+            }
+        },
+        label = "circle offset"
+    ) {
+        IntOffset(
+            x = circleRadiusPx + 20,
+            y = (it - circleRadiusPx).toInt()
+        )
+    }
+    val railShape = remember(cutoutOffset) {
+        BarShape(
+            isVertical = true,
+            offset = cutoutOffset,
+            circleRadius = circleRadius,
+            cornerRadius = 25.dp,
+        )
+    }
+
+    Box(
+        contentAlignment = Alignment.TopStart,
+        modifier = modifier
+    ) {
+        Circle(
+            modifier = Modifier
+                .offset { circleOffset }
+                .zIndex(1f),
+            color = circleColor,
+            radius = circleRadius,
+            button = buttons[selectedItem],
+            iconColor = selectedColor,
+        )
+        Column (
+            modifier = Modifier
+                .onGloballyPositioned {
+                    railHeight = it.size.height
+                }
+                .onPlaced { barSize = it.size }
+                .graphicsLayer {
+                    shape = railShape
+                    clip = true
+                }
+                .fillMaxHeight()
+                .background(barColor),
+            verticalArrangement = Arrangement.Center,
+        ) {
+            buttons.forEachIndexed { index, button ->
+                key(button.route) {
+                    val isSelected = index == selectedItem
+                    AnimatedNavigationItem(
+                        modifier = Modifier.onGloballyPositioned {
+                            itemHeight = it.size.height
+                        },
+                        isVertical = true,
                         selected = isSelected,
                         enabled = enabled,
                         onClick = { onClick(index, button) },
@@ -311,7 +516,8 @@ fun AnimatedNavigationBar(
 }
 
 @Composable
-fun AnimatedNavigationBarItem(
+fun AnimatedNavigationItem(
+    isVertical: Boolean,
     selected: Boolean,
     modifier: Modifier = Modifier,
     enabled: Boolean,
@@ -325,7 +531,7 @@ fun AnimatedNavigationBarItem(
         targetValue = if (selected) selectedColor else unselectedColor,
         animationSpec = tween(100)
     )
-    val textStyle = MaterialTheme.typography.bodySmall
+    val textStyle = if(selected) MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold) else MaterialTheme.typography.bodySmall
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier.size(70.dp).then(modifier)
@@ -346,11 +552,21 @@ fun AnimatedNavigationBarItem(
         ) {
             CompositionLocalProvider(LocalContentColor provides color, content = icon)
             Spacer(modifier = Modifier.height(8.dp))
-            CompositionLocalProvider(
-                LocalContentColor provides color,
-                LocalTextStyle provides textStyle,
-                content = label
-            )
+            if(!isVertical) {
+                CompositionLocalProvider(
+                    LocalContentColor provides color,
+                    LocalTextStyle provides textStyle,
+                    content = label
+                )
+            }else{
+                if(!selected){
+                    CompositionLocalProvider(
+                        LocalContentColor provides color,
+                        LocalTextStyle provides textStyle,
+                        content = label
+                    )
+                }
+            }
         }
     }
 }

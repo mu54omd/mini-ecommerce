@@ -109,8 +109,9 @@ fun OrdersList(
         }
     }
     LazyColumn(
-        state = lazyListState
-    ) {
+        state = lazyListState,
+        contentPadding = PaddingValues(bottom = 50.dp),
+        ) {
         groupedOrders.forEach { (username, orderItems) ->
             val isExpanded = expandedGroups[username] ?: false
             stickyHeader(key = "header_${username}") {
@@ -164,6 +165,7 @@ fun OrderListHeader(
             .pointerHoverIcon(icon = PointerIcon.Hand)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
+                indication = null,
                 onClick = { onItemClick() }
             )
             .padding(8.dp)

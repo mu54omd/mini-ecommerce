@@ -3,6 +3,7 @@ package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.orders.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -31,8 +32,9 @@ fun UserOrdersList(
     orderItems: List<OrderResponse>
 ) {
     LazyColumn(
-        state = lazyListState
-    ) {
+        state = lazyListState,
+        contentPadding = PaddingValues(bottom = 50.dp),
+        ) {
         items( items =orderItems, key = { orderItem -> orderItem.id }) { order ->
             val status = statusList.indexOf(order.status.uppercase())
             OrderCard(

@@ -16,12 +16,16 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.ShoppingCart
@@ -43,6 +47,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -54,6 +59,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -126,6 +132,8 @@ fun AppNavHost(
 
     val isLogin = currentDestination == Screen.Login.route
 
+
+
     LaunchedEffect(tokenState) {
         if (tokenState is UiState.Error) {
             if (currentDestination != Screen.Login.route) {
@@ -143,88 +151,8 @@ fun AppNavHost(
         val isCompactScreen by remember(maxWidth) {
             derivedStateOf { maxWidth < 450.dp }
         }
-        Scaffold(
-            bottomBar = {
-                AnimatedContent(
-                    modifier = Modifier.zIndex(100f),
-                    targetState = !isWideScreen,
-                    transitionSpec = {
-                        slideIntoContainer(
-                            towards = AnimatedContentTransitionScope.SlideDirection.Up
-                        ) togetherWith slideOutOfContainer(
-                            towards = AnimatedContentTransitionScope.SlideDirection.Down
-                        )
-                    },
-                ) { state ->
-                    if (state) {
-                        AnimatedNavigationBar(
-                            modifier = Modifier.zIndex(1f).alpha(if (isLogin) 0f else 1f).height(100.dp),
-                            buttons = navigationDestination,
-                            enabled = !isLogin,
-                            selectedItem = selectedDestination,
-                            onClick = { index, destination ->
-                                if (currentDestination != destination.route) {
-                                    navController.navigate(route = destination.route) {
-                                        launchSingleTop = true
-                                        restoreState = true
-                                        popUpTo(navigationDestination.first().route) {
-                                            saveState = true
-                                        }
-                                    }
-                                    selectedDestination = index
-                                }
-                            },
-                            barColor = MaterialTheme.colorScheme.primaryContainer,
-                            circleColor = ExtendedTheme.colorScheme.quaternary.colorContainer,
-                            selectedColor = ExtendedTheme.colorScheme.quaternary.color,
-                            unselectedColor = MaterialTheme.colorScheme.secondary
-                        )
-//                        NavigationBar(
-//                            modifier = Modifier.alpha(if (isLogin) 0f else 1f),
-//                            windowInsets = NavigationBarDefaults.windowInsets,
-//                        ) {
-//                            navigationDestination.forEachIndexed { index, destination ->
-//                                NavigationBarItem(
-//                                    selected = selectedDestination == index,
-//                                    onClick = {
-//                                        if (currentDestination != destination.route) {
-//                                            navController.navigate(route = destination.route) {
-//                                                launchSingleTop = true
-//                                                restoreState = true
-//                                                popUpTo(navigationDestination.first().route) {
-//                                                    saveState = true
-//                                                }
-//                                            }
-//                                            selectedDestination = index
-//                                        }
-//                                    },
-//                                    label = {
-//                                        Text(
-//                                            text = destination.label,
-//                                            maxLines = 1,
-//                                            overflow = TextOverflow.Ellipsis
-//                                        )
-//                                    },
-//                                    icon = {
-//                                        val iconToShow =
-//                                            if (destination == Screen.Cart) cartIcon else destination.icon
-//                                        val iconColor =
-//                                            if (destination == Screen.Cart) cartIconColor else MaterialTheme.colorScheme.onSurface
-//                                        Icon(
-//                                            imageVector = iconToShow,
-//                                            contentDescription = destination.contentDescription,
-//                                            tint = iconColor
-//                                        )
-//                                    },
-//                                    modifier = Modifier.pointerHoverIcon(if (!isLogin) PointerIcon.Hand else PointerIcon.Default),
-//                                    enabled = !isLogin
-//                                )
-//                            }
-//                        }
-                    }
-                }
 
-            },
+        Scaffold(
             topBar = {
                 Box(
                     modifier = Modifier
@@ -301,89 +229,9 @@ fun AppNavHost(
                 }
             }
         ) { contentPadding ->
-
-            Row(
+            Box(
                 modifier = Modifier.padding(contentPadding)
             ) {
-                AnimatedContent(
-                    targetState = isWideScreen,
-                    transitionSpec = {
-                        slideIntoContainer(towards = AnimatedContentTransitionScope.SlideDirection.End) togetherWith slideOutOfContainer(
-                            towards = AnimatedContentTransitionScope.SlideDirection.Start
-                        )
-                    }
-                ) { state ->
-                    if (state) {
-                        AnimatedNavigationRail(
-                            modifier = Modifier
-                                .zIndex(1f)
-                                .alpha(if (isLogin) 0f else 1f)
-                                .width(100.dp),
-                            enabled = !isLogin,
-                            buttons = navigationDestination,
-                            selectedItem = selectedDestination,
-                            onClick = { index, destination ->
-                                if (currentDestination != destination.route) {
-                                    navController.navigate(route = destination.route) {
-                                        launchSingleTop = true
-                                        restoreState = true
-                                        popUpTo(navigationDestination.first().route) {
-                                            saveState = true
-                                        }
-                                    }
-                                    selectedDestination = index
-                                }
-                            },
-                            barColor = MaterialTheme.colorScheme.primaryContainer,
-                            circleColor = ExtendedTheme.colorScheme.quaternary.colorContainer,
-                            selectedColor = ExtendedTheme.colorScheme.quaternary.color,
-                            unselectedColor = MaterialTheme.colorScheme.secondary
-                        )
-//                        NavigationRail(
-//                            modifier = Modifier
-//                                .alpha(if (isLogin) 0f else 1f)
-//                                .width(100.dp),
-//                        ) {
-//                            navigationDestination.forEachIndexed { index, destination ->
-//                                NavigationRailItem(
-//                                    selected = selectedDestination == index,
-//                                    onClick = {
-//                                        if (currentDestination != destination.route) {
-//                                            navController.navigate(destination.route) {
-//                                                launchSingleTop = true
-//                                                restoreState = true
-//                                                popUpTo(navigationDestination.first().route) {
-//                                                    saveState = true
-//                                                }
-//                                            }
-//                                            selectedDestination = index
-//                                        }
-//                                    },
-//                                    label = {
-//                                        Text(
-//                                            text = destination.label,
-//                                            maxLines = 1,
-//                                            overflow = TextOverflow.Ellipsis
-//                                        )
-//                                    },
-//                                    icon = {
-//                                        val iconToShow =
-//                                            if (destination == Screen.Cart) cartIcon else destination.icon
-//                                        val iconColor =
-//                                            if (destination == Screen.Cart) cartIconColor else MaterialTheme.colorScheme.onSurface
-//                                        Icon(
-//                                            imageVector = iconToShow,
-//                                            contentDescription = destination.contentDescription,
-//                                            tint = iconColor
-//                                        )
-//                                    },
-//                                    modifier = Modifier.pointerHoverIcon(if (!isLogin) PointerIcon.Hand else PointerIcon.Default),
-//                                    enabled = !isLogin
-//                                )
-//                            }
-//                        }
-                    }
-                }
                 NavHost(
                     navController = navController,
                     startDestination = Screen.Login.route,
@@ -400,7 +248,8 @@ fun AppNavHost(
                         } else {
                             fadeOut(tween(100))
                         }
-                    }
+                    },
+                    modifier = Modifier.padding(start = if(isWideScreen && !isLogin) 100.dp else 0.dp)
                 ) {
                     composable(Screen.Login.route) {
                         LoginScreen(
@@ -430,11 +279,9 @@ fun AppNavHost(
                             }
                         )
                     }
-
                     composable(Screen.Admin.route) {
                         AdminPanelScreen()
                     }
-
                     composable(Screen.Users.route) {
                         UsersScreen(
                             userViewModel = userViewModel,
@@ -444,7 +291,6 @@ fun AppNavHost(
                             }
                         )
                     }
-
                     composable(Screen.Orders.route) {
                         OrdersScreen(
                             isCompact = isCompactScreen,
@@ -456,7 +302,6 @@ fun AppNavHost(
                             }
                         )
                     }
-
                     composable(Screen.Products.route) {
                         ProductsScreen(
                             isWideScreen = isWideScreen,
@@ -469,7 +314,6 @@ fun AppNavHost(
                             }
                         )
                     }
-
                     composable(Screen.Cart.route) {
                         CartScreen(
                             cartViewModel = cartViewModel,
@@ -486,6 +330,88 @@ fun AppNavHost(
                                 }
                             }
                         )
+                    }
+                }
+                AnimatedContent(
+                    modifier = Modifier.align(Alignment.BottomCenter).pointerInput(Unit){},
+                    targetState = !isWideScreen && !isLogin,
+                    transitionSpec = {
+                        slideIntoContainer(
+                            towards = AnimatedContentTransitionScope.SlideDirection.Up,
+                            animationSpec = tween(durationMillis = 50, delayMillis = 50)
+                        ) togetherWith slideOutOfContainer(
+                            towards = AnimatedContentTransitionScope.SlideDirection.Down,
+                            animationSpec = tween(durationMillis = 50)
+                        )
+                    },
+                    contentAlignment = Alignment.Center
+                ) { state ->
+                    if (state) {
+                        AnimatedNavigationBar(
+                            modifier = Modifier.height(120.dp),
+                            buttons = navigationDestination,
+                            enabled = !isLogin,
+                            selectedItem = selectedDestination,
+                            onClick = { index, destination ->
+                                if (currentDestination != destination.route) {
+                                    navController.navigate(route = destination.route) {
+                                        launchSingleTop = true
+                                        restoreState = true
+                                        popUpTo(navigationDestination.first().route) {
+                                            saveState = true
+                                        }
+                                    }
+                                    selectedDestination = index
+                                }
+                            },
+                            barColor = MaterialTheme.colorScheme.primaryContainer,
+                            circleColor = ExtendedTheme.colorScheme.quaternary.colorContainer,
+                            selectedColor = ExtendedTheme.colorScheme.quaternary.color,
+                            unselectedColor = MaterialTheme.colorScheme.secondary
+                        )
+                    }else{
+                        Box(modifier = Modifier.fillMaxWidth().height(0.dp))
+                    }
+                }
+                AnimatedContent(
+                    modifier = Modifier.align(Alignment.CenterStart).pointerInput(Unit){},
+                    targetState = isWideScreen && !isLogin,
+                    transitionSpec = {
+                        slideIntoContainer(
+                            towards = AnimatedContentTransitionScope.SlideDirection.End,
+                            animationSpec = tween(durationMillis = 50, delayMillis = 50)
+                        ) togetherWith slideOutOfContainer(
+                            towards = AnimatedContentTransitionScope.SlideDirection.Start,
+                            animationSpec = tween(durationMillis = 50)
+                        )
+                    },
+                    contentAlignment = Alignment.Center
+                ) { state ->
+                    if (state) {
+                        AnimatedNavigationRail(
+                            modifier = Modifier.width(120.dp),
+                            enabled = !isLogin,
+                            buttons = navigationDestination,
+                            selectedItem = selectedDestination,
+                            onClick = { index, destination ->
+                                if (currentDestination != destination.route) {
+                                    navController.navigate(route = destination.route) {
+                                        launchSingleTop = true
+                                        restoreState = true
+                                        popUpTo(navigationDestination.first().route) {
+                                            saveState = true
+                                        }
+                                    }
+                                    selectedDestination = index
+                                }
+                            },
+                            barColor = MaterialTheme.colorScheme.primaryContainer,
+                            circleColor = ExtendedTheme.colorScheme.quaternary.colorContainer,
+                            selectedColor = ExtendedTheme.colorScheme.quaternary.color,
+                            unselectedColor = MaterialTheme.colorScheme.secondary
+                        )
+                    } else{
+                        Box(modifier = Modifier.fillMaxHeight().width(0.dp))
                     }
                 }
             }
