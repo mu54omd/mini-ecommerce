@@ -2,12 +2,10 @@ package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateIntOffset
 import androidx.compose.animation.core.snap
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.scaleIn
@@ -20,7 +18,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,13 +26,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
@@ -44,13 +35,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,7 +52,6 @@ import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -101,9 +89,13 @@ private class BarShape(
     }
     private fun getPath(size: Size, density: Density): Path {
         if(isVertical){
-            val cutoutCenterY = offset
             val cutoutRadius = density.run { (circleRadius + circleGap).toPx() }
             val cornerRadiusPx = density.run { cornerRadius.toPx() }
+            val safeOffset = offset.coerceIn(
+                cornerRadiusPx + cutoutRadius * 1.2f,
+                size.height - (cornerRadiusPx + cutoutRadius * 1.2f)
+            )
+            val cutoutCenterY = safeOffset
             val cornerDiameter = cornerRadiusPx * 2
             return Path().apply {
                 val cutoutEdgeOffset = cutoutRadius * 1.5f
@@ -292,6 +284,9 @@ fun AnimatedNavigationBar(
 ) {
 
     val circleRadius = 26.dp
+    val gap = (circleRadius * 0.8f)
+    val gapPx = with(LocalDensity.current) { gap.toPx().toInt() }
+
     var barSize by remember { mutableStateOf(IntSize(0, 0)) }
     // first item's center offset for Arrangement.SpaceAround
     val offsetStep = remember(barSize, buttons) {
@@ -323,7 +318,7 @@ fun AnimatedNavigationBar(
         },
         label = "circle offset"
     ) {
-        IntOffset(it.toInt() - circleRadiusPx, -circleRadiusPx - 20)
+        IntOffset(it.toInt() - circleRadiusPx, -(circleRadiusPx + gapPx))
     }
     val barShape = remember(cutoutOffset) {
         BarShape(
@@ -404,11 +399,18 @@ fun AnimatedNavigationRail(
 ) {
 
     val circleRadius = 26.dp
+    val gap = (circleRadius * 0.8f)
+    val gapPx = with(LocalDensity.current) { gap.toPx().toInt() }
+
     var railHeight by remember { mutableStateOf(0) }
     var itemHeight by remember { mutableStateOf(0) }
     var barSize by remember { mutableStateOf(IntSize(0, 0)) }
 
-    val offset = remember(railHeight, itemHeight, selectedItem, buttons) {
+
+    val density = LocalDensity.current
+    val circleRadiusPx = remember(density, circleRadius) { density.run { circleRadius.toPx() } }
+    val cornerRadiusPx = remember(density) { density.run { 25.dp.toPx() } }
+    val rawOffset = remember(railHeight, itemHeight, selectedItem, buttons) {
         if (railHeight == 0 || itemHeight == 0) 0f
         else {
             val totalItemsHeight = itemHeight * buttons.size
@@ -417,8 +419,14 @@ fun AnimatedNavigationRail(
             topPadding + itemHeight * selectedItem + itemHeight / 2f
         }
     }
-    val circleRadiusPx = LocalDensity.current.run { circleRadius.toPx().toInt() }
-    val offsetTransition = updateTransition(offset, "offset transition")
+    val cutoutRadiusPx = circleRadiusPx + with(density) { 5.dp.toPx() } // circleGap = 5.dp
+    val marginForCornerAndCutout = (cornerRadiusPx + cutoutRadiusPx * 1.2f)
+    val minAllowed = marginForCornerAndCutout
+    val maxAllowed = (railHeight - marginForCornerAndCutout).coerceAtLeast(minAllowed)
+
+    val safeOffset = rawOffset.coerceIn(minAllowed, maxAllowed)
+    val offsetTransition = updateTransition(targetState = safeOffset, label = "offset transition")
+
     val animation = tween<Float>(durationMillis = 100)
     val cutoutOffset by offsetTransition.animateFloat(
         transitionSpec = {
@@ -441,7 +449,7 @@ fun AnimatedNavigationRail(
         label = "circle offset"
     ) {
         IntOffset(
-            x = circleRadiusPx + 20,
+            x = circleRadiusPx.toInt() + gapPx,
             y = (it - circleRadiusPx).toInt()
         )
     }
@@ -583,7 +591,27 @@ fun AnimatedNavigationBarPreview() {
                 buttons = buttons,
                 enabled = true,
                 selectedItem = selectedItem,
-                onClick = {index, screen -> selectedItem = index},
+                onClick = { index, _ -> selectedItem = index},
+                barColor = MaterialTheme.colorScheme.primaryContainer,
+                circleColor = ExtendedTheme.colorScheme.quaternary.colorContainer,
+                selectedColor = ExtendedTheme.colorScheme.quaternary.color,
+                unselectedColor = MaterialTheme.colorScheme.secondary
+            )
+        }
+    }
+}
+@Preview(showBackground = true, widthDp = 500, heightDp = 300)
+@Composable
+fun AnimatedNavigationRailPreview() {
+    Surface(modifier = Modifier.fillMaxSize()) {
+        MiniECommerceTheme(darkTheme = false) {
+            val buttons = listOf(Screen.Products, Screen.Users, Screen.Orders, Screen.Admin)
+            var selectedItem by remember { mutableIntStateOf(0) }
+            AnimatedNavigationRail(
+                buttons = buttons,
+                enabled = true,
+                selectedItem = selectedItem,
+                onClick = { index, _ -> selectedItem = index},
                 barColor = MaterialTheme.colorScheme.primaryContainer,
                 circleColor = ExtendedTheme.colorScheme.quaternary.colorContainer,
                 selectedColor = ExtendedTheme.colorScheme.quaternary.color,

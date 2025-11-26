@@ -25,6 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
@@ -32,13 +34,14 @@ import kotlin.math.roundToInt
 
 @Composable
 fun SwipeableCard(
-    initialOffset: Float = 0f,
-    maxSwipe: Float = 80f,
+    initialOffset: Dp = 0.dp,
+    maxSwipe: Dp = 80.dp,
     onCardClick: () -> Unit,
     content: @Composable () -> Unit,
     actions: @Composable RowScope.() -> Unit,
 ) {
-    val animatableOffset = remember { Animatable(initialOffset) }
+    val density = LocalDensity.current
+    val animOffsetDp = remember { Animatable(initialOffset.value) }
     val scope = rememberCoroutineScope()
 
     Box(
@@ -56,16 +59,19 @@ fun SwipeableCard(
 
         Box(
             modifier = Modifier
-                .offset { IntOffset(animatableOffset.value.roundToInt(), 0) }
+                .offset {
+                    val px = with(density) { animOffsetDp.value.dp.roundToPx() }
+                    IntOffset(px, 0)
+                }
                 .pointerHoverIcon(icon = PointerIcon.Hand)
                 .pointerInput(Unit) {
                     detectTapGestures(
                         onTap = {
                             scope.launch {
-                                val isOpen = animatableOffset.value != 0f
+                                val isOpen = animOffsetDp.value != 0f
                                 println(isOpen)
                                 if (isOpen) {
-                                        animatableOffset.animateTo(0f)
+                                        animOffsetDp.animateTo(0f)
                                 } else {
                                     onCardClick()
                                 }
@@ -76,22 +82,20 @@ fun SwipeableCard(
                 .pointerInput(Unit) {
                     detectHorizontalDragGestures(
                         onDragEnd = {
-                            val target = if (animatableOffset.value > -maxSwipe / 2f) 0f else -maxSwipe
+                            val half = -maxSwipe.value / 2f
+                            val target = if (animOffsetDp.value > half) 0f else -maxSwipe.value
                             scope.launch {
-                                animatableOffset.animateTo(
+                                animOffsetDp.animateTo(
                                     target,
-                                    animationSpec = tween(
-                                        durationMillis = 250,
-                                        easing = FastOutSlowInEasing
-                                    )
+                                    tween(250, easing = FastOutSlowInEasing)
                                 )
                             }
                         },
                     ) { change, dragAmount ->
                         change.consume()
-                        val newOffset = animatableOffset.value + dragAmount
                         scope.launch {
-                            animatableOffset.snapTo(newOffset.coerceIn(-maxSwipe, 0f))
+                            val new = animOffsetDp.value + with(density) { dragAmount.toDp().value }
+                            animOffsetDp.snapTo(new.coerceIn(-maxSwipe.value, 0f))
                         }
                     }
                 }

@@ -19,8 +19,12 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Mail
 import androidx.compose.material.icons.filled.SupervisorAccount
 import androidx.compose.material.icons.filled.Timelapse
+import androidx.compose.material.icons.outlined.DateRange
+import androidx.compose.material.icons.outlined.Mail
+import androidx.compose.material.icons.outlined.Timelapse
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -31,6 +35,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Size
@@ -39,6 +44,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -59,7 +65,7 @@ fun UserCard(
     val userColor = MaterialTheme.colorScheme.tertiaryContainer
     val shapeColor by remember { mutableStateOf(if (user.role == "ADMIN") adminColor else userColor) }
     SwipeableCard(
-        maxSwipe = 100f,
+        maxSwipe = 100.dp,
         onCardClick = onCardClick,
         content = {
             UserCardContent(
@@ -110,7 +116,7 @@ fun UserCardContent(
     shapeColor: Color,
 ) {
     val animatedHeight by animateDpAsState(
-        targetValue = if (isExpanded) 140.dp else 52.dp
+        targetValue = if (isExpanded) 140.dp else 50.dp
     )
     val iconScale by animateFloatAsState(
         targetValue = if(isExpanded) 1f else 0.9f
@@ -123,6 +129,7 @@ fun UserCardContent(
     ) {
         Row(
             modifier = Modifier
+                .height(50.dp)
                 .padding(2.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
@@ -165,7 +172,7 @@ fun UserCardContent(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 4.dp, end = 6.dp)
+                .padding(5.dp)
                 .drawBehind {
                     drawRoundRect(
                         color = shapeColor,
@@ -175,17 +182,17 @@ fun UserCardContent(
         ) {
             DetailsUserCardItem(
                 text = user.email,
-                icon = Icons.Default.Mail,
-                description = "User Email Address"
+                icon = Icons.Outlined.Mail,
+                description = "User Email Address",
             )
             DetailsUserCardItem(
                 text = createdDate,
-                icon = Icons.Default.DateRange,
+                icon = Icons.Outlined.DateRange,
                 description = "User Creation Date"
             )
             DetailsUserCardItem(
                 text = createdTime,
-                icon = Icons.Default.Timelapse,
+                icon = Icons.Outlined.Timelapse,
                 description = "User Creation Time"
             )
         }
@@ -206,6 +213,7 @@ fun DetailsUserCardItem(
             imageVector = icon,
             contentDescription = description,
             modifier = Modifier.padding(start = 10.dp, end = 10.dp),
+            tint = LocalContentColor.current.copy(alpha = 0.7f)
         )
         VerticalDivider(
             thickness = 4.dp,
@@ -215,11 +223,15 @@ fun DetailsUserCardItem(
         Text(
             text = text,
             style = MaterialTheme.typography.bodySmall,
+            fontStyle = FontStyle.Italic,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier
                 .width(150.dp)
                 .padding(4.dp)
+                .graphicsLayer{
+                    alpha = 0.8f
+                }
         )
     }
 }
