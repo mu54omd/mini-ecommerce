@@ -52,6 +52,7 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.AppThemeExtras
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.ExtendedTheme
 
 @Composable
@@ -61,28 +62,12 @@ fun SearchBar(
     onClearQuery: () -> Unit,
 ) {
     var searchBarText by remember { mutableStateOf("") }
-    val primaryColor = MaterialTheme.colorScheme.primary
-    val secondaryColor = MaterialTheme.colorScheme.secondary
-    val tertiaryColor = MaterialTheme.colorScheme.tertiary
-    val errorColor = MaterialTheme.colorScheme.error
-    val quaternaryColor = ExtendedTheme.colorScheme.quaternary.color
-    val quinaryColor = ExtendedTheme.colorScheme.quinary.color
+
     var isCompact by remember { mutableStateOf(true) }
     val animatedWidth by animateDpAsState(
         targetValue = if (isCompact) 40.dp else 200.dp
     )
-    val lineBrush = remember {
-        Brush.linearGradient(
-            colors = listOf(
-                primaryColor,
-                secondaryColor,
-                tertiaryColor,
-                errorColor,
-                quinaryColor,
-                quaternaryColor
-            ).shuffled()
-        )
-    }
+    val lineBrush = AppThemeExtras.brushes.lineBrush
 
     val searchBarFocusRequester = remember { FocusRequester() }
 

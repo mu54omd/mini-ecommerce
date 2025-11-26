@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.RegisterResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.AuthViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.AppThemeExtras
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.ExtendedTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -78,18 +79,8 @@ fun LoginScreen(
     var haveAnAccount by remember { mutableStateOf(true) }
     val scope = rememberCoroutineScope()
 
-    val primaryColor = MaterialTheme.colorScheme.primary
-    val secondaryColor = MaterialTheme.colorScheme.secondary
-    val tertiaryColor = MaterialTheme.colorScheme.tertiary
-    val errorColor = MaterialTheme.colorScheme.error
-    val quaternaryColor = ExtendedTheme.colorScheme.quaternary.color
-    val quinaryColor = ExtendedTheme.colorScheme.quinary.color
 
-    val lineBrush = remember {
-        Brush.linearGradient(
-            colors = listOf(primaryColor, secondaryColor, tertiaryColor, errorColor, quinaryColor, quaternaryColor).shuffled()
-        )
-    }
+    val lineBrush = AppThemeExtras.brushes.lineBrush
 
     val usernameFocusRequester = remember { FocusRequester() }
     val passwordFocusRequester = remember { FocusRequester() }

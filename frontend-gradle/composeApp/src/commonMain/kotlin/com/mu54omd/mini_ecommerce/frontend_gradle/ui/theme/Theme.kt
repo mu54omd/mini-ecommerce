@@ -7,7 +7,9 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
 @Immutable
@@ -334,6 +336,8 @@ val extendedDarkHighContrast = ExtendedColorScheme(
     ),
 )
 
+
+// Custom Extended Theme
 @Immutable
 data class ColorFamily(
     val color: Color,
@@ -358,25 +362,56 @@ object ExtendedTheme {
         @Composable get() = LocalExtendedColorScheme.current
 }
 
+// Custom Global Brush
+data class AppBrushes(
+    val lineBrush: Brush
+)
+
+val unspecified_brush = AppBrushes(
+    lineBrush = Brush.linearGradient(
+        colors = listOf(Color.Unspecified, Color.Unspecified)
+    )
+)
+
+val LocalAppBrushes = staticCompositionLocalOf {
+    unspecified_brush
+}
+
+object AppThemeExtras {
+    val brushes: AppBrushes
+        @Composable get() = LocalAppBrushes.current
+}
+
 @Composable
 fun MiniECommerceTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
     content: @Composable() () -> Unit
 ) {
     val colorScheme = when {
-//      dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-//          val context = LocalContext.current
-//          if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-//      }
         darkTheme -> darkScheme
         else -> lightScheme
     }
     val extended = if (darkTheme) extendedDark else extendedLight
 
+    val brushes = remember(colorScheme, extended) {
+        AppBrushes(
+            lineBrush = Brush.linearGradient(
+                colors = listOf(
+                    colorScheme.primary,
+                    colorScheme.secondary,
+                    colorScheme.tertiary,
+                    colorScheme.error,
+                    colorScheme.inversePrimary,
+                    extended.quinary.color,
+                    extended.quaternary.color
+                )
+            )
+        )
+    }
+
     CompositionLocalProvider(
-        LocalExtendedColorScheme provides extended
+        LocalExtendedColorScheme provides extended,
+        LocalAppBrushes provides brushes
     ) {
         MaterialTheme(
             colorScheme = colorScheme,

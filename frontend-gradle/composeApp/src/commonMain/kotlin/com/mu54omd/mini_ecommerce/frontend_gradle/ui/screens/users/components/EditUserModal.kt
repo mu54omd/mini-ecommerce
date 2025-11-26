@@ -47,6 +47,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.UserEditRequest
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.UserResponse
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.AppBrushes
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.AppThemeExtras
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.ExtendedTheme
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -65,19 +67,8 @@ fun EditUserModal(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
 
-    val primaryColor = MaterialTheme.colorScheme.primary
-    val secondaryColor = MaterialTheme.colorScheme.secondary
-    val tertiaryColor = MaterialTheme.colorScheme.tertiary
-    val errorColor = MaterialTheme.colorScheme.error
-    val inversePrimaryColor = MaterialTheme.colorScheme.inversePrimary
-    val quaternaryColor = ExtendedTheme.colorScheme.quaternary.color
-    val quinaryColor = ExtendedTheme.colorScheme.quinary.color
 
-    val lineBrush = remember {
-        Brush.linearGradient(
-            colors = listOf(primaryColor, secondaryColor, tertiaryColor, errorColor, inversePrimaryColor, quinaryColor, quaternaryColor).shuffled()
-        )
-    }
+    val lineBrush = AppThemeExtras.brushes.lineBrush
 
     val userColor = MaterialTheme.colorScheme.tertiaryContainer
     val adminColor = MaterialTheme.colorScheme.errorContainer

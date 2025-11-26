@@ -12,6 +12,7 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -27,6 +28,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
@@ -45,12 +47,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
@@ -66,6 +70,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.navigation.Screen
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.AppThemeExtras
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.ExtendedTheme
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.MiniECommerceTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -246,12 +251,17 @@ private fun Circle(
     button: Screen,
     iconColor: Color,
 ) {
+    val lineBrush = AppThemeExtras.brushes.lineBrush
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
             .size(radius * 2)
-            .clip(CircleShape)
-            .background(color),
+            .background(color, shape = CircleShape)
+            .border(
+                width = 2.dp,
+                brush = lineBrush,
+                shape = CircleShape
+            )
     ) {
         AnimatedContent(
             targetState = button.icon,
@@ -264,7 +274,7 @@ private fun Circle(
             Icon(
                 imageVector = targetIcon,
                 contentDescription =  button.contentDescription,
-                tint = iconColor
+                tint = iconColor,
             )
         }
     }

@@ -46,6 +46,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.Product
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.AppThemeExtras
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.ExtendedColorScheme
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.ExtendedTheme
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.LocalExtendedColorScheme
@@ -69,18 +70,8 @@ fun AddEditProductModal(
     var productPrice by rememberSaveable { mutableStateOf(product.price.toString()) }
     var productStocks by rememberSaveable { mutableStateOf(product.stock.toString()) }
 
-    val primaryColor = MaterialTheme.colorScheme.primary
-    val secondaryColor = MaterialTheme.colorScheme.secondary
-    val tertiaryColor = MaterialTheme.colorScheme.tertiary
-    val errorColor = MaterialTheme.colorScheme.error
-    val quaternaryColor = ExtendedTheme.colorScheme.quaternary.color
-    val quinaryColor = ExtendedTheme.colorScheme.quinary.color
 
-    val lineBrush = remember {
-        Brush.linearGradient(
-            colors = listOf(primaryColor, secondaryColor, tertiaryColor, errorColor, quinaryColor, quaternaryColor).shuffled()
-        )
-    }
+    val lineBrush = AppThemeExtras.brushes.lineBrush
 
     ModalBottomSheet(
         onDismissRequest = onCancelClick,
