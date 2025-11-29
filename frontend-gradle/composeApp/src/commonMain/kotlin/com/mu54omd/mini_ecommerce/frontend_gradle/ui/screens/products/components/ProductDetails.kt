@@ -30,7 +30,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -38,7 +37,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.Product
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.Constants.BASE_URL
+import com.mu54omd.mini_ecommerce.frontend_gradle.config.GeneratedConfig.BASE_URL
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.CustomAsyncImage
 
 

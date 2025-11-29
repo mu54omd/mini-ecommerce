@@ -1,7 +1,7 @@
 package com.mu54omd.mini_ecommerce.frontend_gradle.api
 
 import com.mu54omd.mini_ecommerce.frontend_gradle.storage.SessionManager
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.Constants.BASE_URL_API_CLIENT
+import com.mu54omd.mini_ecommerce.frontend_gradle.config.GeneratedConfig.BASE_URL_API_CLIENT
 import io.ktor.client.HttpClient
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.delete

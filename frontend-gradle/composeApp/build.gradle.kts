@@ -39,6 +39,8 @@ kotlin {
             implementation(libs.ktor.client.okhttp)
             implementation(libs.ktor.client.android)
             implementation(libs.koin.android)
+            implementation(libs.androidx.datastore)
+            implementation(libs.androidx.datastore.preferences)
 
         }
         commonMain.dependencies {
@@ -73,6 +75,8 @@ kotlin {
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutinesSwing)
+            implementation(libs.androidx.datastore)
+            implementation(libs.androidx.datastore.preferences)
         }
         webMain.dependencies {
             implementation(libs.ktor.client.js)

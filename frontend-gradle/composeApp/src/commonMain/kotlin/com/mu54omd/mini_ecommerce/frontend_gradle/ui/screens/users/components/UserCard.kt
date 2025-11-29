@@ -9,16 +9,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Mail
 import androidx.compose.material.icons.filled.SupervisorAccount
-import androidx.compose.material.icons.filled.Timelapse
 import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.Mail
 import androidx.compose.material.icons.outlined.Timelapse
@@ -35,10 +31,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -63,7 +57,6 @@ fun UserCard(
 ) {
     val adminColor = MaterialTheme.colorScheme.errorContainer
     val userColor = MaterialTheme.colorScheme.tertiaryContainer
-    val shapeColor by remember { mutableStateOf(if (user.role == "ADMIN") adminColor else userColor) }
     SwipeableCard(
         maxSwipe = 100.dp,
         onCardClick = onCardClick,
@@ -71,7 +64,7 @@ fun UserCard(
             UserCardContent(
                 user = user,
                 isExpanded = isExpanded,
-                shapeColor = shapeColor,
+                shapeColor = if (user.role == "ADMIN") adminColor else userColor,
             )
         },
         actions = {

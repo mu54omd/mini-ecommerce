@@ -9,8 +9,10 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideIn
+import androidx.compose.animation.slideOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -28,10 +30,15 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.ShoppingCartCheckout
+import androidx.compose.material.icons.outlined.DarkMode
+import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarDefaults
@@ -63,6 +70,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.toIntRect
 import androidx.compose.ui.zIndex
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -96,7 +104,9 @@ fun AppNavHost(
     productViewModel: ProductViewModel = koinViewModel<ProductViewModel>(),
     orderViewModel: OrderViewModel = koinViewModel<OrderViewModel>(),
     cartViewModel: CartViewModel = koinViewModel<CartViewModel>(),
-    userViewModel: UserViewModel = koinViewModel<UserViewModel>()
+    userViewModel: UserViewModel = koinViewModel<UserViewModel>(),
+    isDarkTheme: Boolean = false,
+    onToggleTheme: () -> Unit,
 ) {
     val navController = rememberNavController()
     val tokenState = authViewModel.tokenState.collectAsState().value
@@ -194,6 +204,36 @@ fun AppNavHost(
                                     onQuery = { query -> orderViewModel.setSearchQuery(query = query) },
                                     onClearQuery = { orderViewModel.setSearchQuery(query = null) },
                                 )
+                            }
+                        }
+                        IconButton(
+                            onClick = onToggleTheme,
+                            modifier = Modifier.pointerHoverIcon(if (!isLogin) PointerIcon.Hand else PointerIcon.Default),
+                            enabled = !isLogin
+                        ){
+                            AnimatedContent(
+                                targetState = isDarkTheme,
+                                transitionSpec = {
+                                    scaleIn(
+                                        animationSpec = tween(durationMillis = 50),
+                                    ) togetherWith
+                                            scaleOut(
+                                                animationSpec = tween(durationMillis = 50))
+                                }
+                            ) { state ->
+                                if(!state) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.DarkMode,
+                                        contentDescription = "Dark Theme",
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                }else {
+                                    Icon(
+                                        imageVector = Icons.Outlined.LightMode,
+                                        contentDescription = "Light Theme",
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                }
                             }
                         }
                         TextButton(
@@ -365,8 +405,8 @@ fun AppNavHost(
                                 }
                             },
                             barColor = MaterialTheme.colorScheme.primaryContainer,
-                            circleColor = ExtendedTheme.colorScheme.quaternary.colorContainer,
-                            selectedColor = ExtendedTheme.colorScheme.quaternary.color,
+                            circleColor = ExtendedTheme.colorScheme.quinary.colorContainer,
+                            selectedColor = ExtendedTheme.colorScheme.quinary.color,
                             unselectedColor = MaterialTheme.colorScheme.secondary
                         )
                     }else{
@@ -406,8 +446,8 @@ fun AppNavHost(
                                 }
                             },
                             barColor = MaterialTheme.colorScheme.primaryContainer,
-                            circleColor = ExtendedTheme.colorScheme.quaternary.colorContainer,
-                            selectedColor = ExtendedTheme.colorScheme.quaternary.color,
+                            circleColor = ExtendedTheme.colorScheme.quinary.colorContainer,
+                            selectedColor = ExtendedTheme.colorScheme.quinary.color,
                             unselectedColor = MaterialTheme.colorScheme.secondary
                         )
                     } else{

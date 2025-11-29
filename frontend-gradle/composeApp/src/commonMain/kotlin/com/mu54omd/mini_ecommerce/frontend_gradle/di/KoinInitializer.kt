@@ -7,6 +7,6 @@ fun initKoin(appDeclaration: KoinAppDeclaration = {}) =
     startKoin {
         appDeclaration()
         modules(
-            appModule + sessionManagerModule
+            appModule + sessionManagerModule + themeModule
         )
     }

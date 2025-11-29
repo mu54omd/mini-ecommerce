@@ -69,7 +69,6 @@ fun SwipeableCard(
                         onTap = {
                             scope.launch {
                                 val isOpen = animOffsetDp.value != 0f
-                                println(isOpen)
                                 if (isOpen) {
                                         animOffsetDp.animateTo(0f)
                                 } else {
