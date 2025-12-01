@@ -2,52 +2,30 @@ package com.mu54omd.mini_ecommerce.frontend_gradle.ui.navigation
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.animation.slideIn
-import androidx.compose.animation.slideOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.sizeIn
-import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.ShoppingCartCheckout
-import androidx.compose.material.icons.outlined.DarkMode
-import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarDefaults
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationRail
-import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -60,41 +38,34 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.toIntRect
-import androidx.compose.ui.zIndex
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.model.UserRole
-import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.UserViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.AuthViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.CartViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.OrderViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.ProductViewModel
+import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.UserViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.admin.AdminPanelScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.cart.CartScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.AnimatedNavigationBar
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.AnimatedNavigationRail
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.MainMenu
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.SearchBar
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.login.LoginScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.orders.OrdersScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.products.ProductsScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.users.UsersScreen
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.SearchBar
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.ExtendedTheme
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.MiniECommerceTheme
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.extendedLight
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -161,6 +132,7 @@ fun AppNavHost(
         val isCompactScreen by remember(maxWidth) {
             derivedStateOf { maxWidth < 450.dp }
         }
+        var isMainMenuHidden by remember { mutableStateOf(true) }
 
         Scaffold(
             topBar = {
@@ -207,37 +179,22 @@ fun AppNavHost(
                             }
                         }
                         IconButton(
-                            onClick = onToggleTheme,
+                            onClick = {
+                                isMainMenuHidden = !isMainMenuHidden
+                            },
                             modifier = Modifier.pointerHoverIcon(if (!isLogin) PointerIcon.Hand else PointerIcon.Default),
                             enabled = !isLogin
                         ){
-                            AnimatedContent(
-                                targetState = isDarkTheme,
-                                transitionSpec = {
-                                    scaleIn(
-                                        animationSpec = tween(durationMillis = 50),
-                                    ) togetherWith
-                                            scaleOut(
-                                                animationSpec = tween(durationMillis = 50))
-                                }
-                            ) { state ->
-                                if(!state) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.DarkMode,
-                                        contentDescription = "Dark Theme",
-                                        tint = MaterialTheme.colorScheme.primary
-                                    )
-                                }else {
-                                    Icon(
-                                        imageVector = Icons.Outlined.LightMode,
-                                        contentDescription = "Light Theme",
-                                        tint = MaterialTheme.colorScheme.primary
-                                    )
-                                }
-                            }
+                            Icon(
+                                imageVector = Icons.Default.MoreVert,
+                                contentDescription = "Main Menu Icon"
+                            )
                         }
-                        TextButton(
-                            onClick = {
+                        MainMenu(
+                            isExpanded = !isMainMenuHidden,
+                            isDarkTheme = isDarkTheme,
+                            onToggleTheme = onToggleTheme,
+                            onLogoutClick = {
                                 authViewModel.logout()
                                 navController.navigate(Screen.Login.route) {
                                     popUpTo(navController.graph.id) {
@@ -247,24 +204,8 @@ fun AppNavHost(
                                 }
                                 selectedDestination = navigationDestination.indices.first
                             },
-                            modifier = Modifier.pointerHoverIcon(if (!isLogin) PointerIcon.Hand else PointerIcon.Default),
-                            enabled = !isLogin
-                        ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.Logout,
-                                contentDescription = "Logout",
-                            )
-                            AnimatedContent(targetState = isCompactScreen) { state ->
-                                if (!state) {
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text(
-                                        text = "Logout",
-                                        overflow = TextOverflow.Ellipsis,
-                                        maxLines = 1
-                                    )
-                                }
-                            }
-                        }
+                            onDismiss = { isMainMenuHidden = !isMainMenuHidden }
+                        )
                     }
                 }
             }
