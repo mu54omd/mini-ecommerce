@@ -17,6 +17,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -57,7 +59,8 @@ fun MainMenu(
                     )
                 }
             },
-            onClick = onToggleTheme
+            onClick = onToggleTheme,
+            modifier = Modifier.pointerHoverIcon(icon = PointerIcon.Hand)
         )
         DropdownMenuItem(
             text = {
@@ -85,7 +88,8 @@ fun MainMenu(
             onClick = {
                 onDismiss()
                 onLogoutClick()
-            }
+            },
+            modifier = Modifier.pointerHoverIcon(icon = PointerIcon.Hand)
         )
     }
 }
