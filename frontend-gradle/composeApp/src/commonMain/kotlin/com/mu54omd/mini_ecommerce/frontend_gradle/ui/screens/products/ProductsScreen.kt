@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -18,23 +16,20 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.PointerIcon
-import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.Product
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.model.UserRole
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.CartViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.ProductViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.EmptyPage
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.LoadingView
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.AlertModal
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.DeleteModal
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.EmptyPage
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.LoadingView
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.products.components.AddEditProductModal
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.products.components.ProductList
 import frontend_gradle.composeapp.generated.resources.Res
@@ -56,6 +51,8 @@ fun ProductsScreen(
     productViewModel: ProductViewModel,
     cartViewModel: CartViewModel,
     userRole: UserRole,
+    addProductModalState: Boolean,
+    onAddProductModalChange: (Boolean) -> Unit,
     onExit: (UiState<*>) -> Unit,
 ) {
     val productsState = productViewModel.productsState.collectAsState().value
@@ -64,7 +61,6 @@ fun ProductsScreen(
     val deactivateProduct = productViewModel.deactivateProduct.collectAsState().value
     val uploadProductImageState = productViewModel.uploadProductImageState.collectAsState().value
 
-    var addProductModalState by remember { mutableStateOf(false) }
     var editProductModalState by remember { mutableStateOf(false) }
     var deleteProductModalState by remember { mutableStateOf(false) }
     var showAlertModalState by remember { mutableStateOf(false) }
@@ -98,7 +94,7 @@ fun ProductsScreen(
         mode = FileKitMode.Single,
         title = "Add Product Image"
     ) { file ->
-        addProductModalState = true
+        onAddProductModalChange(true)
         file?.let {
             tempImageFile = file
         }
@@ -140,16 +136,6 @@ fun ProductsScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxSize().padding(16.dp)
                 ) {
-                    if (userRole == UserRole.ADMIN) {
-                        TextButton(
-                            onClick = {
-                                addProductModalState = true
-                            },
-                            modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
-                        ) {
-                            Text("Add Product")
-                        }
-                    }
                     ProductList(
                         isWideScreen = isWideScreen,
                         lazyGridState = lazyGridState,
@@ -183,7 +169,7 @@ fun ProductsScreen(
                                         price = 0.0,
                                         stock = 0
                                     )
-                                    addProductModalState = false
+                                    onAddProductModalChange(false)
                                     productViewModel.resetAddProductState()
                                 }
                             },
@@ -196,12 +182,12 @@ fun ProductsScreen(
                                         stock = stocks
                                     )
                                 )
-                                addProductModalState = false
+                                onAddProductModalChange(false)
                             },
                             onUploadImageClick = { name, description, price, stocks ->
                                 scope.launch {
                                     sheetState.hide()
-                                    addProductModalState = false
+                                    onAddProductModalChange(false)
                                     selectedProduct = Product(
                                         name = name,
                                         description = description,
@@ -244,7 +230,7 @@ fun ProductsScreen(
                                 )
                                 editProductModalState = false
                             },
-                            onUploadImageClick = { name, description, price, stocks ->
+                            onUploadImageClick = { _, _, _, _ ->
                                 scope.launch {
                                     sheetState.hide()
                                     editProductModalState = false

@@ -40,6 +40,7 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.product.EditPro
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.product.GetProductsUseCase
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.product.SearchProductsUseCase
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.product.UploadProductImageUseCase
+import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.user.CreateUserUseCase
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.user.DeleteUserUseCase
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.user.EditUserUseCase
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.user.GetAllUsersUseCase
@@ -112,10 +113,11 @@ val appModule = module {
 
     // Order Use Cases
     single { DeleteUserUseCase(get(), get(), get()) }
+    single { CreateUserUseCase(get(), get(), get()) }
     single { EditUserUseCase(get(), get(), get()) }
     single { GetAllUsersUseCase(get(), get(), get()) }
 
-    single { UserUseCases(get(), get(), get()) }
+    single { UserUseCases(get(),get(), get(), get()) }
 
     // ViewModels
     viewModel { ProductViewModel(get()) }

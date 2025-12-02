@@ -2,6 +2,7 @@ package com.mu54omd.mini_ecommerce.frontend_gradle.ui.navigation
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -14,15 +15,21 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.ShoppingCartCheckout
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -38,11 +45,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -133,6 +142,8 @@ fun AppNavHost(
             derivedStateOf { maxWidth < 450.dp }
         }
         var isMainMenuHidden by remember { mutableStateOf(true) }
+        var addProductModalState by remember { mutableStateOf(false) }
+        var addUserModalState by remember { mutableStateOf(false) }
 
         Scaffold(
             topBar = {
@@ -213,6 +224,7 @@ fun AppNavHost(
             Box(
                 modifier = Modifier.padding(contentPadding)
             ) {
+
                 NavHost(
                     navController = navController,
                     startDestination = Screen.Login.route,
@@ -266,6 +278,8 @@ fun AppNavHost(
                     composable(Screen.Users.route) {
                         UsersScreen(
                             userViewModel = userViewModel,
+                            addUserModalState = addUserModalState,
+                            onAddUserStateChange = { state -> addUserModalState = state },
                             onExit = { state ->
                                 authViewModel.logout(state)
                                 userViewModel.resetAllStates()
@@ -289,6 +303,8 @@ fun AppNavHost(
                             productViewModel = productViewModel,
                             cartViewModel = cartViewModel,
                             userRole = userState.role,
+                            addProductModalState = addProductModalState,
+                            onAddProductModalChange = { state -> addProductModalState = state},
                             onExit = { state ->
                                 authViewModel.logout(state)
                                 productViewModel.resetAllStates()
@@ -396,9 +412,49 @@ fun AppNavHost(
                     }
                 }
             }
+            if(userState.role == UserRole.ADMIN){
+                val offsetY by animateDpAsState(
+                    targetValue = if(isWideScreen) (-64).dp else (-100).dp
+                )
+                if(currentDestination == Screen.Products.route || currentDestination == Screen.Users.route){
+                    IconButton(
+                        onClick = {
+                            if(currentDestination == Screen.Products.route) {
+                                addProductModalState = true
+                            } else if(currentDestination == Screen.Users.route){
+                                addUserModalState = true
+                            }
+                        },
+                        colors = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = ExtendedTheme.colorScheme.quinary.colorContainer
+                        ),
+                        modifier = Modifier
+                            .offset{ IntOffset(x = (-32).dp.toPx().toInt(), y = offsetY.toPx().toInt()) }
+                            .pointerHoverIcon(icon = PointerIcon.Hand)
+                            .shadow(elevation = 4.dp, shape = CircleShape)
+                            .size(60.dp)
+                            .align(Alignment.BottomEnd)
+                    ){
+                        AnimatedContent(
+                            targetState = currentDestination
+                        ){ state ->
+                            if(state == Screen.Products.route){
+                                Icon(
+                                    imageVector = Icons.Default.Add,
+                                    contentDescription = "Add Product Icon"
+                                )
+                            }else if(state == Screen.Users.route){
+                                Icon(
+                                    imageVector = Icons.Default.PersonAdd,
+                                    contentDescription = "Add User Icon"
+                                )
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
-
 }
 
 

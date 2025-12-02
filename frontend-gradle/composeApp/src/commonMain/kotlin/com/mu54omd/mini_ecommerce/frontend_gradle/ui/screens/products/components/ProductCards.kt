@@ -80,7 +80,7 @@ fun ProductCards(
         ProductBanner(
             products = products.subList(0,5)
         )
-        Spacer(modifier = Modifier.height(6.dp))
+        Spacer(modifier = Modifier.height(10.dp))
         LazyVerticalGrid(
             modifier = modifier,
             columns = GridCells.Adaptive(180.dp),

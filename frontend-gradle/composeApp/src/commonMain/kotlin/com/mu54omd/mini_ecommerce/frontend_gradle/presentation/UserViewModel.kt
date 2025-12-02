@@ -19,6 +19,9 @@ class UserViewModel(
     private val _usersState = MutableStateFlow<UiState<List<UserResponse>>>(UiState.Idle)
     val usersState = _usersState.asStateFlow()
 
+    private val _createUserState = MutableStateFlow<UiState<UserResponse>>(UiState.Idle)
+    val createUserState = _createUserState.asStateFlow()
+
     private val _deleteUserState = MutableStateFlow<UiState<Unit>>(UiState.Idle)
     val deleteUserState = _deleteUserState.asStateFlow()
 
@@ -30,6 +33,7 @@ class UserViewModel(
 
     fun resetAllStates() {
         resetUsersState()
+        resetCreateUserState()
         resetDeleteUserState()
         resetEditUserState()
     }
@@ -40,6 +44,9 @@ class UserViewModel(
 
     fun resetDeleteUserState(){
         _deleteUserState.update { UiState.Idle }
+    }
+    fun resetCreateUserState(){
+        _createUserState.update { UiState.Idle }
     }
 
     fun resetEditUserState(){
@@ -56,6 +63,14 @@ class UserViewModel(
         }
     }
 
+    fun createUser(newUser: UserEditRequest){
+        viewModelScope.launch {
+            _createUserState.update { UiState.Loading }
+            val result = userUseCases.createUserUseCase(newUser)
+            _createUserState.update { result.toUiState()}
+        }
+    }
+
     fun deleteUser(userId: Long) {
         viewModelScope.launch {
             _deleteUserState.update { UiState.Loading }
@@ -64,10 +79,10 @@ class UserViewModel(
         }
     }
 
-    fun editUser(userId: Long, newUser: UserEditRequest) {
+    fun editUser(userId: Long, userRequest: UserEditRequest) {
         viewModelScope.launch {
             _editUserState.update { UiState.Loading }
-            val result = userUseCases.editUserUseCase(userId, newUser);
+            val result = userUseCases.editUserUseCase(userId, userRequest);
             _editUserState.update { result.toUiState() }
         }
     }

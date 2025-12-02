@@ -35,7 +35,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.pointer.PointerIcon
@@ -47,15 +46,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.UserEditRequest
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.UserResponse
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.AppBrushes
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.AppThemeExtras
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.ExtendedTheme
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditUserModal(
+fun AddEditUserModal(
     user: UserResponse,
     onCancelClick: () -> Unit,
     onConfirmClick: (UserEditRequest) -> Unit,
@@ -239,7 +236,7 @@ fun EditUserModal(
 @Preview
 fun EditUserDialogPreview() {
     MaterialTheme {
-        EditUserModal(
+        AddEditUserModal(
             user = UserResponse(
                 id = 2,
                 "musa",

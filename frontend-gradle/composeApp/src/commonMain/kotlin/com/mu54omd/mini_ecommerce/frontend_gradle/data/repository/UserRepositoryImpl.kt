@@ -9,8 +9,8 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.domain.repository.UserReposito
 class UserRepositoryImpl(private val api: ApiClient): UserRepository {
 
     override suspend fun getAllUsers(): ApiResult<List<UserResponse>> = api.get("/users")
-    override suspend fun deleteUser(userId: Long): ApiResult<Unit> = api.delete("/users/${userId}")
-    override suspend fun editUser(userId: Long, user: UserEditRequest): ApiResult<UserResponse> =
-        api.put("/users/${userId}", user)
+    override suspend fun createUser(user: UserEditRequest): ApiResult<UserResponse> = api.post("/users",user)
 
+    override suspend fun deleteUser(userId: Long): ApiResult<Unit> = api.delete("/users/${userId}")
+    override suspend fun editUser(userId: Long, user: UserEditRequest): ApiResult<UserResponse> = api.put("/users/${userId}", user)
 }

@@ -20,12 +20,13 @@ import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.UserResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.UserViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.LoadingView
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.AlertModal
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.DeleteModal
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.users.components.EditUserModal
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.LoadingView
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.users.components.AddEditUserModal
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.users.components.UserCard
 import frontend_gradle.composeapp.generated.resources.Res
+import frontend_gradle.composeapp.generated.resources.create_user_successful_alert
 import frontend_gradle.composeapp.generated.resources.delete_user_successful_alert
 import frontend_gradle.composeapp.generated.resources.edit_user_successful_alert
 import frontend_gradle.composeapp.generated.resources.error_alert
@@ -34,10 +35,13 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun UsersScreen(
     userViewModel: UserViewModel,
+    addUserModalState: Boolean,
+    onAddUserStateChange: (Boolean) -> Unit,
     onExit: (UiState<*>) -> Unit
 ) {
 
     val usersState = userViewModel.usersState.collectAsState().value
+    val createUserState = userViewModel.createUserState.collectAsState().value
     val deleteUserState = userViewModel.deleteUserState.collectAsState().value
     val editUserState = userViewModel.editUserState.collectAsState().value
 
@@ -84,12 +88,22 @@ fun UsersScreen(
                     }
                 }
                 if(editUserModalState) {
-                    EditUserModal(
+                    AddEditUserModal(
                         user = editUserRequest,
                         onCancelClick = { editUserModalState = false },
                         onConfirmClick = { user ->
                             userViewModel.editUser(editUserRequest.id, user)
                             editUserModalState = false
+                        }
+                    )
+                }
+                if(addUserModalState) {
+                    AddEditUserModal(
+                        user = UserResponse(),
+                        onCancelClick = { onAddUserStateChange(false) },
+                        onConfirmClick = { user ->
+                            userViewModel.createUser(user)
+                            onAddUserStateChange(false)
                         }
                     )
                 }
@@ -107,6 +121,28 @@ fun UsersScreen(
                             selectedUserForDelete = -1
                         }
                     )
+                }
+                when(createUserState){
+                    is UiState.Idle -> {}
+                    is UiState.Loading -> {}
+                    else -> {
+                        alertModalState = true
+                        if(alertModalState) {
+                            AlertModal(
+                                message =
+                                    if(createUserState is UiState.Success) {
+                                        stringResource( Res.string.create_user_successful_alert)
+                                    }else {
+                                        stringResource( Res.string.error_alert)
+                                    },
+                                onConfirmClick = {
+                                    alertModalState = false
+                                    userViewModel.resetCreateUserState()
+                                    userViewModel.getAllUsers()
+                                },
+                            )
+                        }
+                    }
                 }
                 when(deleteUserState){
                     is UiState.Idle -> {}
@@ -152,8 +188,6 @@ fun UsersScreen(
                         }
                     }
                 }
-
-
             }
         }
 
