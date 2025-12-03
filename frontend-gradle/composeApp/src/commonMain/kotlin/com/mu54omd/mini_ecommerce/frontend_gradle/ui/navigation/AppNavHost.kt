@@ -138,6 +138,9 @@ fun AppNavHost(
         val isWideScreen by remember(maxWidth) {
             derivedStateOf { maxWidth > 840.dp }
         }
+        val isNarrowScreen by remember(maxWidth, maxHeight){
+            derivedStateOf { maxHeight < 400.dp || maxWidth < 250.dp}
+        }
         val isCompactScreen by remember(maxWidth) {
             derivedStateOf { maxWidth < 450.dp }
         }
@@ -331,7 +334,7 @@ fun AppNavHost(
                 }
                 AnimatedContent(
                     modifier = Modifier.align(Alignment.BottomCenter).pointerInput(Unit){},
-                    targetState = !isWideScreen && !isLogin,
+                    targetState = !isWideScreen && !isLogin && !isNarrowScreen,
                     transitionSpec = {
                         slideIntoContainer(
                             towards = AnimatedContentTransitionScope.SlideDirection.Up,
@@ -372,7 +375,7 @@ fun AppNavHost(
                 }
                 AnimatedContent(
                     modifier = Modifier.align(Alignment.CenterStart).pointerInput(Unit){},
-                    targetState = isWideScreen && !isLogin,
+                    targetState = isWideScreen && !isLogin && !isNarrowScreen,
                     transitionSpec = {
                         slideIntoContainer(
                             towards = AnimatedContentTransitionScope.SlideDirection.End,
