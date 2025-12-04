@@ -5,9 +5,10 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Product(
     val id: Long? = null,
-    val name: String,
-    val description: String,
-    val price: Double,
-    val stock: Int,
+    val name: String = "",
+    val category: String = "",
+    val description: String = "",
+    val price: Double = 0.0,
+    val stock: Int = 0,
     val imageUrl: String? = null
 )

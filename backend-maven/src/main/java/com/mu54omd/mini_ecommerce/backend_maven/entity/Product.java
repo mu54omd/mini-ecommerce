@@ -16,6 +16,9 @@ public class Product {
     @Column(name = "name", nullable = false)
     private String name;
 
+    @Column(name = "category", nullable = false)
+    private String category;
+
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
@@ -36,9 +39,10 @@ public class Product {
 
     public Product() {}
 
-    public Product(Long id, String name, String description, Double price, Integer stock) {
+    public Product(Long id, String name, String category, String description, Double price, Integer stock) {
         this.id = id;
         this.name = name;
+        this.category = category;
         this.description = description;
         this.price = price;
         this.stock = stock;
@@ -58,6 +62,14 @@ public class Product {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     public String getDescription() {
@@ -99,10 +111,11 @@ public class Product {
         this.createdAt = createdAt;
     }
 
-    public boolean getIsActive() {
+    public boolean isActive() {
         return isActive;
     }
-    public void setIsActive(boolean isActive) {
-        this.isActive = isActive;
+
+    public void setActive(boolean active) {
+        isActive = active;
     }
 }

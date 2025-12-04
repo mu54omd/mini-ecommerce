@@ -21,7 +21,9 @@ class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel
 
     private val _productsState = MutableStateFlow<UiState<List<Product>>>(UiState.Idle)
     val productsState = _productsState.asStateFlow()
-
+    private val _bannerState = MutableStateFlow<UiState<List<Product>>>(UiState.Idle)
+    val bannerState = _bannerState.asStateFlow()
+    
     private val _addProductState = MutableStateFlow<UiState<Product>>(UiState.Idle)
     val addProductState = _addProductState.asStateFlow()
 
@@ -48,6 +50,7 @@ class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel
     private val loadedProducts = mutableListOf<Product>()
 
     init {
+        getBannerItem()
         viewModelScope.launch {
             _searchQuery
                 .debounce(300)
@@ -61,6 +64,7 @@ class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel
     // ============================================================
         fun resetAllStates(){
         resetProductsState()
+//        resetBannerState()
         resetAddProductState()
         resetEditProductState()
         resetDeleteProductState()
@@ -69,6 +73,10 @@ class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel
 
     fun resetProductsState(){
         _productsState.update { UiState.Idle }
+    }
+
+    fun resetBannerState(){
+        _bannerState.update { UiState.Idle }
     }
 
     fun resetAddProductState(){
@@ -111,16 +119,28 @@ class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel
             when (val result = productUseCases.getProductsUseCase(currentPage, pageSize)) {
                 is ApiResult.Success -> {
                     val newProducts = result.data
-                    if (newProducts.isEmpty()) isLastPage = true
-                    else {
+                    if (newProducts.isEmpty()) {
+                        isLastPage = true
+                    } else {
                         loadedProducts.addAll(newProducts)
                         currentPage++
                         _productsState.update { UiState.Success(loadedProducts.toList()) }
                     }
+                    if(loadedProducts.isEmpty() && isLastPage){
+                        _productsState.update { result.toUiState() }
+                    }
                 }
-                else -> { _productsState.update { result.toUiState() }}
+                else -> { _productsState.update { result.toUiState() } }
             }
             isPaginating = false
+        }
+    }
+
+    fun getBannerItem() {
+        viewModelScope.launch {
+            _bannerState.update { UiState.Loading }
+            val result = productUseCases.getProductsUseCase(0, 5)
+            _bannerState.update { result.toUiState() }
         }
     }
 

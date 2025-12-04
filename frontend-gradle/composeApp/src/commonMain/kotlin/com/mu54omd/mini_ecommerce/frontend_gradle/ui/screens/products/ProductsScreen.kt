@@ -28,8 +28,6 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.ProductViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.AlertModal
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.DeleteModal
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.EmptyPage
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.LoadingView
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.products.components.AddEditProductModal
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.products.components.ProductList
 import frontend_gradle.composeapp.generated.resources.Res
@@ -55,7 +53,8 @@ fun ProductsScreen(
     onAddProductModalChange: (Boolean) -> Unit,
     onExit: (UiState<*>) -> Unit,
 ) {
-    val productsState = productViewModel.productsState.collectAsState().value
+    val productsState = productViewModel.productsState.collectAsState()
+    val bannerState = productViewModel.bannerState.collectAsState()
     val addProductState = productViewModel.addProductState.collectAsState().value
     val editProductState = productViewModel.editProductState.collectAsState().value
     val deactivateProduct = productViewModel.deactivateProduct.collectAsState().value
@@ -65,16 +64,7 @@ fun ProductsScreen(
     var deleteProductModalState by remember { mutableStateOf(false) }
     var showAlertModalState by remember { mutableStateOf(false) }
 
-    var selectedProduct by remember {
-        mutableStateOf(
-            Product(
-                name = "",
-                description = "",
-                price = 0.0,
-                stock = 0
-            )
-        )
-    }
+    var selectedProduct by remember { mutableStateOf(Product()) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     var selectedProductIdForDelete by remember { mutableLongStateOf(-1) }
@@ -87,7 +77,7 @@ fun ProductsScreen(
     val scope = rememberCoroutineScope()
     val lazyGridState = rememberLazyGridState()
 
-    var tempImageFile by remember{mutableStateOf<PlatformFile?>(null)}
+    var tempImageFile by remember { mutableStateOf<PlatformFile?>(null) }
 
     val addProductLauncher = rememberFilePickerLauncher(
         type = FileKitType.Image,
@@ -123,240 +113,230 @@ fun ProductsScreen(
                 }
             }
     }
-
-    when (productsState) {
-        is UiState.Idle -> {}
-        is UiState.Loading -> LoadingView()
-        is UiState.Success -> {
-            if (productsState.data.isEmpty()) {
-                EmptyPage("Oops!", "No product found!")
-            } else {
-                Column(
-                    verticalArrangement = Arrangement.Top,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxSize().padding(16.dp)
-                ) {
-                    ProductList(
-                        isWideScreen = isWideScreen,
-                        lazyGridState = lazyGridState,
-                        userRole = userRole,
-                        products = productsState.data,
-                        cartItems = cartItems,
-                        onIncreaseItem = { cartViewModel.add(it) },
-                        onDecreaseItem = { cartViewModel.remove(it) },
-                        onEditClick = { product ->
-                            selectedProduct = product
-                            editProductModalState = true
-                        },
-                        onRemoveClick = { productId ->
-                            selectedProductIdForDelete = productId
-                            deleteProductModalState = true
-                        },
-                        modifier = Modifier.weight(0.9f)
+    Column(
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxSize().padding(top = 16.dp, bottom = 16.dp)
+    ) {
+        ProductList(
+            isWideScreen = isWideScreen,
+            lazyGridState = lazyGridState,
+            userRole = userRole,
+            bannerState = bannerState,
+            productsState = productsState,
+            cartItems = cartItems,
+            onIncreaseItem = { cartViewModel.add(it) },
+            onDecreaseItem = { cartViewModel.remove(it) },
+            onEditClick = { product ->
+                selectedProduct = product
+                editProductModalState = true
+            },
+            onRemoveClick = { productId ->
+                selectedProductIdForDelete = productId
+                deleteProductModalState = true
+            },
+            onExit = onExit,
+            modifier = Modifier.weight(0.9f)
+        )
+        if (addProductModalState) {
+            AddEditProductModal(
+                productImage = tempImageFile,
+                sheetState = sheetState,
+                product = selectedProduct,
+                onCancelClick = {
+                    scope.launch {
+                        sheetState.hide()
+                        tempImageFile = null
+                        selectedProduct = Product()
+                        onAddProductModalChange(false)
+                        productViewModel.resetAddProductState()
+                    }
+                },
+                onConfirmClick = { name, description, price, stocks ->
+                    productViewModel.addProduct(
+                        Product(
+                            name = name,
+                            description = description,
+                            price = price,
+                            stock = stocks
+                        )
                     )
-                    if (addProductModalState) {
-                        AddEditProductModal(
-                            productImage = tempImageFile,
-                            sheetState = sheetState,
-                            product = selectedProduct,
-                            onCancelClick = {
-                                scope.launch {
-                                    sheetState.hide()
-                                    tempImageFile = null
-                                    selectedProduct = Product(
-                                        name = "",
-                                        description = "",
-                                        price = 0.0,
-                                        stock = 0
-                                    )
-                                    onAddProductModalChange(false)
-                                    productViewModel.resetAddProductState()
-                                }
-                            },
-                            onConfirmClick = { name, description, price, stocks ->
-                                productViewModel.addProduct(
-                                    Product(
-                                        name = name,
-                                        description = description,
-                                        price = price,
-                                        stock = stocks
-                                    )
-                                )
-                                onAddProductModalChange(false)
-                            },
-                            onUploadImageClick = { name, description, price, stocks ->
-                                scope.launch {
-                                    sheetState.hide()
-                                    onAddProductModalChange(false)
-                                    selectedProduct = Product(
-                                        name = name,
-                                        description = description,
-                                        price = price,
-                                        stock = stocks
-                                    )
-                                }
-                                addProductLauncher.launch()
-                            }
+                    onAddProductModalChange(false)
+                },
+                onUploadImageClick = { name, description, price, stocks ->
+                    scope.launch {
+                        sheetState.hide()
+                        onAddProductModalChange(false)
+                        selectedProduct = Product(
+                            name = name,
+                            description = description,
+                            price = price,
+                            stock = stocks
                         )
                     }
-                    if (editProductModalState) {
-                        AddEditProductModal(
-                            productImage = tempImageFile,
-                            product = selectedProduct,
-                            sheetState = sheetState,
-                            onCancelClick = {
-                                scope.launch {
-                                    sheetState.hide()
-                                    editProductModalState = false
-                                    tempImageFile = null
-                                    selectedProduct = Product(
-                                        name = "",
-                                        description = "",
-                                        price = 0.0,
-                                        stock = 0
-                                    )
-                                    productViewModel.resetEditProductState()
-                                }
-                            },
-                            onConfirmClick = { name, description, price, stocks ->
-                                productViewModel.editProduct(
-                                    Product(
-                                        id = selectedProduct.id,
-                                        name = name,
-                                        description = description,
-                                        price = price,
-                                        stock = stocks
-                                    )
-                                )
-                                editProductModalState = false
-                            },
-                            onUploadImageClick = { _, _, _, _ ->
-                                scope.launch {
-                                    sheetState.hide()
-                                    editProductModalState = false
-                                }
-                                editProductLauncher.launch()
-                            }
+                    addProductLauncher.launch()
+                }
+            )
+        }
+        if (editProductModalState) {
+            AddEditProductModal(
+                productImage = tempImageFile,
+                product = selectedProduct,
+                sheetState = sheetState,
+                onCancelClick = {
+                    scope.launch {
+                        sheetState.hide()
+                        editProductModalState = false
+                        tempImageFile = null
+                        selectedProduct = Product(
+                            name = "",
+                            description = "",
+                            price = 0.0,
+                            stock = 0
                         )
+                        productViewModel.resetEditProductState()
                     }
-                    if (deleteProductModalState) {
-                        DeleteModal(
-                            id = selectedProductIdForDelete,
-                            onCancelClick = {
-                                deleteProductModalState = false
-                                selectedProductIdForDelete = -1
-                            },
-                            onConfirmClick = { productId ->
-                                deleteProductModalState = false
-                                productViewModel.deactivateProduct(productId)
-                                selectedProductIdForDelete = -1
-                            }
+                },
+                onConfirmClick = { name, description, price, stocks ->
+                    productViewModel.editProduct(
+                        Product(
+                            id = selectedProduct.id,
+                            name = name,
+                            description = description,
+                            price = price,
+                            stock = stocks
                         )
+                    )
+                    editProductModalState = false
+                },
+                onUploadImageClick = { _, _, _, _ ->
+                    scope.launch {
+                        sheetState.hide()
+                        editProductModalState = false
                     }
-                    when (addProductState) {
-                        is UiState.Idle -> {}
-                        is UiState.Loading -> {}
-                        is UiState.Success -> {
-                            scope.launch {
-                                tempImageFile?.let {
-                                    productViewModel.uploadProductImage(
-                                        productId = addProductState.data.id!!,
-                                        fileName = it.name,
-                                        byteArray = it.readBytes()
-                                    )
-                                }
-                            }
-                        }
-                        else -> {
-                            showAlertModalState = true
-                            if (showAlertModalState) {
-                                AlertModal(
-                                    message = stringResource(Res.string.error_alert),
-                                    onConfirmClick = {
-                                        showAlertModalState = false
-                                        productViewModel.resetAddProductState()
-                                    }
-                                )
-                            }
-                        }
-                    }
-                    when (editProductState) {
-                        is UiState.Idle -> {}
-                        is UiState.Loading -> {}
-                        is UiState.Success -> {
-                            scope.launch {
-                                tempImageFile?.let {
-                                    productViewModel.uploadProductImage(
-                                        productId = editProductState.data.id!!,
-                                        fileName = it.name,
-                                        byteArray = it.readBytes()
-                                    )
-                                }
-                            }
-                        }
-                        else -> {
-                            showAlertModalState = true
-                            if (showAlertModalState) {
-                                AlertModal(
-                                    message = stringResource(Res.string.error_alert),
-                                    onConfirmClick = {
-                                        showAlertModalState = false
-                                        productViewModel.resetEditProductState()
-                                    }
-                                )
-                            }
-                        }
-                    }
-                    when (deactivateProduct) {
-                        is UiState.Idle -> {}
-                        is UiState.Loading -> {}
-                        is UiState.Success -> {}
-                        else -> {
-                            showAlertModalState = true
-                            if (showAlertModalState) {
-                                AlertModal(
-                                    message = stringResource(Res.string.error_alert),
-                                    onConfirmClick = {
-                                        showAlertModalState = false
-                                        productViewModel.resetDeleteProductState()
-                                    }
-                                )
-                            }
-                        }
-                    }
-                    when (uploadProductImageState) {
-                        is UiState.Idle -> {}
-                        is UiState.Loading -> {}
-                        is UiState.Success -> {
-                            showAlertModalState = true
-                            if (showAlertModalState) {
-                                AlertModal(
-                                    message = stringResource(Res.string.upload_image_successful_alert),
-                                    onConfirmClick = {
-                                        showAlertModalState = false
-                                        productViewModel.resetAddProductState()
-                                        productViewModel.resetEditProductState()
-                                        productViewModel.resetUploadProductImageState()
-                                    }
-                                )
-                            }
-                        }
-                        else -> {
-                            showAlertModalState = true
-                            if (showAlertModalState) {
-                                AlertModal(
-                                    message = stringResource(Res.string.error_alert),
-                                    onConfirmClick = {
-                                        showAlertModalState = false
-                                        productViewModel.resetUploadProductImageState()
-                                    }
-                                )
-                            }
-                        }
+                    editProductLauncher.launch()
+                }
+            )
+        }
+        if (deleteProductModalState) {
+            DeleteModal(
+                id = selectedProductIdForDelete,
+                onCancelClick = {
+                    deleteProductModalState = false
+                    selectedProductIdForDelete = -1
+                },
+                onConfirmClick = { productId ->
+                    deleteProductModalState = false
+                    productViewModel.deactivateProduct(productId)
+                    selectedProductIdForDelete = -1
+                }
+            )
+        }
+        when (addProductState) {
+            is UiState.Idle -> {}
+            is UiState.Loading -> {}
+            is UiState.Success -> {
+                scope.launch {
+                    tempImageFile?.let {
+                        productViewModel.uploadProductImage(
+                            productId = addProductState.data.id!!,
+                            fileName = it.name,
+                            byteArray = it.readBytes()
+                        )
                     }
                 }
             }
+
+            else -> {
+                showAlertModalState = true
+                if (showAlertModalState) {
+                    AlertModal(
+                        message = stringResource(Res.string.error_alert),
+                        onConfirmClick = {
+                            showAlertModalState = false
+                            productViewModel.resetAddProductState()
+                        }
+                    )
+                }
+            }
         }
-        else -> onExit(productsState)
+        when (editProductState) {
+            is UiState.Idle -> {}
+            is UiState.Loading -> {}
+            is UiState.Success -> {
+                scope.launch {
+                    tempImageFile?.let {
+                        productViewModel.uploadProductImage(
+                            productId = editProductState.data.id!!,
+                            fileName = it.name,
+                            byteArray = it.readBytes()
+                        )
+                    }
+                }
+            }
+
+            else -> {
+                showAlertModalState = true
+                if (showAlertModalState) {
+                    AlertModal(
+                        message = stringResource(Res.string.error_alert),
+                        onConfirmClick = {
+                            showAlertModalState = false
+                            productViewModel.resetEditProductState()
+                        }
+                    )
+                }
+            }
+        }
+        when (deactivateProduct) {
+            is UiState.Idle -> {}
+            is UiState.Loading -> {}
+            is UiState.Success -> {}
+            else -> {
+                showAlertModalState = true
+                if (showAlertModalState) {
+                    AlertModal(
+                        message = stringResource(Res.string.error_alert),
+                        onConfirmClick = {
+                            showAlertModalState = false
+                            productViewModel.resetDeleteProductState()
+                        }
+                    )
+                }
+            }
+        }
+        when (uploadProductImageState) {
+            is UiState.Idle -> {}
+            is UiState.Loading -> {}
+            is UiState.Success -> {
+                showAlertModalState = true
+                if (showAlertModalState) {
+                    AlertModal(
+                        message = stringResource(Res.string.upload_image_successful_alert),
+                        onConfirmClick = {
+                            showAlertModalState = false
+                            productViewModel.resetAddProductState()
+                            productViewModel.resetEditProductState()
+                            productViewModel.resetUploadProductImageState()
+                        }
+                    )
+                }
+            }
+
+            else -> {
+                showAlertModalState = true
+                if (showAlertModalState) {
+                    AlertModal(
+                        message = stringResource(Res.string.error_alert),
+                        onConfirmClick = {
+                            showAlertModalState = false
+                            productViewModel.resetUploadProductImageState()
+                        }
+                    )
+                }
+            }
+        }
     }
+
+
 }

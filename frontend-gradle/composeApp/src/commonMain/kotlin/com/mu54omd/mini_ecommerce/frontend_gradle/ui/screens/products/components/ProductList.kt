@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,6 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.Product
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.model.UserRole
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
 
 
 enum class ProductListState {
@@ -38,12 +40,14 @@ fun ProductList(
     isWideScreen: Boolean = false,
     lazyGridState: LazyGridState = rememberLazyGridState(),
     userRole: UserRole,
-    products: List<Product>,
+    bannerState: State<UiState<List<Product>>>,
+    productsState: State<UiState<List<Product>>>,
     cartItems: Map<Long, Int>,
     onEditClick: (Product) -> Unit,
     onRemoveClick: (Long) -> Unit,
     onIncreaseItem: (Long) -> Unit,
     onDecreaseItem: (Long) -> Unit,
+    onExit: (UiState<*>) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var productListState by remember(isWideScreen) {
@@ -62,7 +66,8 @@ fun ProductList(
                 ProductListState.Cards -> {
                     ProductCards(
                         lazyGridState = lazyGridState,
-                        products = products,
+                        bannerState = bannerState,
+                        productsState = productsState,
                         cartItems = cartItems,
                         userRole = userRole,
                         onProductClick = { product ->
@@ -75,6 +80,7 @@ fun ProductList(
                         onDecreaseItem = onDecreaseItem,
                         sharedTransitionScope = this@SharedTransitionLayout,
                         animatedVisibilityScope = this@AnimatedContent,
+                        onExit = onExit
                     )
                 }
 
@@ -103,7 +109,8 @@ fun ProductList(
                         ) {
                             ProductCards(
                                 lazyGridState = lazyGridState,
-                                products = products,
+                                bannerState = bannerState,
+                                productsState = productsState,
                                 cartItems = cartItems,
                                 userRole = userRole,
                                 enableSharedTransition = false,
@@ -115,6 +122,7 @@ fun ProductList(
                                 onRemoveClick = onRemoveClick,
                                 onIncreaseItem = onIncreaseItem,
                                 onDecreaseItem = onDecreaseItem,
+                                onExit = onExit,
                                 sharedTransitionScope = this@SharedTransitionLayout,
                                 animatedVisibilityScope = this@AnimatedContent,
                             )

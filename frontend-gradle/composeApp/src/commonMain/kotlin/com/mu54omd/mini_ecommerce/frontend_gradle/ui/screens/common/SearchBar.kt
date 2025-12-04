@@ -1,7 +1,6 @@
 package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
@@ -10,30 +9,23 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkHorizontally
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -53,7 +45,6 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.AppThemeExtras
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.ExtendedTheme
 
 @Composable
 fun SearchBar(
@@ -73,6 +64,12 @@ fun SearchBar(
 
     BasicTextField(
         modifier = Modifier.focusRequester(searchBarFocusRequester),
+        cursorBrush = Brush.verticalGradient(
+            listOf(
+                MaterialTheme.colorScheme.onBackground,
+                MaterialTheme.colorScheme.onPrimaryContainer,
+                MaterialTheme.colorScheme.onSecondaryContainer)
+        ),
         value = searchBarText,
         onValueChange = {
             searchBarText = it
@@ -120,12 +117,13 @@ fun SearchBar(
                 }
                 Spacer(modifier = Modifier.width(4.dp))
                 Box(
-                    modifier = Modifier.weight(1f).padding(4.dp),
+                    modifier = Modifier.weight(1f),
                     contentAlignment = Alignment.CenterStart
                 ) {
                     AnimatedContent(
                         targetState = searchBarText.isBlank(),
-                        transitionSpec = { fadeIn(tween(50)) togetherWith fadeOut(tween(50)) },
+                        contentAlignment = Alignment.CenterStart,
+                        transitionSpec = { expandHorizontally(tween(50)) + fadeIn() togetherWith shrinkHorizontally(tween(50)) + fadeOut() },
                     ) { state ->
                         if (state) {
                             Text(
@@ -133,8 +131,13 @@ fun SearchBar(
                                 style = MaterialTheme.typography.bodySmall.copy(brush = lineBrush),
                                 color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
                                 overflow = TextOverflow.Ellipsis,
-                                maxLines = 1
+                                maxLines = 1,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .wrapContentHeight(align = Alignment.CenterVertically),
                             )
+                        }else{
+                            Box(modifier = Modifier.fillMaxSize())
                         }
                     }
                     inner()

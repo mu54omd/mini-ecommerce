@@ -35,7 +35,7 @@ public class ProductService {
     public void deactivateProduct(Long productId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
-        product.setIsActive(false);
+        product.setActive(false);
         productRepository.save(product);
     }
 
