@@ -35,7 +35,7 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.ExtendedTheme
 import kotlinx.coroutines.launch
 
 @Composable
-fun CategoryTabs(
+fun CategoryCustomChips(
     categoriesState: State<UiState<List<String>>>,
     selectedCategory: String?,
     onSelectCategory: (String?) -> Unit,

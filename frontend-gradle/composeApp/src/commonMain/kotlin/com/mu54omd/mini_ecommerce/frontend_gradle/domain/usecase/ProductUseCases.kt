@@ -4,6 +4,7 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.product.AddProd
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.product.DeactivateProductUseCase
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.product.DeleteProductUseCase
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.product.EditProductUseCase
+import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.product.FilterProductsUseCase
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.product.GetCategoriesUseCase
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.product.GetLatestProductsUseCase
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.product.GetProductsByCategoryUseCase
@@ -21,5 +22,6 @@ data class ProductUseCases(
     val getProductsByCategoryUseCase: GetProductsByCategoryUseCase,
     val getLatestProductsUseCase: GetLatestProductsUseCase,
     val searchProductsUseCase: SearchProductsUseCase,
+    val filterProductsUseCase: FilterProductsUseCase,
     val uploadProductImageUseCase: UploadProductImageUseCase
 )

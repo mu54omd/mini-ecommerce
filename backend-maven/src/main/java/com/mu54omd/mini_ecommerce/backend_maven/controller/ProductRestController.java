@@ -5,13 +5,10 @@ import com.mu54omd.mini_ecommerce.backend_maven.entity.Product;
 import com.mu54omd.mini_ecommerce.backend_maven.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -62,6 +59,15 @@ public class ProductRestController {
     @GetMapping("/search")
     public ResponseEntity<List<Product>> searchProducts(@RequestParam String q) {
         return ResponseEntity.ok(productService.searchProducts(q));
+    }
+
+    @GetMapping("/filter")
+    public ResponseEntity<Page<Product>> filterProducts(
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) String category,
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(productService.filterProducts(q, category, pageable));
     }
 
     @PutMapping

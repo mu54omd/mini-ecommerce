@@ -64,7 +64,7 @@ class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel
                 .debounce(300)
                 .distinctUntilChanged()
                 .collect { query ->
-                    filterProducts(query =  query)
+                    filterProducts(query =  query, category = selectedCategory.value)
                 }
         }
     }
@@ -174,7 +174,7 @@ class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel
     fun setSearchQuery(query: String?){
         _searchQuery.update { query }
     }
-    fun filterProducts(query: String?){
+    fun searchProducts(query: String?){
         viewModelScope.launch {
             if (query.isNullOrBlank()) {
                 refreshProducts()
@@ -183,6 +183,19 @@ class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel
             isLastPage = true
             isPaginating = false
             val result = productUseCases.searchProductsUseCase(query)
+            _productsState.value = result.toUiState()
+        }
+    }
+
+    fun filterProducts(query: String?, category: String?, page: Int = 0, size: Int = 20){
+        viewModelScope.launch {
+            if (query.isNullOrBlank()) {
+                refreshProducts()
+                return@launch
+            }
+            isLastPage = true
+            isPaginating = false
+            val result = productUseCases.filterProductsUseCase(query, category, page, size)
             _productsState.value = result.toUiState()
         }
     }

@@ -11,6 +11,7 @@ interface ProductRepository {
     suspend fun getCategories(): ApiResult<List<String>>
     suspend fun getProductsByCategory(category: String, page: Int = 0, size: Int = 20): ApiResult<List<Product>>
     suspend fun searchProduct(query: String): ApiResult<List<Product>>
+    suspend fun filterProducts(query: String?, category: String?, page: Int = 0, size: Int = 20): ApiResult<List<Product>>
 
     suspend fun addProduct(product: Product): ApiResult<Product>
     suspend fun uploadProductImage(

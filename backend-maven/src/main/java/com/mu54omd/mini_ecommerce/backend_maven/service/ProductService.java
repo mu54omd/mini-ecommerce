@@ -7,10 +7,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+
+import static com.mu54omd.mini_ecommerce.backend_maven.service.ProductSpecifications.*;
 
 @Service
 @Transactional
@@ -74,6 +77,20 @@ public class ProductService {
 
     public List<Product> searchProducts(String keyword) {
         return productRepository.findByNameContainingIgnoreCase(keyword);
+    }
+
+    public Page<Product> filterProducts(String q, String category, Pageable pageable) {
+        Specification<Product> spec = ProductSpecifications.isActive();
+
+        if (q != null && !q.isBlank()) {
+            spec = spec.and(ProductSpecifications.nameContains(q));
+        }
+
+        if (category != null && !category.isBlank()) {
+            spec = spec.and(ProductSpecifications.categoryEquals(category));
+        }
+
+        return productRepository.findAll(spec, pageable);
     }
 
     public Product updateStock(Long productId, int newStock){

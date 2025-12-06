@@ -51,6 +51,23 @@ class ProductRepositoryImpl(private val api: ApiClient): ProductRepository {
             )
     }
 
+    override suspend fun filterProducts(
+        query: String?,
+        category: String?,
+        page: Int,
+        size: Int
+    ): ApiResult<List<Product>> {
+        val params = mutableMapOf<String, String>()
+        query?.let { params["q"] = it.encodeURLParameter() }
+        category?.let { params["category"] = it.encodeURLParameter() }
+        val query = params.entries.joinToString("&") { "${it.key}=${it.value}" }
+        val url = if (params.isEmpty()) "/products" else "/products/filter?$query&page=$page&size=$size"
+        return api.get<PageResponse<Product>>(url)
+            .map(
+                onSuccess = { it.content }
+            )
+    }
+
     override suspend fun addProduct(product: Product): ApiResult<Product> = api.post("/products", product)
     override suspend fun uploadProductImage(
         productId: Long,

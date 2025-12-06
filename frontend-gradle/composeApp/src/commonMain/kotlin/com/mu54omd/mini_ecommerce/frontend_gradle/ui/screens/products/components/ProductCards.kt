@@ -74,7 +74,7 @@ fun ProductCards(
             }
         }
         Spacer(modifier = Modifier.height(10.dp))
-        CategoryTabs(
+        CategoryCustomChips(
             categoriesState = categoriesState,
             selectedCategory = selectedCategory,
             onSelectCategory = { category -> onSelectCategory(category) },
