@@ -40,8 +40,11 @@ fun ProductList(
     isWideScreen: Boolean = false,
     lazyGridState: LazyGridState = rememberLazyGridState(),
     userRole: UserRole,
-    bannerState: State<UiState<List<Product>>>,
+    latestProductsBannerState: State<UiState<List<Product>>>,
     productsState: State<UiState<List<Product>>>,
+    categoriesState: State<UiState<List<String>>>,
+    selectedCategory: State<String?>,
+    onSelectCategory: (String?) -> Unit,
     cartItems: Map<Long, Int>,
     onEditClick: (Product) -> Unit,
     onRemoveClick: (Long) -> Unit,
@@ -55,6 +58,7 @@ fun ProductList(
     }
     var selectedProduct by remember { mutableStateOf<Product?>(null) }
 
+
     SharedTransitionLayout(modifier = modifier.fillMaxSize()) {
         AnimatedContent(
             targetState = productListState,
@@ -66,8 +70,11 @@ fun ProductList(
                 ProductListState.Cards -> {
                     ProductCards(
                         lazyGridState = lazyGridState,
-                        bannerState = bannerState,
+                        latestProductsBannerState = latestProductsBannerState,
                         productsState = productsState,
+                        categoriesState = categoriesState,
+                        selectedCategory = selectedCategory.value,
+                        onSelectCategory = onSelectCategory,
                         cartItems = cartItems,
                         userRole = userRole,
                         onProductClick = { product ->
@@ -109,8 +116,11 @@ fun ProductList(
                         ) {
                             ProductCards(
                                 lazyGridState = lazyGridState,
-                                bannerState = bannerState,
+                                latestProductsBannerState = latestProductsBannerState,
                                 productsState = productsState,
+                                categoriesState = categoriesState,
+                                selectedCategory = selectedCategory.value,
+                                onSelectCategory = onSelectCategory,
                                 cartItems = cartItems,
                                 userRole = userRole,
                                 enableSharedTransition = false,

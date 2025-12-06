@@ -21,9 +21,16 @@ class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel
 
     private val _productsState = MutableStateFlow<UiState<List<Product>>>(UiState.Idle)
     val productsState = _productsState.asStateFlow()
-    private val _bannerState = MutableStateFlow<UiState<List<Product>>>(UiState.Idle)
-    val bannerState = _bannerState.asStateFlow()
-    
+
+    private val _categoriesState = MutableStateFlow<UiState<List<String>>>(UiState.Idle)
+    val categoriesState = _categoriesState.asStateFlow()
+
+    private val _selectedCategory = MutableStateFlow<String?>(null)
+    val selectedCategory = _selectedCategory.asStateFlow()
+
+    private val _latestProductsBannerState = MutableStateFlow<UiState<List<Product>>>(UiState.Idle)
+    val latestProductsBannerState = _latestProductsBannerState.asStateFlow()
+
     private val _addProductState = MutableStateFlow<UiState<Product>>(UiState.Idle)
     val addProductState = _addProductState.asStateFlow()
 
@@ -50,7 +57,8 @@ class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel
     private val loadedProducts = mutableListOf<Product>()
 
     init {
-        getBannerItem()
+        getLatestProductsBanner()
+        getCategories()
         viewModelScope.launch {
             _searchQuery
                 .debounce(300)
@@ -62,9 +70,8 @@ class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel
     }
 
     // ============================================================
-        fun resetAllStates(){
+    fun resetAllStates(){
         resetProductsState()
-//        resetBannerState()
         resetAddProductState()
         resetEditProductState()
         resetDeleteProductState()
@@ -75,8 +82,8 @@ class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel
         _productsState.update { UiState.Idle }
     }
 
-    fun resetBannerState(){
-        _bannerState.update { UiState.Idle }
+    fun resetLatestProductsBannerState(){
+        _latestProductsBannerState.update { UiState.Idle }
     }
 
     fun resetAddProductState(){
@@ -112,11 +119,31 @@ class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel
         }
     }
 
+    fun getCategories() {
+        viewModelScope.launch {
+            _categoriesState.value = UiState.Loading
+            val result = productUseCases.getCategoriesUseCase()
+            _categoriesState.value = result.toUiState()
+        }
+    }
+
+    fun selectCategory(category: String?) {
+        _selectedCategory.value = category
+        refreshProducts()
+    }
+
     fun loadNextPage() {
         if (isPaginating || isLastPage) return
         viewModelScope.launch {
             isPaginating = true
-            when (val result = productUseCases.getProductsUseCase(currentPage, pageSize)) {
+
+            val category = _selectedCategory.value
+            val result = if (category.isNullOrEmpty()) {
+                productUseCases.getProductsUseCase(currentPage, pageSize)
+            } else {
+                productUseCases.getProductsByCategoryUseCase(category, currentPage, pageSize)
+            }
+            when (result) {
                 is ApiResult.Success -> {
                     val newProducts = result.data
                     if (newProducts.isEmpty()) {
@@ -136,11 +163,11 @@ class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel
         }
     }
 
-    fun getBannerItem() {
+    fun getLatestProductsBanner() {
         viewModelScope.launch {
-            _bannerState.update { UiState.Loading }
-            val result = productUseCases.getProductsUseCase(0, 5)
-            _bannerState.update { result.toUiState() }
+            _latestProductsBannerState.update { UiState.Loading }
+            val result = productUseCases.getLatestProductsUseCase(0, 5)
+            _latestProductsBannerState.update { result.toUiState() }
         }
     }
 

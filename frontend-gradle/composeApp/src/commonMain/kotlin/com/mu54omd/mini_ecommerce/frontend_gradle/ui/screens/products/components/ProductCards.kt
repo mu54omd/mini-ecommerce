@@ -41,11 +41,14 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.EmptyPage
 @Composable
 fun ProductCards(
     lazyGridState: LazyGridState = rememberLazyGridState(),
-    bannerState: State<UiState<List<Product>>>,
+    latestProductsBannerState: State<UiState<List<Product>>>,
     productsState: State<UiState<List<Product>>>,
+    categoriesState: State<UiState<List<String>>>,
     cartItems: Map<Long, Int>,
     userRole: UserRole,
     enableSharedTransition: Boolean = true,
+    selectedCategory: String?,
+    onSelectCategory: (String?) -> Unit,
     onProductClick: (Product) -> Unit,
     onEditClick: (Product) -> Unit,
     onRemoveClick: (Long) -> Unit,
@@ -56,18 +59,28 @@ fun ProductCards(
     animatedVisibilityScope: AnimatedVisibilityScope
 ) {
     Column {
-        when (bannerState.value) {
+        when (latestProductsBannerState.value) {
             is UiState.Idle -> {}
             is UiState.Loading -> {}
             is UiState.Success -> {
                 ProductBanner(
-                    products = (bannerState.value as UiState.Success<List<Product>>).data
+                    bannerTitle = "Latest Products",
+                    products = (latestProductsBannerState.value as UiState.Success<List<Product>>).data
                 )
             }
 
-            else -> { onExit(bannerState.value)}
+            else -> {
+                onExit(latestProductsBannerState.value)
+            }
         }
-        when(productsState.value){
+        Spacer(modifier = Modifier.height(10.dp))
+        CategoryTabs(
+            categoriesState = categoriesState,
+            selectedCategory = selectedCategory,
+            onSelectCategory = { category -> onSelectCategory(category) },
+            onExit = onExit
+        )
+        when (productsState.value) {
             is UiState.Idle -> {}
             is UiState.Loading -> {}
             is UiState.Success -> {
@@ -76,9 +89,7 @@ fun ProductCards(
                 } else {
                     val products = (productsState.value as UiState.Success<List<Product>>).data
                     Spacer(modifier = Modifier.height(10.dp))
-                    Box(
-                        contentAlignment = Alignment.Center
-                    ) {
+                    Box(contentAlignment = Alignment.Center) {
                         LazyVerticalGrid(
                             modifier = Modifier.padding(start = 16.dp, end = 16.dp),
                             columns = GridCells.Adaptive(180.dp),
@@ -150,7 +161,10 @@ fun ProductCards(
                     }
                 }
             }
-            else -> { onExit(productsState.value)}
+
+            else -> {
+                onExit(productsState.value)
+            }
         }
     }
 }

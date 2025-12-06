@@ -40,7 +40,7 @@ class CartRestControllerTest {
     @WithMockUser(username = "john", roles = {"USER"})
     void testGetCartShouldReturnUserCart() throws Exception {
         User user = new User(1L, "john", "john@example.com", "pass");
-        Product product = new Product(1L, "Phone", "Smart", 1000.0, 10);
+        Product product = new Product(1L, "Phone","smartphone", "Smart", 1000.0, 10);
         CartItem item = new CartItem(product, 2);
         Cart cart = new Cart(user);
         item.setCart(cart);

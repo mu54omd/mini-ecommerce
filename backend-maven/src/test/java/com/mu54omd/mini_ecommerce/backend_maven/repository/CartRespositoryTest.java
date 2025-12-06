@@ -28,7 +28,7 @@ class CartRepositoryTest {
     void testSaveAndRetrieveCartWithItems() {
         User newUser = new User(null, "testuser", "user@test.com", "1234");
         User user = userRepository.save(newUser);
-        Product product = productRepository.save(new Product(null, "Phone", "Smart", 999.0, 10));
+        Product product = productRepository.save(new Product(null, "Phone", "smartphone", "Smart", 999.0, 10));
 
         Cart cart = new Cart();
         cart.setUser(user);

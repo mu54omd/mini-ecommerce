@@ -5,6 +5,7 @@ import com.mu54omd.mini_ecommerce.backend_maven.entity.Product;
 import com.mu54omd.mini_ecommerce.backend_maven.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -41,6 +42,21 @@ public class ProductRestController {
     @GetMapping
     public ResponseEntity<Page<Product>> getAllActiveProducts(Pageable pageable) {
         return ResponseEntity.ok(productService.getAllActiveProducts(pageable));
+    }
+
+    @GetMapping("/latest")
+    public ResponseEntity<Page<Product>> getLatestProduct(Pageable pageable){
+        return ResponseEntity.ok(productService.getAllLatestActiveProducts(pageable));
+    }
+
+    @GetMapping("/categories")
+    public ResponseEntity<List<String>> getAllCategories(){
+        return ResponseEntity.ok(productService.getCategories());
+    }
+
+    @GetMapping("/categories/{category}")
+    public ResponseEntity<Page<Product>> getActiveProductsByCategory(@PathVariable String category, Pageable pageable){
+        return ResponseEntity.ok(productService.getActiveProductsByCategory(category, pageable));
     }
 
     @GetMapping("/search")

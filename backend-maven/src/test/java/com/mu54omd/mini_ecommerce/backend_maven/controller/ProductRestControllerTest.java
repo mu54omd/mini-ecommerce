@@ -41,7 +41,7 @@ class ProductRestControllerTest {
 
     @Test
     void testGetAllProductsShouldReturnList() throws Exception {
-        Product product = new Product(1L, "Laptop", "Good", 2500.0, 5);
+        Product product = new Product(1L, "Laptop","laptop", "Good", 2500.0, 5);
         Page<Product> page = new PageImpl<>(List.of(product));
 
         when(productService.getAllProducts(any(Pageable.class))).thenReturn(page);
@@ -54,7 +54,7 @@ class ProductRestControllerTest {
 
     @Test
     void testCreateProductShouldReturnCreatedProduct() throws Exception {
-        Product product = new Product(null, "Phone", "Smart", 1200.0, 10);
+        Product product = new Product(null, "Phone","smartphone", "Smart", 1200.0, 10);
         when(productService.addProduct(any(Product.class))).thenReturn(product);
         mockMvc.perform(MockMvcRequestBuilders.post("/api/products")
                         .contentType(MediaType.APPLICATION_JSON)

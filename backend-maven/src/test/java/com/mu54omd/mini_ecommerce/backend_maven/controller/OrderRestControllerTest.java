@@ -45,7 +45,7 @@ class OrderRestControllerTest {
     @Test
     void testGetOrdersByUserShouldReturnList() throws Exception {
         User user = new User(1L, "sara", "sara@example.com", "1234");
-        Product product = new Product(1L, "Laptop", "Computer", 2000.0, 3);
+        Product product = new Product(1L, "Laptop","laptop", "Computer", 2000.0, 3);
         OrderItem orderItem = new OrderItem();
         Order order = new Order();
         order.setId(1L);

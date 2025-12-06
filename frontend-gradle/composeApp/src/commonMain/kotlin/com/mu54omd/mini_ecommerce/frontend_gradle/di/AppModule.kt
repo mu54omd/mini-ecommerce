@@ -1,11 +1,11 @@
 package com.mu54omd.mini_ecommerce.frontend_gradle.di
 
 import com.mu54omd.mini_ecommerce.frontend_gradle.api.ApiClient
-import com.mu54omd.mini_ecommerce.frontend_gradle.data.repository.UserRepositoryImpl
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.repository.AuthRepositoryImpl
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.repository.CartRepositoryImpl
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.repository.OrderRepositoryImpl
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.repository.ProductRepositoryImpl
+import com.mu54omd.mini_ecommerce.frontend_gradle.data.repository.UserRepositoryImpl
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.permission.PermissionChecker
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.repository.AuthRepository
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.repository.CartRepository
@@ -37,6 +37,9 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.product.AddProd
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.product.DeactivateProductUseCase
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.product.DeleteProductUseCase
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.product.EditProductUseCase
+import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.product.GetCategoriesUseCase
+import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.product.GetLatestProductsUseCase
+import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.product.GetProductsByCategoryUseCase
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.product.GetProductsUseCase
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.product.SearchProductsUseCase
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.product.UploadProductImageUseCase
@@ -45,12 +48,11 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.user.DeleteUser
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.user.EditUserUseCase
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.user.GetAllUsersUseCase
 import com.mu54omd.mini_ecommerce.frontend_gradle.network.createHttpClient
-import com.mu54omd.mini_ecommerce.frontend_gradle.preference.ThemeStorage
-import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.UserViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.AuthViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.CartViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.OrderViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.ProductViewModel
+import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.UserViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
@@ -106,10 +108,13 @@ val appModule = module {
     single { DeactivateProductUseCase(get(), get(), get()) }
     single { EditProductUseCase(get(), get(), get()) }
     single { GetProductsUseCase(get()) }
+    single { GetLatestProductsUseCase(get()) }
+    single { GetCategoriesUseCase(get()) }
+    single { GetProductsByCategoryUseCase(get()) }
     single { SearchProductsUseCase(get()) }
     single { UploadProductImageUseCase(get(), get(), get()) }
 
-    single { ProductUseCases(get(), get(), get(),get(), get(), get(), get()) }
+    single { ProductUseCases(get(),get(), get(), get(), get(), get(),get(), get(), get(), get()) }
 
     // Order Use Cases
     single { DeleteUserUseCase(get(), get(), get()) }

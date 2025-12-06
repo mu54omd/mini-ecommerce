@@ -20,6 +20,29 @@ class ProductRepositoryImpl(private val api: ApiClient): ProductRepository {
                 onSuccess = {it.content}
             )
     }
+
+    override suspend fun getLatestProducts(page: Int, size: Int): ApiResult<List<Product>> {
+        return api.get<PageResponse<Product>>("/products/latest?page=$page&size=$size")
+            .map(
+                onSuccess = { it.content }
+            )
+    }
+
+    override suspend fun getCategories(): ApiResult<List<String>> {
+        return api.get<List<String>>("/products/categories")
+            .map(
+                onSuccess = { it }
+            )
+    }
+
+    override suspend fun getProductsByCategory(category: String, page: Int, size: Int): ApiResult<List<Product>> {
+        val encodedCategory = category.encodeURLParameter()
+        return api.get<PageResponse<Product>>("/products/categories/$encodedCategory?page=$page&size=$size")
+            .map(
+                onSuccess = { it.content }
+            )
+    }
+
     override suspend fun searchProduct(query: String): ApiResult<List<Product>> {
         val encodedQuery = query.encodeURLParameter()
         return api.get<List<Product>>("/products/search?q=$encodedQuery")

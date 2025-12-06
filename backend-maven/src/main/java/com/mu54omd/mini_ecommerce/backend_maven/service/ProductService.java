@@ -4,7 +4,9 @@ import com.mu54omd.mini_ecommerce.backend_maven.entity.Product;
 import com.mu54omd.mini_ecommerce.backend_maven.repository.ProductRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,12 +26,24 @@ public class ProductService {
         return productRepository.save(product);
     }
 
+    public List<String> getCategories(){
+        return productRepository.findDistinctActiveCategories();
+    }
+
+    public Page<Product> getActiveProductsByCategory(String category, Pageable pageable) {
+        return productRepository.findByCategoryAndIsActiveTrue(category, pageable);
+    }
+
     public Page<Product> getAllProducts(Pageable pageable) {
         return productRepository.findAll(pageable);
     }
 
     public Page<Product> getAllActiveProducts(Pageable pageable){
         return productRepository.findByIsActiveTrue(pageable);
+    }
+
+    public Page<Product> getAllLatestActiveProducts(Pageable pageable){
+        return productRepository.findAllByIsActiveTrueOrderByCreatedAtDesc(pageable);
     }
 
     public void deactivateProduct(Long productId) {

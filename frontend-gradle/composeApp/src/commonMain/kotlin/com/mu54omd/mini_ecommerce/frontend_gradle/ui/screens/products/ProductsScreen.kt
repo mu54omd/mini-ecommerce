@@ -54,7 +54,9 @@ fun ProductsScreen(
     onExit: (UiState<*>) -> Unit,
 ) {
     val productsState = productViewModel.productsState.collectAsState()
-    val bannerState = productViewModel.bannerState.collectAsState()
+    val categoriesState = productViewModel.categoriesState.collectAsState()
+    val selectedCategory = productViewModel.selectedCategory.collectAsState()
+    val latestProductsBannerState = productViewModel.latestProductsBannerState.collectAsState()
     val addProductState = productViewModel.addProductState.collectAsState().value
     val editProductState = productViewModel.editProductState.collectAsState().value
     val deactivateProduct = productViewModel.deactivateProduct.collectAsState().value
@@ -122,8 +124,11 @@ fun ProductsScreen(
             isWideScreen = isWideScreen,
             lazyGridState = lazyGridState,
             userRole = userRole,
-            bannerState = bannerState,
+            latestProductsBannerState = latestProductsBannerState,
             productsState = productsState,
+            categoriesState = categoriesState,
+            selectedCategory = selectedCategory,
+            onSelectCategory = productViewModel::selectCategory,
             cartItems = cartItems,
             onIncreaseItem = { cartViewModel.add(it) },
             onDecreaseItem = { cartViewModel.remove(it) },
