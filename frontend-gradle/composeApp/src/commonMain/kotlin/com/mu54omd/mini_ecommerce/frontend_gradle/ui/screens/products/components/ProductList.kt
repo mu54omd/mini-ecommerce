@@ -11,17 +11,18 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.Product
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.model.UserRole
@@ -57,7 +58,6 @@ fun ProductList(
         mutableStateOf(if(isWideScreen) ProductListState.CardsWithDetails else ProductListState.Cards)
     }
     var selectedProduct by remember { mutableStateOf<Product?>(null) }
-
 
     SharedTransitionLayout(modifier = modifier.fillMaxSize()) {
         AnimatedContent(
@@ -95,9 +95,15 @@ fun ProductList(
                     selectedProduct?.let { product ->
                         ProductDetails(
                             product = product,
+                            addedItem = cartItems[product.id] ?: 0,
+                            userRole = userRole,
                             onDismiss = {
                                 productListState = ProductListState.Cards
                             },
+                            onIncreaseItem = { onIncreaseItem(product.id!!) },
+                            onDecreaseItem = { onDecreaseItem(product.id!!) },
+                            onEditClick = { onEditClick(product) },
+                            onRemoveClick = { onRemoveClick(product.id!!) },
                             sharedTransitionScope = this@SharedTransitionLayout,
                             animatedVisibilityScope = this@AnimatedContent,
                         )
@@ -106,18 +112,33 @@ fun ProductList(
 
                 ProductListState.CardsWithDetails -> {
                     var isDetailsBoxVisible by remember { mutableStateOf(false) }
-                    Row(
+                    val filteredProductsState = remember(selectedProduct, productsState.value) {
+                        derivedStateOf {
+                            val original = productsState.value
+                            if (isDetailsBoxVisible && selectedProduct != null) {
+                                when (original) {
+                                    is UiState.Success -> UiState.Success(
+                                        original.data.filter { it.id != selectedProduct!!.id }
+                                    )
+                                    else -> original
+                                }
+                            } else {
+                                original
+                            }
+                        }
+                    }
+
+                    Box(
                         modifier = Modifier.fillMaxSize()
                     ) {
                         Box(
                             modifier = Modifier
-                                .weight(0.6f)
                                 .fillMaxHeight()
                         ) {
                             ProductCards(
                                 lazyGridState = lazyGridState,
                                 latestProductsBannerState = latestProductsBannerState,
-                                productsState = productsState,
+                                productsState = filteredProductsState,
                                 categoriesState = categoriesState,
                                 selectedCategory = selectedCategory.value,
                                 onSelectCategory = onSelectCategory,
@@ -139,7 +160,6 @@ fun ProductList(
                         }
                         AnimatedVisibility(
                             visible = isDetailsBoxVisible,
-                            modifier = Modifier.weight(0.4f),
                             enter = slideInHorizontally(
                                 animationSpec = tween(100),
                                 initialOffsetX = { it }
@@ -152,6 +172,13 @@ fun ProductList(
                             selectedProduct?.let { product ->
                                 ProductDetails(
                                     product = product,
+                                    alignment = Alignment.CenterEnd,
+                                    addedItem = cartItems[product.id] ?: 0,
+                                    userRole = userRole,
+                                    onIncreaseItem = { onIncreaseItem(product.id!!) },
+                                    onDecreaseItem = { onDecreaseItem(product.id!!) },
+                                    onEditClick = { onEditClick(product) },
+                                    onRemoveClick = { onRemoveClick(product.id!!) },
                                     onDismiss = { isDetailsBoxVisible = false },
                                     enableSharedTransition = false,
                                     sharedTransitionScope = this@SharedTransitionLayout,

@@ -7,6 +7,7 @@ import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,16 +16,15 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -38,11 +38,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Brush.Companion.verticalGradient
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.config.GeneratedConfig.BASE_URL
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.Product
@@ -55,6 +60,9 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 fun ProductCard(
     modifier: Modifier = Modifier,
+    cardWidth: Dp = 150.dp,
+    cardHeight: Dp = 150.dp,
+    imageWidth: Dp = 100.dp,
     interactionSource: MutableInteractionSource? = null,
     scale: Float,
     addedItem: Int,
@@ -70,61 +78,88 @@ fun ProductCard(
     animatedVisibilityScope: AnimatedVisibilityScope
 ) {
     with(sharedTransitionScope) {
-        Card(
-            modifier = modifier,
-            interactionSource = interactionSource,
-            onClick = onProductClick,
-            elevation = CardDefaults.cardElevation(4.dp)
+
+        var addedItem by rememberSaveable { mutableIntStateOf(addedItem) }
+        Box(
+            modifier = Modifier
+                .width(width = cardWidth)
+                .height(height = cardHeight)
+                .padding(4.dp)
+                .clickable(
+                    interactionSource = interactionSource,
+                    indication = null
+                ) {
+                    onProductClick()
+                }
+                .then(modifier),
+            contentAlignment = Alignment.Center
         ) {
-            var addedItem by rememberSaveable { mutableIntStateOf(addedItem) }
-            Box(
-                Modifier.weight(0.7f), Alignment.Center
-            ) {
-                CustomAsyncImage(
-                    url = $$"$$BASE_URL$${product.imageUrl}",
-                    contentDescription = product.description,
-                    errorTint = MaterialTheme.colorScheme.error,
-                    size = 150.dp,
-                    modifier = Modifier
-                        .graphicsLayer {
-                            scaleX = scale
-                            scaleY = scale
+            CustomAsyncImage(
+                url = $$"$$BASE_URL$${product.imageUrl}",
+                contentDescription = product.description,
+                errorTint = MaterialTheme.colorScheme.error,
+                loadedImageSize = imageWidth,
+                errorImageSize = imageWidth,
+                loadingImageSize = imageWidth,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .offset(y = (-20).dp)
+                    .graphicsLayer {
+                        scaleX = scale
+                        scaleY = scale
+                    }
+                    .then(
+                        if (enableSharedTransition) {
+                            Modifier.sharedElement(
+                                sharedContentState = rememberSharedContentState(
+                                    key = "image_${product.id}"
+                                ),
+                                animatedVisibilityScope = animatedVisibilityScope
+                            )
+                        } else {
+                            Modifier
                         }
-                        .then(
-                            if (enableSharedTransition) {
-                                Modifier.sharedElement(
+                    )
+                    .clip(RoundedCornerShape(10.dp))
+            )
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .then(
+                        if (enableSharedTransition) {
+                            Modifier
+                                .sharedElement(
                                     sharedContentState = rememberSharedContentState(
-                                        key = "image_${product.id}"
+                                        key = "product_info${product.id}"
                                     ),
                                     animatedVisibilityScope = animatedVisibilityScope
                                 )
-                            } else {
-                                Modifier
-                            }
-                        )
-                        .clip(RoundedCornerShape(10.dp))
-                )
+                        } else {
+                            Modifier
+                        }
+                    )
+            ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .align(Alignment.BottomStart)
-                        .height(70.dp)
-                            then (
-                            if (enableSharedTransition) {
-                                Modifier
-                                    .sharedElement(
-                                        sharedContentState = rememberSharedContentState(
-                                            key = "product_info${product.id}"
-                                        ),
-                                        animatedVisibilityScope = animatedVisibilityScope
-                                    )
-                            } else {
-                                Modifier
-                            }
-                            )
-                        .graphicsLayer { alpha = 0.7f }
                         .background(
-                            color = MaterialTheme.colorScheme.surfaceBright
+                            brush = Brush.composite(
+                                dstBrush = verticalGradient(
+                                    colors = listOf(
+                                        Color.Transparent,
+                                        MaterialTheme.colorScheme.primaryContainer
+                                    )
+                                ),
+                                srcBrush = verticalGradient(
+                                    colors = listOf(
+                                        Color.Transparent,
+                                        MaterialTheme.colorScheme.secondaryContainer
+                                    )
+                                ),
+                                blendMode = BlendMode.Color
+                            ),
+                            shape = RoundedCornerShape(bottomStart = 10.dp, bottomEnd = 10.dp)
                         )
                         .padding(4.dp),
                     horizontalAlignment = Alignment.Start,
@@ -240,7 +275,8 @@ fun ProductCardPreview() {
                 AnimatedContent(targetState = true) { state ->
                     Row {
                         ProductCard(
-                            modifier = Modifier.size(150.dp).padding(4.dp),
+                            cardWidth = 150.dp,
+                            cardHeight = 200.dp,
                             scale = 1f,
                             addedItem = 3,
                             product = product,
@@ -255,7 +291,8 @@ fun ProductCardPreview() {
                             animatedVisibilityScope = this@AnimatedContent
                         )
                         ProductCard(
-                            modifier = Modifier.size(200.dp).padding(4.dp),
+                            cardWidth = 180.dp,
+                            cardHeight = 220.dp,
                             scale = 1f,
                             addedItem = 3,
                             product = product,

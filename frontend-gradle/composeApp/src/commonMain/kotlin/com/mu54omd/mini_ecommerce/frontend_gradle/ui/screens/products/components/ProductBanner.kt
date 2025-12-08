@@ -120,7 +120,8 @@ fun ProductBanner(
             ) {
                 CustomAsyncImage(
                     url = "${BASE_URL}${product.imageUrl}",
-                    contentDescription = product.description
+                    contentDescription = product.description,
+                    isFullSize = true
                 )
             }
         }

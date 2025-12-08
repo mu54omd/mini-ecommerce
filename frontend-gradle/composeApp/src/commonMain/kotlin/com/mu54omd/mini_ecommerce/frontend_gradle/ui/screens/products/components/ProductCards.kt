@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -93,7 +92,7 @@ fun ProductCards(
                         LazyVerticalGrid(
                             modifier = Modifier.padding(start = 16.dp, end = 16.dp),
                             columns = GridCells.Adaptive(150.dp),
-                            contentPadding = PaddingValues(bottom = 50.dp),
+                            contentPadding = PaddingValues(top = 30.dp, bottom = 50.dp),
                             state = lazyGridState
                         ) {
                             items(items = products, key = { product -> product.id!! }) { product ->
@@ -110,7 +109,9 @@ fun ProductCards(
                                     label = ""
                                 )
                                 ProductCard(
-                                    modifier = Modifier.size(150.dp).padding(8.dp).animateItem(),
+                                    cardWidth = 150.dp,
+                                    imageWidth = 120.dp,
+                                    cardHeight = 250.dp,
                                     addedItem = cartItems[product.id] ?: 0,
                                     scale = scale,
                                     interactionSource = interaction,

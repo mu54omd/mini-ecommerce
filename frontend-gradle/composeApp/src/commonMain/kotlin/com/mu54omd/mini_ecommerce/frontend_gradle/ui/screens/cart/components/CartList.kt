@@ -104,7 +104,7 @@ fun CartList(
                         url = "$BASE_URL${item.product.imageUrl}",
                         contentDescription = item.product.description,
                         errorTint = MaterialTheme.colorScheme.surface,
-                        size = 150.dp,
+                        errorImageSize = 150.dp,
                         modifier = Modifier.weight(0.3f)
                     )
                     Column(

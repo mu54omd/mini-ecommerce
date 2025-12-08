@@ -31,7 +31,10 @@ fun CustomAsyncImage(
     contentDescription: String? = null,
     modifier: Modifier = Modifier,
     errorTint: Color = Color.Red,
-    size: Dp = 100.dp
+    isFullSize: Boolean = false,
+    loadedImageSize: Dp = 150.dp,
+    errorImageSize: Dp = 150.dp,
+    loadingImageSize: Dp = 150.dp,
 ) {
     val painter = rememberAsyncImagePainter(
         ImageRequest.Builder(LocalPlatformContext.current)
@@ -50,6 +53,7 @@ fun CustomAsyncImage(
         when (state) {
             is AsyncImagePainter.State.Success -> {
                 Image(
+                    modifier = Modifier.then(if(isFullSize) Modifier.fillMaxSize() else Modifier.size(loadedImageSize)),
                     painter = painter,
                     contentDescription = contentDescription,
                     contentScale = ContentScale.Crop
@@ -61,7 +65,7 @@ fun CustomAsyncImage(
                     imageVector = Icons.Default.BrokenImage,
                     contentDescription = contentDescription,
                     tint = errorTint,
-                    modifier = Modifier.size(size)
+                    modifier = Modifier.size(errorImageSize)
                 )
             }
 
@@ -73,10 +77,10 @@ fun CustomAsyncImage(
                     Icon(
                         imageVector = Icons.Default.Image,
                         contentDescription = contentDescription,
-                        modifier = Modifier.size(size)
+                        modifier = Modifier.size(loadingImageSize)
                     )
                     Box(
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.size(loadingImageSize)
                             .shimmerEffect(
                                 isLoadingCompleted = state is AsyncImagePainter.State.Success,
                                 isLightModeActive = !isSystemInDarkTheme()

@@ -13,6 +13,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,22 +23,39 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Brush.Companion.verticalGradient
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.Product
 import com.mu54omd.mini_ecommerce.frontend_gradle.config.GeneratedConfig.BASE_URL
+import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.Product
+import com.mu54omd.mini_ecommerce.frontend_gradle.domain.model.UserRole
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.CustomAsyncImage
 
 
@@ -45,15 +63,23 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.CustomAsyncI
 @Composable
 fun ProductDetails(
     product: Product,
+    addedItem: Int,
+    userRole: UserRole,
+    alignment: Alignment = Alignment.Center,
     onDismiss: () -> Unit,
+    onEditClick: () -> Unit,
+    onRemoveClick: () -> Unit,
+    onIncreaseItem: () -> Unit,
+    onDecreaseItem: () -> Unit,
     enableSharedTransition: Boolean = true,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope
 ) {
     with(animatedVisibilityScope) {
         with(sharedTransitionScope) {
+            var addedItem by rememberSaveable { mutableIntStateOf(addedItem) }
             Box(
-                contentAlignment = Alignment.Center,
+                contentAlignment = alignment,
                 modifier = Modifier
                     .fillMaxSize()
                     .clickable(
@@ -71,22 +97,23 @@ fun ProductDetails(
                         .clip(RoundedCornerShape(10.dp))
                         .background(color = MaterialTheme.colorScheme.surfaceBright)
                         .verticalScroll(state = rememberScrollState())
-                        then(
-                            if(enableSharedTransition){
+                            then (
+                            if (enableSharedTransition) {
                                 Modifier
                                     .sharedBounds(
                                         sharedContentState = rememberSharedContentState(key = "container_${product.id}"),
                                         animatedVisibilityScope = animatedVisibilityScope,
                                         placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize
                                     )
-                            }else{
+                            } else {
                                 Modifier
                             }
-                        )
+                            )
 
                 ) {
                     CustomAsyncImage(
                         url = "$BASE_URL${product.imageUrl}",
+                        isFullSize = true,
                         contentDescription = product.description,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -111,53 +138,158 @@ fun ProductDetails(
                                 )
                             ),
                         errorTint = MaterialTheme.colorScheme.error,
-                        size = 250.dp,
                     )
-                    Column(
-                        horizontalAlignment = Alignment.Start,
-                        verticalArrangement = Arrangement.Center,
+
+                    Row(
                         modifier = Modifier
-                            .fillMaxWidth()
+                            .background(
+                                brush = Brush.composite(
+                                    dstBrush = verticalGradient(
+                                        colors = listOf(
+                                            Color.Transparent,
+                                            MaterialTheme.colorScheme.primaryContainer
+                                        )
+                                    ),
+                                    srcBrush = verticalGradient(
+                                        colors = listOf(
+                                            Color.Transparent,
+                                            MaterialTheme.colorScheme.secondaryContainer
+                                        )
+                                    ),
+                                    blendMode = BlendMode.Color
+                                ),
+                            )
                             .padding(start = 4.dp, end = 4.dp, top = 2.dp, bottom = 2.dp)
-                            then(
-                                if(enableSharedTransition){
+                            .fillMaxWidth()
+                                then (
+                                if (enableSharedTransition) {
                                     Modifier.sharedBounds(
                                         sharedContentState = rememberSharedContentState(
                                             key = "product_info${product.id}"
                                         ),
                                         animatedVisibilityScope = animatedVisibilityScope,
                                     )
-                                }else{
+                                } else {
                                     Modifier
                                 }
-                            )
+                                ),
+                        verticalAlignment = Alignment.Bottom,
+                        horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
-                        Text(
-                            product.name,
-                            fontWeight = FontWeight.Bold,
-                            style = MaterialTheme.typography.titleLarge,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                        Text(
-                            text = "${product.price} $",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        Text(
-                            text = "#${product.stock}",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+                        Column(
+                            horizontalAlignment = Alignment.Start,
+                            verticalArrangement = Arrangement.Center,
+
+                            ) {
+                            Text(
+                                product.name,
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.titleLarge,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                            Text(
+                                text = "${product.price} $",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Text(
+                                text = "#${product.stock}",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.End,
+                        ) {
+                            if (userRole == UserRole.USER) {
+                                IconButton(
+                                    onClick = {
+                                        addedItem--
+                                        onDecreaseItem()
+                                    },
+                                    enabled = addedItem > 0,
+                                    modifier = Modifier.pointerHoverIcon(
+                                        PointerIcon.Hand
+                                    )
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Remove,
+                                        contentDescription = "Remove Product from Cart"
+                                    )
+                                }
+                                Text(text = "$addedItem")
+                                IconButton(
+                                    onClick = {
+                                        addedItem++
+                                        onIncreaseItem()
+                                    },
+                                    enabled = (addedItem < product.stock) && (product.stock > 0),
+                                    modifier = Modifier.pointerHoverIcon(
+                                        PointerIcon.Hand
+                                    )
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Add,
+                                        contentDescription = "Add Product to Cart"
+                                    )
+                                }
+                            } else if (userRole == UserRole.ADMIN) {
+                                IconButton(
+                                    onClick = onRemoveClick,
+                                    enabled = true,
+                                    modifier = Modifier.pointerHoverIcon(
+                                        PointerIcon.Hand
+                                    )
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Delete,
+                                        contentDescription = "Delete Product"
+                                    )
+                                }
+                                IconButton(
+                                    onClick = {
+                                        onEditClick()
+                                    },
+                                    enabled = true,
+                                    modifier = Modifier.pointerHoverIcon(
+                                        PointerIcon.Hand
+                                    )
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Edit,
+                                        contentDescription = "Edit Product"
+                                    )
+                                }
+                            }
+                        }
                     }
                     HorizontalDivider()
                     Column(
                         modifier = Modifier
+                            .background(
+                                brush = Brush.composite(
+                                    dstBrush = verticalGradient(
+                                        colors = listOf(
+                                            MaterialTheme.colorScheme.primaryContainer,
+                                            MaterialTheme.colorScheme.primaryContainer
+                                        )
+                                    ),
+                                    srcBrush = verticalGradient(
+                                        colors = listOf(
+                                            MaterialTheme.colorScheme.secondaryContainer,
+                                            MaterialTheme.colorScheme.secondaryContainer
+                                        )
+                                    ),
+                                    blendMode = BlendMode.Color
+                                ),
+                            )
                             .padding(start = 4.dp, end = 4.dp, top = 2.dp, bottom = 2.dp)
                             .fillMaxWidth()
                             .skipToLookaheadSize()
                             .animateEnterExit(
-                                enter = fadeIn() + slideInVertically(initialOffsetY = {it}),
-                                exit = fadeOut() + slideOutVertically(targetOffsetY = {it})
+                                enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
+                                exit = fadeOut() + slideOutVertically(targetOffsetY = { it })
                             )
                     ) {
                         Text(
@@ -180,6 +312,7 @@ fun ProductDetails(
                         )
                     }
                 }
+
             }
         }
     }
