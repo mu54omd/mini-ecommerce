@@ -157,10 +157,11 @@ fun ProductsScreen(
                         productViewModel.resetAddProductState()
                     }
                 },
-                onConfirmClick = { name, description, price, stocks ->
+                onConfirmClick = { name, category, description, price, stocks ->
                     productViewModel.addProduct(
                         Product(
                             name = name,
+                            category = category,
                             description = description,
                             price = price,
                             stock = stocks
@@ -168,12 +169,13 @@ fun ProductsScreen(
                     )
                     onAddProductModalChange(false)
                 },
-                onUploadImageClick = { name, description, price, stocks ->
+                onUploadImageClick = { name, category, description, price, stocks ->
                     scope.launch {
                         sheetState.hide()
                         onAddProductModalChange(false)
                         selectedProduct = Product(
                             name = name,
+                            category = category,
                             description = description,
                             price = price,
                             stock = stocks
@@ -202,11 +204,12 @@ fun ProductsScreen(
                         productViewModel.resetEditProductState()
                     }
                 },
-                onConfirmClick = { name, description, price, stocks ->
+                onConfirmClick = { name, category, description, price, stocks ->
                     productViewModel.editProduct(
                         Product(
                             id = selectedProduct.id,
                             name = name,
+                            category = category,
                             description = description,
                             price = price,
                             stock = stocks
@@ -214,7 +217,7 @@ fun ProductsScreen(
                     )
                     editProductModalState = false
                 },
-                onUploadImageClick = { _, _, _, _ ->
+                onUploadImageClick = { _, _, _, _, _ ->
                     scope.launch {
                         sheetState.hide()
                         editProductModalState = false

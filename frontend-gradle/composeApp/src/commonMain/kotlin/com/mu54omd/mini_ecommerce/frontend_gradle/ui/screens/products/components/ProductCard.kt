@@ -1,7 +1,9 @@
 package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.products.components
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
@@ -10,9 +12,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -24,6 +28,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -43,6 +48,8 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.config.GeneratedConfig.BASE_UR
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.Product
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.model.UserRole
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.CustomAsyncImage
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.MiniECommerceTheme
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -213,4 +220,61 @@ fun ProductCard(
         }
     }
 }
+
+
+@OptIn(ExperimentalSharedTransitionApi::class)
+@Preview
+@Composable
+fun ProductCardPreview() {
+    MiniECommerceTheme {
+        val product = Product(
+            id = 120L,
+            name = "Product",
+            category = "Smartphone",
+            description = "The newest smartphone in the world",
+            price = 1230.25,
+            stock = 5,
+        )
+        Surface {
+            SharedTransitionLayout(modifier = Modifier.fillMaxSize()) {
+                AnimatedContent(targetState = true) { state ->
+                    Row {
+                        ProductCard(
+                            modifier = Modifier.size(150.dp).padding(4.dp),
+                            scale = 1f,
+                            addedItem = 3,
+                            product = product,
+                            userRole = UserRole.USER,
+                            onProductClick = {},
+                            onIncreaseItem = {},
+                            onDecreaseItem = {},
+                            onEditClick = {},
+                            onRemoveClick = {},
+                            enableSharedTransition = false,
+                            sharedTransitionScope = this@SharedTransitionLayout,
+                            animatedVisibilityScope = this@AnimatedContent
+                        )
+                        ProductCard(
+                            modifier = Modifier.size(200.dp).padding(4.dp),
+                            scale = 1f,
+                            addedItem = 3,
+                            product = product,
+                            userRole = UserRole.ADMIN,
+                            onProductClick = {},
+                            onIncreaseItem = {},
+                            onDecreaseItem = {},
+                            onEditClick = {},
+                            onRemoveClick = {},
+                            enableSharedTransition = false,
+                            sharedTransitionScope = this@SharedTransitionLayout,
+                            animatedVisibilityScope = this@AnimatedContent
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+
 

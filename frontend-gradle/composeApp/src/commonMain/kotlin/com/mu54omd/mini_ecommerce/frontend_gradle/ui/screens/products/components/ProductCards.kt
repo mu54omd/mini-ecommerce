@@ -92,7 +92,7 @@ fun ProductCards(
                     Box(contentAlignment = Alignment.Center) {
                         LazyVerticalGrid(
                             modifier = Modifier.padding(start = 16.dp, end = 16.dp),
-                            columns = GridCells.Adaptive(180.dp),
+                            columns = GridCells.Adaptive(150.dp),
                             contentPadding = PaddingValues(bottom = 50.dp),
                             state = lazyGridState
                         ) {
@@ -110,7 +110,7 @@ fun ProductCards(
                                     label = ""
                                 )
                                 ProductCard(
-                                    modifier = Modifier.size(180.dp).padding(8.dp).animateItem(),
+                                    modifier = Modifier.size(150.dp).padding(8.dp).animateItem(),
                                     addedItem = cartItems[product.id] ?: 0,
                                     scale = scale,
                                     interactionSource = interaction,

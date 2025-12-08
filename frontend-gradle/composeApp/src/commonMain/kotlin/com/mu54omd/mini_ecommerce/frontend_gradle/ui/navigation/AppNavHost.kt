@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.ShoppingCart
@@ -32,7 +33,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -50,7 +50,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
@@ -160,14 +159,14 @@ fun AppNavHost(
                         },
                     contentAlignment = Alignment.Center
                 ) {
-                    Box(
-                        contentAlignment = Alignment.CenterStart,
-                        modifier = Modifier.width(100.dp).align(Alignment.CenterStart)
-                    ) {
-                        Text(
-                            text = currentDestination?.uppercase() ?: "",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.ExtraBold,
+                    IconButton(
+                        onClick = {},
+                        modifier = Modifier.pointerHoverIcon(if (!isLogin) PointerIcon.Hand else PointerIcon.Default).align(Alignment.CenterStart),
+                        enabled = !isLogin
+                    ){
+                        Icon(
+                            imageVector = Icons.Default.Menu,
+                            contentDescription = "Drawer Menu Icon",
                         )
                     }
                     Row(
@@ -192,34 +191,38 @@ fun AppNavHost(
                                 )
                             }
                         }
-                        IconButton(
-                            onClick = {
-                                isMainMenuHidden = !isMainMenuHidden
-                            },
-                            modifier = Modifier.pointerHoverIcon(if (!isLogin) PointerIcon.Hand else PointerIcon.Default),
-                            enabled = !isLogin
-                        ){
-                            Icon(
-                                imageVector = Icons.Default.MoreVert,
-                                contentDescription = "Main Menu Icon"
+                        Box(
+                            contentAlignment = Alignment.CenterEnd
+                        ) {
+                            IconButton(
+                                onClick = {
+                                    isMainMenuHidden = !isMainMenuHidden
+                                },
+                                modifier = Modifier.pointerHoverIcon(if (!isLogin) PointerIcon.Hand else PointerIcon.Default),
+                                enabled = !isLogin
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.MoreVert,
+                                    contentDescription = "Main Menu Icon"
+                                )
+                            }
+                            MainMenu(
+                                isExpanded = !isMainMenuHidden,
+                                isDarkTheme = isDarkTheme,
+                                onToggleTheme = onToggleTheme,
+                                onLogoutClick = {
+                                    authViewModel.logout()
+                                    navController.navigate(Screen.Login.route) {
+                                        popUpTo(navController.graph.id) {
+                                            inclusive = true
+                                        }
+                                        launchSingleTop = true
+                                    }
+                                    selectedDestination = navigationDestination.indices.first
+                                },
+                                onDismiss = { isMainMenuHidden = true }
                             )
                         }
-                        MainMenu(
-                            isExpanded = !isMainMenuHidden,
-                            isDarkTheme = isDarkTheme,
-                            onToggleTheme = onToggleTheme,
-                            onLogoutClick = {
-                                authViewModel.logout()
-                                navController.navigate(Screen.Login.route) {
-                                    popUpTo(navController.graph.id) {
-                                        inclusive = true
-                                    }
-                                    launchSingleTop = true
-                                }
-                                selectedDestination = navigationDestination.indices.first
-                            },
-                            onDismiss = { isMainMenuHidden = !isMainMenuHidden }
-                        )
                     }
                 }
             }

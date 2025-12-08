@@ -2,6 +2,8 @@ package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.products.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,12 +34,10 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.pointer.PointerIcon
@@ -47,9 +47,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.Product
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.AppThemeExtras
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.ExtendedColorScheme
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.ExtendedTheme
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.LocalExtendedColorScheme
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.name
 
@@ -61,11 +58,12 @@ fun AddEditProductModal(
     sheetState: SheetState = rememberModalBottomSheetState(),
     product: Product,
     onCancelClick: () -> Unit,
-    onConfirmClick: (String, String, Double, Int) -> Unit,
-    onUploadImageClick: (String, String, Double, Int) -> Unit,
+    onConfirmClick: (String, String, String , Double, Int) -> Unit,
+    onUploadImageClick: (String, String, String, Double, Int) -> Unit,
 ) {
 
     var productName by rememberSaveable { mutableStateOf(product.name) }
+    var productCategory by rememberSaveable { mutableStateOf(product.category) }
     var productDescription by rememberSaveable { mutableStateOf(product.description) }
     var productPrice by rememberSaveable { mutableStateOf(product.price.toString()) }
     var productStocks by rememberSaveable { mutableStateOf(product.stock.toString()) }
@@ -80,11 +78,17 @@ fun AddEditProductModal(
         contentColor = MaterialTheme.colorScheme.onSurface,
         shape = RectangleShape,
         dragHandle = null,
-        scrimColor = Color.Black.copy(alpha = .5f),
+        scrimColor = Color.Black.copy(alpha = 0.5f),
     ) {
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
+                .clickable(
+                    indication = null,
+                    interactionSource = MutableInteractionSource()
+                ){
+                    onCancelClick()
+                }
                 .fillMaxWidth()
                 .padding(10.dp)
         ) {
@@ -101,21 +105,46 @@ fun AddEditProductModal(
                         shape = RoundedCornerShape(5)
                     )
                     .padding(8.dp)
+                    .clickable(
+                        enabled = false,
+                        indication = null,
+                        interactionSource = MutableInteractionSource()
+                    ){}
             ) {
-                OutlinedTextField(
-                    value = productName,
-                    onValueChange = { productName = it },
-                    label = {
-                        Text(
-                            text = "Name",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    },
-                    singleLine = true,
-                    modifier = Modifier.width(300.dp),
-                    shape = RoundedCornerShape(30),
-                    textStyle = TextStyle(brush = lineBrush)
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.width(300.dp)
+                ) {
+                    OutlinedTextField(
+                        value = productName,
+                        onValueChange = { productName = it },
+                        label = {
+                            Text(
+                                text = "Name",
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        },
+                        singleLine = true,
+                        modifier = Modifier.width(160.dp),
+                        shape = RoundedCornerShape(30),
+                        textStyle = TextStyle(brush = lineBrush)
+                    )
+                    OutlinedTextField(
+                        value = productCategory,
+                        onValueChange = { productCategory = it },
+                        label = {
+                            Text(
+                                text = "Category",
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        },
+                        singleLine = true,
+                        modifier = Modifier.width(135.dp),
+                        shape = RoundedCornerShape(30),
+                        textStyle = TextStyle(brush = lineBrush)
+                    )
+                }
                 Spacer(modifier = Modifier.height(4.dp))
                 OutlinedTextField(
                     value = productDescription,
@@ -189,6 +218,7 @@ fun AddEditProductModal(
                             onClick = {
                                 onUploadImageClick(
                                     productName,
+                                    productCategory,
                                     productDescription,
                                     productPrice.toDouble(),
                                     productStocks.toInt()
@@ -226,12 +256,13 @@ fun AddEditProductModal(
                         onClick = {
                             onConfirmClick(
                                 productName,
+                                productCategory,
                                 productDescription,
                                 productPrice.toDouble(),
                                 productStocks.toInt()
                             )
                         },
-                        enabled = productName.isNotBlank() && productPrice.isNotBlank() && productDescription.isNotBlank() && productStocks.isNotBlank(),
+                        enabled = productName.isNotBlank() && productCategory.isNotBlank() && productPrice.isNotBlank() && productDescription.isNotBlank() && productStocks.isNotBlank(),
                         modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
 
                     ) {

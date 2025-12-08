@@ -3,6 +3,7 @@ package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.users.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -83,6 +84,12 @@ fun AddEditUserModal(
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
+                .clickable(
+                    indication = null,
+                    interactionSource = MutableInteractionSource()
+                ){
+                    onCancelClick()
+                }
                 .fillMaxWidth()
                 .padding(10.dp)
         ) {
@@ -103,6 +110,11 @@ fun AddEditUserModal(
                         shape = RoundedCornerShape(5)
                     )
                     .padding(8.dp)
+                    .clickable(
+                        enabled = false,
+                        indication = null,
+                        interactionSource = MutableInteractionSource()
+                    ){}
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
