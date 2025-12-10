@@ -31,17 +31,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Brush.Companion.verticalGradient
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
@@ -53,6 +45,7 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.config.GeneratedConfig.BASE_UR
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.Product
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.model.UserRole
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.CustomAsyncImage
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.AppThemeExtras
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.MiniECommerceTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -65,7 +58,7 @@ fun ProductCard(
     imageWidth: Dp = 100.dp,
     interactionSource: MutableInteractionSource? = null,
     scale: Float,
-    addedItem: Int,
+    itemCount: Int,
     product: Product,
     userRole: UserRole,
     onProductClick: () -> Unit,
@@ -78,8 +71,6 @@ fun ProductCard(
     animatedVisibilityScope: AnimatedVisibilityScope
 ) {
     with(sharedTransitionScope) {
-
-        var addedItem by rememberSaveable { mutableIntStateOf(addedItem) }
         Box(
             modifier = Modifier
                 .width(width = cardWidth)
@@ -144,21 +135,7 @@ fun ProductCard(
                         .fillMaxWidth()
                         .align(Alignment.BottomStart)
                         .background(
-                            brush = Brush.composite(
-                                dstBrush = verticalGradient(
-                                    colors = listOf(
-                                        Color.Transparent,
-                                        MaterialTheme.colorScheme.primaryContainer
-                                    )
-                                ),
-                                srcBrush = verticalGradient(
-                                    colors = listOf(
-                                        Color.Transparent,
-                                        MaterialTheme.colorScheme.secondaryContainer
-                                    )
-                                ),
-                                blendMode = BlendMode.Color
-                            ),
+                            brush = AppThemeExtras.brushes.cardBrush,
                             shape = RoundedCornerShape(bottomStart = 10.dp, bottomEnd = 10.dp)
                         )
                         .padding(4.dp),
@@ -192,11 +169,8 @@ fun ProductCard(
                 ) {
                     if (userRole == UserRole.USER) {
                         IconButton(
-                            onClick = {
-                                addedItem--
-                                onDecreaseItem()
-                            },
-                            enabled = addedItem > 0,
+                            onClick = onDecreaseItem,
+                            enabled = itemCount > 0,
                             modifier = Modifier.pointerHoverIcon(
                                 PointerIcon.Hand
                             )
@@ -206,13 +180,10 @@ fun ProductCard(
                                 contentDescription = "Remove Product from Cart"
                             )
                         }
-                        Text(text = "$addedItem")
+                        Text(text = "$itemCount")
                         IconButton(
-                            onClick = {
-                                addedItem++
-                                onIncreaseItem()
-                            },
-                            enabled = (addedItem < product.stock) && (product.stock > 0),
+                            onClick = onIncreaseItem,
+                            enabled = (itemCount < product.stock) && (product.stock > 0),
                             modifier = Modifier.pointerHoverIcon(
                                 PointerIcon.Hand
                             )
@@ -278,7 +249,7 @@ fun ProductCardPreview() {
                             cardWidth = 150.dp,
                             cardHeight = 200.dp,
                             scale = 1f,
-                            addedItem = 3,
+                            itemCount = 3,
                             product = product,
                             userRole = UserRole.USER,
                             onProductClick = {},
@@ -294,7 +265,7 @@ fun ProductCardPreview() {
                             cardWidth = 180.dp,
                             cardHeight = 220.dp,
                             scale = 1f,
-                            addedItem = 3,
+                            itemCount = 3,
                             product = product,
                             userRole = UserRole.ADMIN,
                             onProductClick = {},

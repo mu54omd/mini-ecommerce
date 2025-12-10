@@ -34,11 +34,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -57,13 +53,14 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.config.GeneratedConfig.BASE_UR
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.Product
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.model.UserRole
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.CustomAsyncImage
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.AppThemeExtras
 
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun ProductDetails(
     product: Product,
-    addedItem: Int,
+    itemCount: Int,
     userRole: UserRole,
     alignment: Alignment = Alignment.Center,
     onDismiss: () -> Unit,
@@ -77,16 +74,24 @@ fun ProductDetails(
 ) {
     with(animatedVisibilityScope) {
         with(sharedTransitionScope) {
-            var addedItem by rememberSaveable { mutableIntStateOf(addedItem) }
             Box(
                 contentAlignment = alignment,
                 modifier = Modifier
                     .fillMaxSize()
+                    .background(
+                        brush = Brush.horizontalGradient(
+                            colors = listOf(MaterialTheme.colorScheme.background, MaterialTheme.colorScheme.background.copy(alpha = 0.5f), Color.Transparent),
+                            startX = Float.POSITIVE_INFINITY,
+                            endX = 0f
+                        )
+                    )
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null
                     ) { onDismiss() }
-                    .background(color = Color.Transparent)
+                    .verticalScroll(state = rememberScrollState(initial = 60))
+                    .padding(top = 60.dp, bottom = 80.dp)
+
             ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -96,7 +101,6 @@ fun ProductDetails(
                         .fillMaxHeight()
                         .clip(RoundedCornerShape(10.dp))
                         .background(color = MaterialTheme.colorScheme.surfaceBright)
-                        .verticalScroll(state = rememberScrollState())
                             then (
                             if (enableSharedTransition) {
                                 Modifier
@@ -143,21 +147,7 @@ fun ProductDetails(
                     Row(
                         modifier = Modifier
                             .background(
-                                brush = Brush.composite(
-                                    dstBrush = verticalGradient(
-                                        colors = listOf(
-                                            Color.Transparent,
-                                            MaterialTheme.colorScheme.primaryContainer
-                                        )
-                                    ),
-                                    srcBrush = verticalGradient(
-                                        colors = listOf(
-                                            Color.Transparent,
-                                            MaterialTheme.colorScheme.secondaryContainer
-                                        )
-                                    ),
-                                    blendMode = BlendMode.Color
-                                ),
+                                brush = AppThemeExtras.brushes.cardBrush,
                             )
                             .padding(start = 4.dp, end = 4.dp, top = 2.dp, bottom = 2.dp)
                             .fillMaxWidth()
@@ -179,6 +169,7 @@ fun ProductDetails(
                         Column(
                             horizontalAlignment = Alignment.Start,
                             verticalArrangement = Arrangement.Center,
+                            modifier = Modifier.padding(start = 12.dp, end = 12.dp)
 
                             ) {
                             Text(
@@ -204,11 +195,8 @@ fun ProductDetails(
                         ) {
                             if (userRole == UserRole.USER) {
                                 IconButton(
-                                    onClick = {
-                                        addedItem--
-                                        onDecreaseItem()
-                                    },
-                                    enabled = addedItem > 0,
+                                    onClick = onDecreaseItem,
+                                    enabled = itemCount > 0,
                                     modifier = Modifier.pointerHoverIcon(
                                         PointerIcon.Hand
                                     )
@@ -218,13 +206,10 @@ fun ProductDetails(
                                         contentDescription = "Remove Product from Cart"
                                     )
                                 }
-                                Text(text = "$addedItem")
+                                Text(text = "$itemCount")
                                 IconButton(
-                                    onClick = {
-                                        addedItem++
-                                        onIncreaseItem()
-                                    },
-                                    enabled = (addedItem < product.stock) && (product.stock > 0),
+                                    onClick = onIncreaseItem,
+                                    enabled = (itemCount < product.stock) && (product.stock > 0),
                                     modifier = Modifier.pointerHoverIcon(
                                         PointerIcon.Hand
                                     )
@@ -268,23 +253,23 @@ fun ProductDetails(
                     Column(
                         modifier = Modifier
                             .background(
-                                brush = Brush.composite(
+                                Brush.composite(
                                     dstBrush = verticalGradient(
                                         colors = listOf(
                                             MaterialTheme.colorScheme.primaryContainer,
-                                            MaterialTheme.colorScheme.primaryContainer
-                                        )
+                                            MaterialTheme.colorScheme.primaryContainer,
+                                        ),
                                     ),
                                     srcBrush = verticalGradient(
                                         colors = listOf(
                                             MaterialTheme.colorScheme.secondaryContainer,
-                                            MaterialTheme.colorScheme.secondaryContainer
-                                        )
+                                            MaterialTheme.colorScheme.secondaryContainer,
+                                        ),
                                     ),
-                                    blendMode = BlendMode.Color
+                                    blendMode = BlendMode.Saturation
                                 ),
                             )
-                            .padding(start = 4.dp, end = 4.dp, top = 2.dp, bottom = 2.dp)
+                            .padding(start = 12.dp, end = 12.dp, top = 8.dp, bottom = 8.dp)
                             .fillMaxWidth()
                             .skipToLookaheadSize()
                             .animateEnterExit(
@@ -312,7 +297,6 @@ fun ProductDetails(
                         )
                     }
                 }
-
             }
         }
     }

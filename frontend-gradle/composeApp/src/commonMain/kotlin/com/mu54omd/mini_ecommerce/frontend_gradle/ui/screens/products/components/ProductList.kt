@@ -95,7 +95,7 @@ fun ProductList(
                     selectedProduct?.let { product ->
                         ProductDetails(
                             product = product,
-                            addedItem = cartItems[product.id] ?: 0,
+                            itemCount = cartItems[product.id] ?: 0,
                             userRole = userRole,
                             onDismiss = {
                                 productListState = ProductListState.Cards
@@ -173,7 +173,7 @@ fun ProductList(
                                 ProductDetails(
                                     product = product,
                                     alignment = Alignment.CenterEnd,
-                                    addedItem = cartItems[product.id] ?: 0,
+                                    itemCount = cartItems[product.id] ?: 0,
                                     userRole = userRole,
                                     onIncreaseItem = { onIncreaseItem(product.id!!) },
                                     onDecreaseItem = { onDecreaseItem(product.id!!) },

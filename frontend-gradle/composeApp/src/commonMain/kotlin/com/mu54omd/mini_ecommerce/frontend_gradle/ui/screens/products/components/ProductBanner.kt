@@ -50,7 +50,8 @@ import kotlin.math.absoluteValue
 @Composable
 fun ProductBanner(
     bannerTitle: String,
-    products: List<Product>
+    products: List<Product>,
+    onProductClick: (Product) -> Unit,
 ) {
     val backBrush = Brush.horizontalGradient(
         listOf(
@@ -115,7 +116,10 @@ fun ProductBanner(
                         this.scaleX = scale
                         this.scaleY = scale
                         this.alpha = alpha
-                    },
+                    }
+                    .pointerHoverIcon(icon = PointerIcon.Hand),
+                enabled = true,
+                onClick = { onProductClick(product) },
                 elevation = CardDefaults.cardElevation(4.dp)
             ) {
                 CustomAsyncImage(

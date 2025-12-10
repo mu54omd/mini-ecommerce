@@ -9,7 +9,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Brush.Companion.verticalGradient
 import androidx.compose.ui.graphics.Color
 
 @Immutable
@@ -364,11 +366,15 @@ object ExtendedTheme {
 
 // Custom Global Brush
 data class AppBrushes(
-    val lineBrush: Brush
+    val lineBrush: Brush,
+    val cardBrush: Brush,
 )
 
 val unspecified_brush = AppBrushes(
     lineBrush = Brush.linearGradient(
+        colors = listOf(Color.Unspecified, Color.Unspecified)
+    ),
+    cardBrush = Brush.linearGradient(
         colors = listOf(Color.Unspecified, Color.Unspecified)
     )
 )
@@ -405,6 +411,21 @@ fun MiniECommerceTheme(
                     extended.quinary.color,
                     extended.quaternary.color
                 )
+            ),
+            cardBrush = Brush.composite(
+                dstBrush = verticalGradient(
+                    colors = listOf(
+                        Color.Transparent,
+                        colorScheme.primaryContainer,
+                    ),
+                ),
+                srcBrush = verticalGradient(
+                    colors = listOf(
+                        Color.Transparent,
+                        colorScheme.secondaryContainer,
+                    ),
+                ),
+                blendMode = BlendMode.Saturation
             )
         )
     }

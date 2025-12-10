@@ -64,7 +64,8 @@ fun ProductCards(
             is UiState.Success -> {
                 ProductBanner(
                     bannerTitle = "Latest Products",
-                    products = (latestProductsBannerState.value as UiState.Success<List<Product>>).data
+                    products = (latestProductsBannerState.value as UiState.Success<List<Product>>).data,
+                    onProductClick = onProductClick
                 )
             }
 
@@ -112,7 +113,7 @@ fun ProductCards(
                                     cardWidth = 150.dp,
                                     imageWidth = 120.dp,
                                     cardHeight = 250.dp,
-                                    addedItem = cartItems[product.id] ?: 0,
+                                    itemCount = cartItems[product.id] ?: 0,
                                     scale = scale,
                                     interactionSource = interaction,
                                     product = product,

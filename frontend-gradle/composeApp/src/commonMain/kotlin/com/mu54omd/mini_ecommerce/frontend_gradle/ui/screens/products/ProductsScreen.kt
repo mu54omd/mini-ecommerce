@@ -72,8 +72,7 @@ fun ProductsScreen(
     var selectedProductIdForDelete by remember { mutableLongStateOf(-1) }
 
     val cartState = cartViewModel.cartState.collectAsState().value
-    val cartItems: Map<Long, Int> =
-        if (cartState is UiState.Success) cartState.data.items.associate { (_, product, quantity) -> product.id to quantity } else emptyMap()
+    val cartItems: Map<Long, Int> = if (cartState is UiState.Success) cartState.data.items.associate { (_, product, quantity) -> product.id to quantity } else emptyMap()
 
 
     val scope = rememberCoroutineScope()
