@@ -88,7 +88,7 @@ fun ProductCard(
             CustomAsyncImage(
                 url = $$"$$BASE_URL$${product.imageUrl}",
                 contentDescription = product.description,
-                errorTint = MaterialTheme.colorScheme.error,
+                errorTint = MaterialTheme.colorScheme.errorContainer,
                 loadedImageSize = imageWidth,
                 errorImageSize = imageWidth,
                 loadingImageSize = imageWidth,

@@ -1,10 +1,9 @@
 package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.products.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.snapping.SnapPosition
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -26,9 +25,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,6 +34,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.config.GeneratedConfig.BASE_URL
@@ -51,7 +48,7 @@ import kotlin.math.absoluteValue
 fun ProductBanner(
     bannerTitle: String,
     products: List<Product>,
-    onProductClick: (Product) -> Unit,
+    onProductClick: (Product) -> Unit
 ) {
     val backBrush = Brush.horizontalGradient(
         listOf(
@@ -80,11 +77,6 @@ fun ProductBanner(
         val pagerState = rememberPagerState(initialPage = startIndex, pageCount = { infinitelyScrollableCount })
         val scope = rememberCoroutineScope()
         val cardWidth = 350.dp
-        val boxWidth by remember(maxWidth) {
-            derivedStateOf {
-                (maxWidth - cardWidth) / 2
-            }
-        }
         LaunchedEffect(Unit) {
             while (true) {
                 delay(3000)
@@ -96,18 +88,16 @@ fun ProductBanner(
             pageSize = PageSize.Fixed(cardWidth),
             snapPosition = SnapPosition.Center,
             userScrollEnabled = false,
-            modifier = Modifier.align(Alignment.BottomCenter).offset(y = (-24).dp)
+            modifier = Modifier.align(Alignment.BottomCenter).offset(y = (-24).dp),
         ) { page ->
             val realIndex = page % products.size
             val product = products[realIndex]
-            val pageOffset =
-                ((pagerState.currentPage - page) + pagerState.currentPageOffsetFraction).absoluteValue.coerceIn(
-                    0f,
-                    1f
-                )
+            val pageOffset = ((pagerState.currentPage - page) + pagerState.currentPageOffsetFraction).absoluteValue.coerceIn(0f, 1f)
 
             val scale = 1f - 0.2f * pageOffset
             val alpha = 1f - 0.3f * pageOffset
+
+
             Card(
                 modifier = Modifier
                     .width(cardWidth)
@@ -117,9 +107,14 @@ fun ProductBanner(
                         this.scaleY = scale
                         this.alpha = alpha
                     }
-                    .pointerHoverIcon(icon = PointerIcon.Hand),
-                enabled = true,
-                onClick = { onProductClick(product) },
+                    .pointerHoverIcon(if(page == pagerState.currentPage) PointerIcon.Hand else PointerIcon.Default)
+                    .pointerInput(Unit) {
+                        detectTapGestures {
+                            if (page == pagerState.currentPage){
+                                onProductClick(product)
+                            }
+                        }
+                    },
                 elevation = CardDefaults.cardElevation(4.dp)
             ) {
                 CustomAsyncImage(
@@ -129,36 +124,6 @@ fun ProductBanner(
                 )
             }
         }
-        Box(
-            modifier = Modifier
-                .align(Alignment.CenterStart)
-                .fillMaxHeight()
-                .width(boxWidth)
-//                .background(
-//                    brush = Brush.horizontalGradient(
-//                        listOf(
-//                            MaterialTheme.colorScheme.primaryContainer,
-//                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
-//                            Color.Transparent
-//                        )
-//                    )
-//                ),
-        )
-        Box(
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .fillMaxHeight()
-                .width(boxWidth)
-//                .background(
-//                    brush = Brush.horizontalGradient(
-//                        listOf(
-//                            Color.Transparent,
-//                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
-//                            MaterialTheme.colorScheme.primaryContainer
-//                        )
-//                    )
-//                ),
-        )
         IconButton(
             onClick = {
                 scope.launch {

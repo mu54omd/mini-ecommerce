@@ -141,7 +141,7 @@ fun ProductDetails(
                                     bottomEnd = 10.dp
                                 )
                             ),
-                        errorTint = MaterialTheme.colorScheme.error,
+                        errorTint = MaterialTheme.colorScheme.errorContainer,
                     )
 
                     Row(
