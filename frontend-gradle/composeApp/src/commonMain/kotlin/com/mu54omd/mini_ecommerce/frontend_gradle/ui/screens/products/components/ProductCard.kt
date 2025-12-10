@@ -5,47 +5,29 @@ import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.foundation.background
-import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.PointerIcon
-import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.config.GeneratedConfig.BASE_URL
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.Product
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.model.UserRole
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.CustomAsyncImage
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.AppThemeExtras
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.MiniECommerceTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -113,116 +95,18 @@ fun ProductCard(
                     )
                     .clip(RoundedCornerShape(10.dp))
             )
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .then(
-                        if (enableSharedTransition) {
-                            Modifier
-                                .sharedElement(
-                                    sharedContentState = rememberSharedContentState(
-                                        key = "product_info${product.id}"
-                                    ),
-                                    animatedVisibilityScope = animatedVisibilityScope
-                                )
-                        } else {
-                            Modifier
-                        }
-                    )
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.BottomStart)
-                        .background(
-                            brush = AppThemeExtras.brushes.cardBrush,
-                            shape = RoundedCornerShape(bottomStart = 10.dp, bottomEnd = 10.dp)
-                        )
-                        .padding(4.dp),
-                    horizontalAlignment = Alignment.Start,
-                    verticalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        product.name,
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.titleSmall,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier
-                            .basicMarquee(),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = "${product.price} $",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Text(
-                        text = "#${product.stock}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.End,
-                    modifier = Modifier.align(Alignment.BottomEnd)
-                ) {
-                    if (userRole == UserRole.USER) {
-                        IconButton(
-                            onClick = onDecreaseItem,
-                            enabled = itemCount > 0,
-                            modifier = Modifier.pointerHoverIcon(
-                                PointerIcon.Hand
-                            )
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Remove,
-                                contentDescription = "Remove Product from Cart"
-                            )
-                        }
-                        Text(text = "$itemCount")
-                        IconButton(
-                            onClick = onIncreaseItem,
-                            enabled = (itemCount < product.stock) && (product.stock > 0),
-                            modifier = Modifier.pointerHoverIcon(
-                                PointerIcon.Hand
-                            )
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Add,
-                                contentDescription = "Add Product to Cart"
-                            )
-                        }
-                    } else if (userRole == UserRole.ADMIN) {
-                        IconButton(
-                            onClick = onRemoveClick,
-                            enabled = true,
-                            modifier = Modifier.pointerHoverIcon(
-                                PointerIcon.Hand
-                            )
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Delete,
-                                contentDescription = "Delete Product"
-                            )
-                        }
-                        IconButton(
-                            onClick = {
-                                onEditClick()
-                            },
-                            enabled = true,
-                            modifier = Modifier.pointerHoverIcon(
-                                PointerIcon.Hand
-                            )
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Edit,
-                                contentDescription = "Edit Product"
-                            )
-                        }
-                    }
-                }
-            }
+            ProductCardDetails(
+                product = product,
+                userRole = userRole,
+                itemCount = itemCount,
+                onEditClick = onEditClick,
+                onRemoveClick = onRemoveClick,
+                onDecreaseItem = onDecreaseItem,
+                onIncreaseItem = onIncreaseItem,
+                enableSharedTransition = enableSharedTransition,
+                sharedTransitionScope = sharedTransitionScope,
+                animatedVisibilityScope = animatedVisibilityScope
+            )
         }
     }
 }

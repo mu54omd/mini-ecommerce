@@ -13,7 +13,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,14 +23,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -42,18 +34,13 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Brush.Companion.verticalGradient
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.PointerIcon
-import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.config.GeneratedConfig.BASE_URL
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.Product
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.model.UserRole
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.CustomAsyncImage
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.AppThemeExtras
 
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -80,7 +67,11 @@ fun ProductDetails(
                     .fillMaxSize()
                     .background(
                         brush = Brush.horizontalGradient(
-                            colors = listOf(MaterialTheme.colorScheme.background, MaterialTheme.colorScheme.background.copy(alpha = 0.5f), Color.Transparent),
+                            colors = listOf(
+                                MaterialTheme.colorScheme.background,
+                                MaterialTheme.colorScheme.background.copy(alpha = 0.9f),
+                                MaterialTheme.colorScheme.background.copy(alpha = 0.7f),
+                                Color.Transparent),
                             startX = Float.POSITIVE_INFINITY,
                             endX = 0f
                         )
@@ -100,7 +91,7 @@ fun ProductDetails(
                         .widthIn(min = 350.dp, max = 450.dp)
                         .fillMaxHeight()
                         .clip(RoundedCornerShape(10.dp))
-                        .background(color = MaterialTheme.colorScheme.surfaceBright)
+                        .background(color = Color.Transparent)
                             then (
                             if (enableSharedTransition) {
                                 Modifier
@@ -143,113 +134,20 @@ fun ProductDetails(
                             ),
                         errorTint = MaterialTheme.colorScheme.errorContainer,
                     )
-
-                    Row(
-                        modifier = Modifier
-                            .background(
-                                brush = AppThemeExtras.brushes.cardBrush,
-                            )
-                            .padding(start = 4.dp, end = 4.dp, top = 2.dp, bottom = 2.dp)
-                            .fillMaxWidth()
-                                then (
-                                if (enableSharedTransition) {
-                                    Modifier.sharedBounds(
-                                        sharedContentState = rememberSharedContentState(
-                                            key = "product_info${product.id}"
-                                        ),
-                                        animatedVisibilityScope = animatedVisibilityScope,
-                                    )
-                                } else {
-                                    Modifier
-                                }
-                                ),
-                        verticalAlignment = Alignment.Bottom,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.Start,
-                            verticalArrangement = Arrangement.Center,
-                            modifier = Modifier.padding(start = 12.dp, end = 12.dp)
-
-                            ) {
-                            Text(
-                                product.name,
-                                fontWeight = FontWeight.Bold,
-                                style = MaterialTheme.typography.titleLarge,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                            Text(
-                                text = "${product.price} $",
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                            Text(
-                                text = "#${product.stock}",
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.End,
-                        ) {
-                            if (userRole == UserRole.USER) {
-                                IconButton(
-                                    onClick = onDecreaseItem,
-                                    enabled = itemCount > 0,
-                                    modifier = Modifier.pointerHoverIcon(
-                                        PointerIcon.Hand
-                                    )
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Remove,
-                                        contentDescription = "Remove Product from Cart"
-                                    )
-                                }
-                                Text(text = "$itemCount")
-                                IconButton(
-                                    onClick = onIncreaseItem,
-                                    enabled = (itemCount < product.stock) && (product.stock > 0),
-                                    modifier = Modifier.pointerHoverIcon(
-                                        PointerIcon.Hand
-                                    )
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Add,
-                                        contentDescription = "Add Product to Cart"
-                                    )
-                                }
-                            } else if (userRole == UserRole.ADMIN) {
-                                IconButton(
-                                    onClick = onRemoveClick,
-                                    enabled = true,
-                                    modifier = Modifier.pointerHoverIcon(
-                                        PointerIcon.Hand
-                                    )
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Delete,
-                                        contentDescription = "Delete Product"
-                                    )
-                                }
-                                IconButton(
-                                    onClick = {
-                                        onEditClick()
-                                    },
-                                    enabled = true,
-                                    modifier = Modifier.pointerHoverIcon(
-                                        PointerIcon.Hand
-                                    )
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Edit,
-                                        contentDescription = "Edit Product"
-                                    )
-                                }
-                            }
-                        }
-                    }
-                    HorizontalDivider()
+                    ProductCardDetails(
+                        product = product,
+                        userRole = userRole,
+                        itemCount = itemCount,
+                        isLarge = true,
+                        onEditClick = onEditClick,
+                        onRemoveClick = onRemoveClick,
+                        onDecreaseItem = onDecreaseItem,
+                        onIncreaseItem = onIncreaseItem,
+                        enableSharedTransition = enableSharedTransition,
+                        sharedTransitionScope = sharedTransitionScope,
+                        animatedVisibilityScope = animatedVisibilityScope
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
                     Column(
                         modifier = Modifier
                             .background(
@@ -268,6 +166,7 @@ fun ProductDetails(
                                     ),
                                     blendMode = BlendMode.Saturation
                                 ),
+                                shape = RoundedCornerShape(10.dp)
                             )
                             .padding(start = 12.dp, end = 12.dp, top = 8.dp, bottom = 8.dp)
                             .fillMaxWidth()
