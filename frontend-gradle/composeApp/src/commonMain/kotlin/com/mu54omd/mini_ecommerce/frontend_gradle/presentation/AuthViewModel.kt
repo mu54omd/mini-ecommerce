@@ -10,21 +10,15 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.AuthUseCases
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.toUiState
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class AuthViewModel(private val authUseCases: AuthUseCases): ViewModel() {
 
     private val _tokenState: MutableStateFlow<UiState<LoginResponse>> = MutableStateFlow(UiState.Idle)
-    val tokenState: StateFlow<UiState<LoginResponse>> = _tokenState.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000L),
-            initialValue = UiState.Idle
-        )
+    val tokenState: StateFlow<UiState<LoginResponse>> = _tokenState.asStateFlow()
 
     private val _healthState: MutableStateFlow<UiState<HealthResponse>> = MutableStateFlow(UiState.Idle)
     val healthState = _healthState.asStateFlow()

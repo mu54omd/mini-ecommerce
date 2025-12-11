@@ -25,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.font.FontWeight
@@ -34,7 +35,6 @@ import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.Product
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.model.UserRole
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.AppThemeExtras
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.ExtendedTheme
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -86,24 +86,25 @@ fun ProductCardDetails(
                     style = if(isLarge) MaterialTheme.typography.titleLarge else MaterialTheme.typography.titleSmall,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier
+                        .padding(start = 6.dp, end = 6.dp)
                         .basicMarquee(),
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth().background(
-                        color = ExtendedTheme.colorScheme.quinary.colorContainer.copy(alpha = 0.5f)
-                    ).padding(top = 4.dp, bottom = 4.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 6.dp, end = 6.dp, top = 2.dp, bottom = 2.dp)
                 ) {
                     Text(
                         text = "${product.price} $",
-                        style = if(isLarge) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyMedium,
+                        style = if(isLarge) MaterialTheme.typography.titleMedium else MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                     Text(
                         text = "#${product.stock}",
-                        style = if(isLarge) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodySmall,
+                        style = if(isLarge) MaterialTheme.typography.titleMedium else MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
@@ -117,6 +118,7 @@ fun ProductCardDetails(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier
                                 .weight(0.4f)
+                                .clip(shape = RoundedCornerShape(bottomStart = 10.dp))
                                 .clickable(
                                     enabled = itemCount > 0,
                                 ){
@@ -129,7 +131,8 @@ fun ProductCardDetails(
                             Icon(
                                 imageVector = Icons.Filled.Remove,
                                 contentDescription = "Remove Product from Cart",
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.padding(4.dp)
                             )
                         }
                         Text(
@@ -143,6 +146,7 @@ fun ProductCardDetails(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier
                                 .weight(0.4f)
+                                .clip(shape = RoundedCornerShape(bottomEnd = 10.dp))
                                 .clickable(
                                     enabled = (itemCount < product.stock) && (product.stock > 0),
                                 ){
@@ -155,7 +159,8 @@ fun ProductCardDetails(
                             Icon(
                                 imageVector = Icons.Filled.Add,
                                 contentDescription = "Add Product to Cart",
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.padding(4.dp)
                             )
                         }
                     } else if (userRole == UserRole.ADMIN) {
@@ -163,6 +168,7 @@ fun ProductCardDetails(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier
                                 .weight(0.5f)
+                                .clip(shape = RoundedCornerShape(bottomStart = 10.dp))
                                 .clickable(
                                     enabled = true
                                 ){
@@ -175,13 +181,15 @@ fun ProductCardDetails(
                             Icon(
                                 imageVector = Icons.Filled.Delete,
                                 contentDescription = "Delete Product",
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.padding(4.dp)
                             )
                         }
                         Box(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier
                                 .weight(0.5f)
+                                .clip(shape = RoundedCornerShape(bottomEnd = 10.dp))
                                 .clickable(
                                     enabled = true,
                                 ){
@@ -194,7 +202,8 @@ fun ProductCardDetails(
                             Icon(
                                 imageVector = Icons.Filled.Edit,
                                 contentDescription = "Edit Product",
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.padding(4.dp)
                             )
                         }
                     }

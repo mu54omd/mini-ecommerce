@@ -7,24 +7,20 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.CartUseCases
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.toUiState
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class CartViewModel(private val cartUseCases: CartUseCases) : ViewModel() {
 
     private val _cartState = MutableStateFlow<UiState<CartResponse>>(UiState.Idle)
-    val cartState = _cartState
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000L),
-            initialValue = UiState.Idle
-        )
+    val cartState = _cartState.asStateFlow()
 
     private val _checkoutState = MutableStateFlow<UiState<String>>(UiState.Idle)
     val checkoutState = _checkoutState.asStateFlow()
+
+    private val _cartItems = MutableStateFlow<Map<Long, Int>>(emptyMap())
+    val cartItems = _cartItems.asStateFlow()
 
     // ============================================================
     fun resetAllStates(){
@@ -46,9 +42,18 @@ class CartViewModel(private val cartUseCases: CartUseCases) : ViewModel() {
         viewModelScope.launch {
             _cartState.update { UiState.Loading }
             val result = cartUseCases.getCartUseCase()
-            _cartState.update { result.toUiState()}
+            _cartState.update { result.toUiState() }
+
+            if (cartState.value is UiState.Success) {
+                syncCartItems((cartState.value as UiState.Success<CartResponse>).data)
+            }
         }
     }
+
+    private fun syncCartItems(response: CartResponse){
+        _cartItems.value = response.items.associate { it.product.id to it.quantity }
+    }
+
     fun add(productId: Long, qty: Int = 1) {
         viewModelScope.launch {
             cartUseCases.addToCartUseCase(productId, qty)
