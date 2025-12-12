@@ -2,8 +2,10 @@ package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.login
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,6 +16,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -27,7 +30,6 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -41,6 +43,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -133,17 +136,18 @@ fun LoginScreen(
                 },
                 trailingIcon = {
                     if (username.isNotBlank()) {
-                        IconButton(
-                            onClick = {
-                                username = ""
-                            },
+                        Box(
+                            contentAlignment = Alignment.Center,
                             modifier = Modifier
-                                .size(25.dp)
-                                .pointerHoverIcon(PointerIcon.Hand)
+                                .size(40.dp)
+                                .clip(shape = CircleShape)
+                                .clickable{ username = "" }
+                                .pointerHoverIcon(PointerIcon.Hand),
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Clear,
                                 contentDescription = "Clear Username Icon",
+                                modifier = Modifier.size(25.dp)
                             )
                         }
                     }
@@ -188,33 +192,34 @@ fun LoginScreen(
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.End,
-                            modifier = Modifier.width(80.dp).padding(end = 8.dp, start = 8.dp)
+                            modifier = Modifier.width(100.dp).padding(end = 4.dp)
                         ){
-                            IconButton(
-                                onClick = {
-                                    isPasswordVisible = !isPasswordVisible
-                                },
+                            Box(
+                                contentAlignment = Alignment.Center,
                                 modifier = Modifier
-                                    .size(25.dp)
-                                    .pointerHoverIcon(PointerIcon.Hand)
+                                    .size(40.dp)
+                                    .clip(shape = CircleShape)
+                                    .clickable{ isPasswordVisible = !isPasswordVisible }
+                                    .pointerHoverIcon(PointerIcon.Hand),
                             ) {
                                 Icon(
                                     imageVector = if(isPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
                                     contentDescription = "Clear Password Icon",
+                                    modifier = Modifier.size(25.dp)
                                 )
                             }
-                            Spacer(modifier = Modifier.width(2.dp))
-                            IconButton(
-                                onClick = {
-                                    password = ""
-                                },
+                            Box(
+                                contentAlignment = Alignment.Center,
                                 modifier = Modifier
-                                    .size(25.dp)
+                                    .size(40.dp)
+                                    .clip(shape = CircleShape)
+                                    .clickable{ password = "" }
                                     .pointerHoverIcon(PointerIcon.Hand)
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Clear,
                                     contentDescription = "Clear Password Icon",
+                                    modifier = Modifier.size(25.dp)
                                 )
                             }
                         }
@@ -267,19 +272,19 @@ fun LoginScreen(
                     },
                     trailingIcon = {
                         if (email.isNotBlank()) {
-                            IconButton(
-                                onClick = {
-                                    email = ""
-                                },
+                            Box(
+                                contentAlignment = Alignment.Center,
                                 modifier = Modifier
-                                    .size(25.dp)
+                                    .size(40.dp)
+                                    .clip(shape = CircleShape)
+                                    .clickable{ email = "" }
                                     .pointerHoverIcon(PointerIcon.Hand)
                                     .focusable(false)
-
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Clear,
                                     contentDescription = "Clear Email Icon",
+                                    modifier = Modifier.size(25.dp)
                                 )
                             }
                         }
