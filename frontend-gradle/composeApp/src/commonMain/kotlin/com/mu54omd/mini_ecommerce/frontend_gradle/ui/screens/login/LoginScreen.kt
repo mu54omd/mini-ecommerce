@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,6 +19,11 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Key
+import androidx.compose.material.icons.filled.Mail
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -37,21 +43,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.RegisterResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.AuthViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.AppThemeExtras
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.ExtendedTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -68,6 +72,8 @@ fun LoginScreen(
     var isUsernameWrong by remember { mutableStateOf(false) }
     var isPasswordWrong by remember { mutableStateOf(false) }
     var isEmailWrong by remember { mutableStateOf(false) }
+
+    var isPasswordVisible by remember { mutableStateOf(false) }
 
     var usernameWrongMessage by remember { mutableStateOf("") }
     var passwordWrongMessage by remember { mutableStateOf("") }
@@ -90,6 +96,7 @@ fun LoginScreen(
         isEmailWrong = false
         isUsernameWrong = false
         isPasswordWrong = false
+        isPasswordVisible = false
         usernameWrongMessage = ""
         passwordWrongMessage = ""
         emailWrongMessage = ""
@@ -118,6 +125,12 @@ fun LoginScreen(
                     .fillMaxWidth()
                     .focusRequester(usernameFocusRequester),
                 isError = isUsernameWrong,
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "Username Field Icon"
+                    )
+                },
                 trailingIcon = {
                     if (username.isNotBlank()) {
                         IconButton(
@@ -158,27 +171,54 @@ fun LoginScreen(
                 value = password,
                 onValueChange = { password = it },
                 label = { Text("Password") },
-                visualTransformation = PasswordVisualTransformation(),
+                visualTransformation = if(!isPasswordVisible) PasswordVisualTransformation() else VisualTransformation.None,
                 singleLine = true,
                 modifier = Modifier
                     .fillMaxWidth()
                     .focusRequester(passwordFocusRequester),
                 isError = isPasswordWrong,
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Key,
+                        contentDescription = "Password Field Icon"
+                    )
+                },
                 trailingIcon = {
                     if (password.isNotBlank()) {
-                        IconButton(
-                            onClick = {
-                                password = ""
-                            },
-                            modifier = Modifier
-                                .size(25.dp)
-                                .pointerHoverIcon(PointerIcon.Hand)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Clear,
-                                contentDescription = "Clear Password Icon",
-                            )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.End,
+                            modifier = Modifier.width(80.dp).padding(end = 8.dp, start = 8.dp)
+                        ){
+                            IconButton(
+                                onClick = {
+                                    isPasswordVisible = !isPasswordVisible
+                                },
+                                modifier = Modifier
+                                    .size(25.dp)
+                                    .pointerHoverIcon(PointerIcon.Hand)
+                            ) {
+                                Icon(
+                                    imageVector = if(isPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                    contentDescription = "Clear Password Icon",
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(2.dp))
+                            IconButton(
+                                onClick = {
+                                    password = ""
+                                },
+                                modifier = Modifier
+                                    .size(25.dp)
+                                    .pointerHoverIcon(PointerIcon.Hand)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Clear,
+                                    contentDescription = "Clear Password Icon",
+                                )
+                            }
                         }
+
                     }
                 },
                 supportingText = {
@@ -219,6 +259,12 @@ fun LoginScreen(
                         .fillMaxWidth()
                         .focusRequester(emailFocusRequester),
                     isError = isEmailWrong,
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Mail,
+                            contentDescription = "Email Field Icon"
+                        )
+                    },
                     trailingIcon = {
                         if (email.isNotBlank()) {
                             IconButton(
