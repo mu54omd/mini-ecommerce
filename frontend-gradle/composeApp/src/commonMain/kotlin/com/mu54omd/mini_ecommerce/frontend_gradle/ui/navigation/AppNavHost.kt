@@ -1,37 +1,13 @@
 package com.mu54omd.mini_ecommerce.frontend_gradle.ui.navigation
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
-import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.PersonAdd
-import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material.icons.filled.ShoppingCartCheckout
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -43,14 +19,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.PointerIcon
-import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -63,17 +32,17 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.OrderViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.ProductViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.UserViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.navigation.components.FAB
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.navigation.components.NavigationBar
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.navigation.components.Screen
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.navigation.components.SearchBarState
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.navigation.components.TopBar
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.admin.AdminPanelScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.cart.CartScreen
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.AnimatedNavigationBar
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.AnimatedNavigationRail
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.MainMenu
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.SearchBar
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.login.LoginScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.orders.OrdersScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.products.ProductsScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.users.UsersScreen
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.ExtendedTheme
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -98,27 +67,14 @@ fun AppNavHost(
         else -> listOf(Screen.Products)
     }
 
-    val cartIcon = remember(cartItemCount) {
-        if (cartItemCount > 0) {
-            Icons.Filled.ShoppingCartCheckout
-        } else {
-            Icons.Filled.ShoppingCart
-        }
-    }
-    val cartIconColor = if (cartItemCount > 0) {
-        MaterialTheme.colorScheme.error
-    } else {
-        MaterialTheme.colorScheme.onSurface
-    }
-
-
     var selectedDestination by rememberSaveable(tokenState) {
         mutableIntStateOf(
             navigationDestination.indices.first
         )
     }
-    val currentDestination = navController.currentBackStackEntryAsState().value?.destination?.route
 
+    val startDestination = Screen.Login.route
+    val currentDestination = navController.currentBackStackEntryAsState().value?.destination?.route ?: startDestination
     val isLogin = currentDestination == Screen.Login.route
 
 
@@ -149,91 +105,52 @@ fun AppNavHost(
 
         Scaffold(
             topBar = {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 20.dp, end = 20.dp, top = 30.dp)
-                        .height(64.dp)
-                        .graphicsLayer {
-                            alpha = if (isLogin) 0f else 1f
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    IconButton(
-                        onClick = {},
-                        modifier = Modifier.pointerHoverIcon(if (!isLogin) PointerIcon.Hand else PointerIcon.Default).align(Alignment.CenterStart),
-                        enabled = !isLogin
-                    ){
-                        Icon(
-                            imageVector = Icons.Default.Menu,
-                            contentDescription = "Drawer Menu Icon",
-                        )
-                    }
-                    Row(
-                        horizontalArrangement = Arrangement.End,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.align(Alignment.CenterEnd)
-                    ) {
-                        when (currentDestination) {
-                            Screen.Products.route -> {
-                                SearchBar(
-                                    placeHolderText = "Search Products",
-                                    onQuery = { query -> productViewModel.setSearchQuery(query.ifBlank { null }) },
-                                    onClearQuery = { productViewModel.setSearchQuery(null) },
-                                )
-                            }
-
-                            Screen.Orders.route -> {
-                                SearchBar(
-                                    placeHolderText = "Search Orders",
-                                    onQuery = { query -> orderViewModel.setSearchQuery(query = query) },
-                                    onClearQuery = { orderViewModel.setSearchQuery(query = null) },
-                                )
-                            }
-                        }
-                        Box(
-                            contentAlignment = Alignment.CenterEnd
-                        ) {
-                            IconButton(
-                                onClick = {
-                                    isMainMenuHidden = !isMainMenuHidden
-                                },
-                                modifier = Modifier.pointerHoverIcon(if (!isLogin) PointerIcon.Hand else PointerIcon.Default),
-                                enabled = !isLogin
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.MoreVert,
-                                    contentDescription = "Main Menu Icon"
-                                )
-                            }
-                            MainMenu(
-                                isExpanded = !isMainMenuHidden,
-                                isDarkTheme = isDarkTheme,
-                                onToggleTheme = onToggleTheme,
-                                onLogoutClick = {
-                                    authViewModel.logout()
-                                    navController.navigate(Screen.Login.route) {
-                                        popUpTo(navController.graph.id) {
-                                            inclusive = true
-                                        }
-                                        launchSingleTop = true
-                                    }
-                                    selectedDestination = navigationDestination.indices.first
-                                },
-                                onDismiss = { isMainMenuHidden = true }
+                TopBar(
+                    isLogin = isLogin,
+                    isMainMenuHidden = isMainMenuHidden,
+                    isDarkTheme = isDarkTheme,
+                    searchBarState = when (currentDestination) {
+                        Screen.Products.route -> {
+                            SearchBarState(
+                                isVisible = true,
+                                placeHolderText = "Search Products",
+                                onSearchQuery = { query -> productViewModel . setSearchQuery (query.ifBlank { null })  },
+                                onClearSearchQuery = { productViewModel.setSearchQuery(null) }
                             )
                         }
-                    }
-                }
+                        Screen.Orders.route -> {
+                            SearchBarState(
+                                isVisible = true,
+                                placeHolderText = "Search Orders",
+                                onSearchQuery = { query -> orderViewModel.setSearchQuery(query = query) },
+                                onClearSearchQuery = { orderViewModel.setSearchQuery(query = null) }
+                            )
+                        }
+
+                        else -> SearchBarState()
+                    },
+                    onMainMenuClick = { isMainMenuHidden = !isMainMenuHidden },
+                    onMainMenuDismiss = { isMainMenuHidden = true },
+                    onToggleTheme = onToggleTheme,
+                    onLogoutClick = {
+                        authViewModel.logout()
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(navController.graph.id) {
+                                inclusive = true
+                            }
+                            launchSingleTop = true
+                        }
+                        selectedDestination = navigationDestination.indices.first
+                    },
+                )
             }
         ) { contentPadding ->
             Box(
                 modifier = Modifier.padding(contentPadding)
             ) {
-
                 NavHost(
                     navController = navController,
-                    startDestination = Screen.Login.route,
+                    startDestination = startDestination,
                     enterTransition = {
                         if (initialState.destination.route == Screen.Login.route) {
                             scaleIn()
@@ -335,130 +252,39 @@ fun AppNavHost(
                         )
                     }
                 }
-                AnimatedContent(
-                    modifier = Modifier.align(Alignment.BottomCenter).pointerInput(Unit){},
-                    targetState = !isWideScreen && !isLogin && !isNarrowScreen,
-                    transitionSpec = {
-                        slideIntoContainer(
-                            towards = AnimatedContentTransitionScope.SlideDirection.Up,
-                            animationSpec = tween(durationMillis = 50, delayMillis = 50)
-                        ) togetherWith slideOutOfContainer(
-                            towards = AnimatedContentTransitionScope.SlideDirection.Down,
-                            animationSpec = tween(durationMillis = 50)
-                        )
-                    },
-                    contentAlignment = Alignment.Center
-                ) { state ->
-                    if (state) {
-                        AnimatedNavigationBar(
-                            modifier = Modifier.height(120.dp),
-                            buttons = navigationDestination,
-                            enabled = !isLogin,
-                            selectedItem = selectedDestination,
-                            onClick = { index, destination ->
-                                if (currentDestination != destination.route) {
-                                    navController.navigate(route = destination.route) {
-                                        launchSingleTop = true
-                                        restoreState = true
-                                        popUpTo(navigationDestination.first().route) {
-                                            saveState = true
-                                        }
-                                    }
-                                    selectedDestination = index
+                println("currentDestination: $currentDestination isLogin: $isLogin isWideScreen: $isWideScreen isNarrowScreen: $isNarrowScreen")
+                NavigationBar(
+                    isLogin = isLogin,
+                    isWideScreen = isWideScreen,
+                    isNarrowScreen = isNarrowScreen,
+                    navigationDestination = navigationDestination,
+                    selectedDestination = selectedDestination,
+                    onDestinationClick = { index, destination ->
+                        if (currentDestination != destination.route) {
+                            navController.navigate(route = destination.route) {
+                                launchSingleTop = true
+                                restoreState = true
+                                popUpTo(navigationDestination.first().route) {
+                                    saveState = true
                                 }
-                            },
-                            barColor = MaterialTheme.colorScheme.primaryContainer,
-                            circleColor = ExtendedTheme.colorScheme.quinary.colorContainer,
-                            selectedColor = ExtendedTheme.colorScheme.quinary.color,
-                            unselectedColor = MaterialTheme.colorScheme.secondary
-                        )
-                    }else{
-                        Box(modifier = Modifier.fillMaxWidth().height(0.dp))
-                    }
-                }
-                AnimatedContent(
-                    modifier = Modifier.align(Alignment.CenterStart).pointerInput(Unit){},
-                    targetState = isWideScreen && !isLogin && !isNarrowScreen,
-                    transitionSpec = {
-                        slideIntoContainer(
-                            towards = AnimatedContentTransitionScope.SlideDirection.End,
-                            animationSpec = tween(durationMillis = 50, delayMillis = 50)
-                        ) togetherWith slideOutOfContainer(
-                            towards = AnimatedContentTransitionScope.SlideDirection.Start,
-                            animationSpec = tween(durationMillis = 50)
-                        )
-                    },
-                    contentAlignment = Alignment.Center
-                ) { state ->
-                    if (state) {
-                        AnimatedNavigationRail(
-                            modifier = Modifier.width(120.dp),
-                            enabled = !isLogin,
-                            buttons = navigationDestination,
-                            selectedItem = selectedDestination,
-                            onClick = { index, destination ->
-                                if (currentDestination != destination.route) {
-                                    navController.navigate(route = destination.route) {
-                                        launchSingleTop = true
-                                        restoreState = true
-                                        popUpTo(navigationDestination.first().route) {
-                                            saveState = true
-                                        }
-                                    }
-                                    selectedDestination = index
-                                }
-                            },
-                            barColor = MaterialTheme.colorScheme.primaryContainer,
-                            circleColor = ExtendedTheme.colorScheme.quinary.colorContainer,
-                            selectedColor = ExtendedTheme.colorScheme.quinary.color,
-                            unselectedColor = MaterialTheme.colorScheme.secondary
-                        )
-                    } else{
-                        Box(modifier = Modifier.fillMaxHeight().width(0.dp))
-                    }
-                }
-            }
-            if(userState.role == UserRole.ADMIN){
-                val offsetY by animateDpAsState(
-                    targetValue = if(isWideScreen) (-64).dp else (-100).dp
-                )
-                if(currentDestination == Screen.Products.route || currentDestination == Screen.Users.route){
-                    IconButton(
-                        onClick = {
-                            if(currentDestination == Screen.Products.route) {
-                                addProductModalState = true
-                            } else if(currentDestination == Screen.Users.route){
-                                addUserModalState = true
                             }
-                        },
-                        colors = IconButtonDefaults.filledIconButtonColors(
-                            containerColor = ExtendedTheme.colorScheme.quinary.colorContainer
-                        ),
-                        modifier = Modifier
-                            .offset{ IntOffset(x = (-32).dp.toPx().toInt(), y = offsetY.toPx().toInt()) }
-                            .pointerHoverIcon(icon = PointerIcon.Hand)
-                            .shadow(elevation = 4.dp, shape = CircleShape)
-                            .size(60.dp)
-                            .align(Alignment.BottomEnd)
-                    ){
-                        AnimatedContent(
-                            targetState = currentDestination
-                        ){ state ->
-                            if(state == Screen.Products.route){
-                                Icon(
-                                    imageVector = Icons.Default.Add,
-                                    contentDescription = "Add Product Icon"
-                                )
-                            }else if(state == Screen.Users.route){
-                                Icon(
-                                    imageVector = Icons.Default.PersonAdd,
-                                    contentDescription = "Add User Icon"
-                                )
-                            }
+                            selectedDestination = index
                         }
                     }
-                }
+                )
             }
+            FAB(
+                userRole = userState.role,
+                isWideScreen = isWideScreen,
+                currentDestination = currentDestination,
+                onFabClick = {
+                    if(currentDestination == Screen.Products.route) {
+                        addProductModalState = true
+                    } else if(currentDestination == Screen.Users.route){
+                        addUserModalState = true
+                    }
+                }
+            )
         }
     }
 }

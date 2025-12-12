@@ -1,6 +1,6 @@
 package com.mu54omd.mini_ecommerce.backend_maven.controller;
 
-import com.mu54omd.mini_ecommerce.backend_maven.dto.AuthRequest;
+import com.mu54omd.mini_ecommerce.backend_maven.dto.LoginRequest;
 import com.mu54omd.mini_ecommerce.backend_maven.dto.LoginResponse;
 import com.mu54omd.mini_ecommerce.backend_maven.dto.RegisterRequest;
 import com.mu54omd.mini_ecommerce.backend_maven.dto.RegisterResponse;
@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,7 +36,7 @@ public class AuthRestController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AuthRequest request) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
             final UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());

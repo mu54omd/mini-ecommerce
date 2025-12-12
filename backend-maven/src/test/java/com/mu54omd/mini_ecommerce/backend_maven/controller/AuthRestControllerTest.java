@@ -1,7 +1,7 @@
 package com.mu54omd.mini_ecommerce.backend_maven.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mu54omd.mini_ecommerce.backend_maven.dto.AuthRequest;
+import com.mu54omd.mini_ecommerce.backend_maven.dto.LoginRequest;
 import com.mu54omd.mini_ecommerce.backend_maven.entity.User;
 import com.mu54omd.mini_ecommerce.backend_maven.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,7 +17,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.Optional;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -39,7 +38,7 @@ class AuthRestControllerTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        AuthRequest request = new AuthRequest();
+        LoginRequest request = new LoginRequest();
         request.setUsername("user");
         request.setPassword("user");
 
@@ -61,7 +60,7 @@ class AuthRestControllerTest {
 
     @Test
     void testLoginShouldReturnJwtTokenWhenCredentialsAreValid() throws Exception {
-        AuthRequest request = new AuthRequest();
+        LoginRequest request = new LoginRequest();
         request.setUsername("user");
         request.setPassword("user");
 
@@ -74,7 +73,7 @@ class AuthRestControllerTest {
 
     @Test
     void testLoginShouldFailWhenPasswordIsInvalid() throws Exception {
-        AuthRequest request = new AuthRequest();
+        LoginRequest request = new LoginRequest();
         request.setUsername("user");
         request.setPassword("wrongpassword");
 
