@@ -5,6 +5,7 @@ import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.filled.AdminPanelSettings
 import androidx.compose.material.icons.filled.ShoppingBasket
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.ShoppingCartCheckout
 import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material.icons.filled.SwitchAccount
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -18,6 +19,7 @@ enum class Screen(
     Products("products", "Products", Icons.Default.Storefront, "Products Screen"),
     Login("login", "Login", Icons.AutoMirrored.Filled.Login, "Login Screen"),
     Cart("cart", "My Cart", Icons.Default.ShoppingCart, "User Cart Screen"),
+    FullCart("cart", "My Cart", Icons.Default.ShoppingCartCheckout, "User Cart Screen"),
     Users("users", "Users", Icons.Default.SwitchAccount, "Admin Users Screen"),
     Orders("orders", "Orders", Icons.Default.ShoppingBasket, "Orders Screen"),
     Admin("admin", "Admin", Icons.Default.AdminPanelSettings, "Admin Panel Screen"),

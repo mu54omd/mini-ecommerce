@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -43,6 +44,7 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.login.LoginScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.orders.OrdersScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.products.ProductsScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.users.UsersScreen
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.ExtendedTheme
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,10 +62,17 @@ fun AppNavHost(
     val tokenState = authViewModel.tokenState.collectAsState().value
     val userState = authViewModel.userState.collectAsState().value
     val cartState = cartViewModel.cartState.collectAsState().value
-    val cartItemCount by remember(cartState) { derivedStateOf { if (cartState is UiState.Success) cartState.data.items.size else 0 } }
+
+    var isCartEmpty by remember { mutableStateOf(true) }
+    LaunchedEffect(cartState) {
+        if (cartState is UiState.Success) {
+            isCartEmpty = cartState.data.items.isEmpty()
+        }
+    }
+
     val navigationDestination = when (userState.role) {
         UserRole.ADMIN -> listOf(Screen.Products, Screen.Users, Screen.Orders, Screen.Admin)
-        UserRole.USER -> listOf(Screen.Products, Screen.Cart, Screen.Orders)
+        UserRole.USER -> listOf(Screen.Products, if(isCartEmpty) Screen.Cart else Screen.FullCart, Screen.Orders)
         else -> listOf(Screen.Products)
     }
 
@@ -126,7 +135,6 @@ fun AppNavHost(
                                 onClearSearchQuery = { orderViewModel.setSearchQuery(query = null) }
                             )
                         }
-
                         else -> SearchBarState()
                     },
                     onMainMenuClick = { isMainMenuHidden = !isMainMenuHidden },
@@ -252,7 +260,6 @@ fun AppNavHost(
                         )
                     }
                 }
-                println("currentDestination: $currentDestination isLogin: $isLogin isWideScreen: $isWideScreen isNarrowScreen: $isNarrowScreen")
                 NavigationBar(
                     isLogin = isLogin,
                     isWideScreen = isWideScreen,
@@ -270,7 +277,11 @@ fun AppNavHost(
                             }
                             selectedDestination = index
                         }
-                    }
+                    },
+                    barColor = MaterialTheme.colorScheme.primaryContainer,
+                    circleColor = ExtendedTheme.colorScheme.quinary.colorContainer,
+                    selectedColor = ExtendedTheme.colorScheme.quinary.color,
+                    unselectedColor = MaterialTheme.colorScheme.secondary
                 )
             }
             FAB(

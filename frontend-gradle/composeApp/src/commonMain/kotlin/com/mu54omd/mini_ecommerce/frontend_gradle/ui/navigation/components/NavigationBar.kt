@@ -10,13 +10,12 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.ExtendedTheme
 
 @Composable
 fun BoxScope.NavigationBar(
@@ -25,6 +24,10 @@ fun BoxScope.NavigationBar(
     isNarrowScreen: Boolean,
     navigationDestination: List<Screen>,
     selectedDestination: Int,
+    barColor: Color,
+    circleColor: Color,
+    selectedColor: Color,
+    unselectedColor: Color,
     onDestinationClick: (Int, Screen) -> Unit,
 ) {
 
@@ -49,10 +52,10 @@ fun BoxScope.NavigationBar(
                 enabled = !isLogin,
                 selectedItem = selectedDestination,
                 onClick = onDestinationClick,
-                barColor = MaterialTheme.colorScheme.primaryContainer,
-                circleColor = ExtendedTheme.colorScheme.quinary.colorContainer,
-                selectedColor = ExtendedTheme.colorScheme.quinary.color,
-                unselectedColor = MaterialTheme.colorScheme.secondary
+                barColor = barColor,
+                circleColor = circleColor,
+                selectedColor = selectedColor,
+                unselectedColor = unselectedColor
             )
         } else {
             Box(modifier = Modifier.fillMaxWidth().height(0.dp))
@@ -79,10 +82,10 @@ fun BoxScope.NavigationBar(
                 buttons = navigationDestination,
                 selectedItem = selectedDestination,
                 onClick = onDestinationClick,
-                barColor = MaterialTheme.colorScheme.primaryContainer,
-                circleColor = ExtendedTheme.colorScheme.quinary.colorContainer,
-                selectedColor = ExtendedTheme.colorScheme.quinary.color,
-                unselectedColor = MaterialTheme.colorScheme.secondary
+                barColor = barColor,
+                circleColor = circleColor,
+                selectedColor = selectedColor,
+                unselectedColor = unselectedColor
             )
         } else {
             Box(modifier = Modifier.fillMaxHeight().width(0.dp))
