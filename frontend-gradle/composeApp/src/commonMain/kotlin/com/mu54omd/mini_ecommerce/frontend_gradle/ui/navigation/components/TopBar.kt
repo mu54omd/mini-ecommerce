@@ -1,5 +1,6 @@
 package com.mu54omd.mini_ecommerce.frontend_gradle.ui.navigation.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -18,8 +19,13 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.unit.dp
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.MainMenu
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.SearchBar
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.common.MainMenu
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.common.SearchBar
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.common.SearchBarState
+import frontend_gradle.composeapp.generated.resources.Res
+import frontend_gradle.composeapp.generated.resources.app_icon_dark
+import frontend_gradle.composeapp.generated.resources.app_icon_light
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun TopBar(
@@ -31,8 +37,9 @@ fun TopBar(
     onMainMenuDismiss: () -> Unit,
     onToggleTheme: () -> Unit,
     onLogoutClick: () -> Unit,
+    onDrawerClick: () -> Unit,
 
-){
+    ){
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -44,7 +51,7 @@ fun TopBar(
         contentAlignment = Alignment.Center
     ) {
         IconButton(
-            onClick = {},
+            onClick = onDrawerClick,
             modifier = Modifier.pointerHoverIcon(if (!isLogin) PointerIcon.Hand else PointerIcon.Default).align(Alignment.CenterStart),
             enabled = !isLogin
         ){
@@ -53,6 +60,11 @@ fun TopBar(
                 contentDescription = "Drawer Menu Icon",
             )
         }
+        Image(
+            painter = painterResource(if(isDarkTheme) Res.drawable.app_icon_dark else Res.drawable.app_icon_light),
+            contentDescription = "App Logo",
+            modifier = Modifier.align(Alignment.Center)
+        )
         Row(
             horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically,

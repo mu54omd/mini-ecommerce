@@ -1,12 +1,21 @@
 package com.mu54omd.mini_ecommerce.frontend_gradle.ui.navigation
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -21,6 +30,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -36,7 +47,7 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.navigation.components.FAB
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.navigation.components.NavigationBar
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.navigation.components.Screen
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.navigation.components.SearchBarState
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.common.SearchBarState
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.navigation.components.TopBar
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.admin.AdminPanelScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.cart.CartScreen
@@ -72,7 +83,12 @@ fun AppNavHost(
 
     val navigationDestination = when (userState.role) {
         UserRole.ADMIN -> listOf(Screen.Products, Screen.Users, Screen.Orders, Screen.Admin)
-        UserRole.USER -> listOf(Screen.Products, if(isCartEmpty) Screen.Cart else Screen.FullCart, Screen.Orders)
+        UserRole.USER -> listOf(
+            Screen.Products,
+            if (isCartEmpty) Screen.Cart else Screen.FullCart,
+            Screen.Orders
+        )
+
         else -> listOf(Screen.Products)
     }
 
@@ -83,7 +99,8 @@ fun AppNavHost(
     }
 
     val startDestination = Screen.Login.route
-    val currentDestination = navController.currentBackStackEntryAsState().value?.destination?.route ?: startDestination
+    val currentDestination =
+        navController.currentBackStackEntryAsState().value?.destination?.route ?: startDestination
     val isLogin = currentDestination == Screen.Login.route
 
 
@@ -102,8 +119,8 @@ fun AppNavHost(
         val isWideScreen by remember(maxWidth) {
             derivedStateOf { maxWidth > 840.dp }
         }
-        val isNarrowScreen by remember(maxWidth, maxHeight){
-            derivedStateOf { maxHeight < 400.dp || maxWidth < 250.dp}
+        val isNarrowScreen by remember(maxWidth, maxHeight) {
+            derivedStateOf { maxHeight < 400.dp || maxWidth < 250.dp }
         }
         val isCompactScreen by remember(maxWidth) {
             derivedStateOf { maxWidth < 450.dp }
@@ -111,6 +128,8 @@ fun AppNavHost(
         var isMainMenuHidden by remember { mutableStateOf(true) }
         var addProductModalState by remember { mutableStateOf(false) }
         var addUserModalState by remember { mutableStateOf(false) }
+
+        var isDrawerVisible by remember { mutableStateOf(false) }
 
         Scaffold(
             topBar = {
@@ -123,10 +142,11 @@ fun AppNavHost(
                             SearchBarState(
                                 isVisible = true,
                                 placeHolderText = "Search Products",
-                                onSearchQuery = { query -> productViewModel . setSearchQuery (query.ifBlank { null })  },
+                                onSearchQuery = { query -> productViewModel.setSearchQuery(query.ifBlank { null }) },
                                 onClearSearchQuery = { productViewModel.setSearchQuery(null) }
                             )
                         }
+
                         Screen.Orders.route -> {
                             SearchBarState(
                                 isVisible = true,
@@ -135,6 +155,7 @@ fun AppNavHost(
                                 onClearSearchQuery = { orderViewModel.setSearchQuery(query = null) }
                             )
                         }
+
                         else -> SearchBarState()
                     },
                     onMainMenuClick = { isMainMenuHidden = !isMainMenuHidden },
@@ -150,6 +171,7 @@ fun AppNavHost(
                         }
                         selectedDestination = navigationDestination.indices.first
                     },
+                    onDrawerClick = { isDrawerVisible = true }
                 )
             }
         ) { contentPadding ->
@@ -173,7 +195,7 @@ fun AppNavHost(
                             fadeOut(tween(100))
                         }
                     },
-                    modifier = Modifier.padding(start = if(isWideScreen && !isLogin) 100.dp else 0.dp)
+                    modifier = Modifier.padding(start = if (isWideScreen && !isLogin) 100.dp else 0.dp)
                 ) {
                     composable(Screen.Login.route) {
                         LoginScreen(
@@ -235,7 +257,7 @@ fun AppNavHost(
                             cartViewModel = cartViewModel,
                             userRole = userState.role,
                             addProductModalState = addProductModalState,
-                            onAddProductModalChange = { state -> addProductModalState = state},
+                            onAddProductModalChange = { state -> addProductModalState = state },
                             onExit = { state ->
                                 authViewModel.logout(state)
                                 productViewModel.resetAllStates()
@@ -289,13 +311,54 @@ fun AppNavHost(
                 isWideScreen = isWideScreen,
                 currentDestination = currentDestination,
                 onFabClick = {
-                    if(currentDestination == Screen.Products.route) {
+                    if (currentDestination == Screen.Products.route) {
                         addProductModalState = true
-                    } else if(currentDestination == Screen.Users.route){
+                    } else if (currentDestination == Screen.Users.route) {
                         addUserModalState = true
                     }
                 }
             )
+        }
+        Box(modifier = Modifier.fillMaxSize()) {
+            AnimatedVisibility(
+                visible = isDrawerVisible,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.5f))
+                        .pointerInput(Unit) {
+                            detectTapGestures {
+                                isDrawerVisible = false
+                            }
+                        }
+                )
+            }
+
+            // Drawer
+            AnimatedVisibility(
+                visible = isDrawerVisible,
+                enter = slideInHorizontally(
+                    initialOffsetX = { -it },
+                    animationSpec = tween(400, 50)
+                ),
+                exit = slideOutHorizontally(
+                    targetOffsetX = { -it },
+                    animationSpec = tween(400, 50)
+                )
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .width(350.dp)
+                        .background(
+                            MaterialTheme.colorScheme.primaryContainer,
+                            RoundedCornerShape(topEnd = 30.dp, bottomEnd = 30.dp)
+                        )
+                )
+            }
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.mu54omd.mini_ecommerce.frontend_gradle.ui.navigation.components
+package com.mu54omd.mini_ecommerce.frontend_gradle.ui.common
 
 data class SearchBarState(
     val isVisible: Boolean = false,

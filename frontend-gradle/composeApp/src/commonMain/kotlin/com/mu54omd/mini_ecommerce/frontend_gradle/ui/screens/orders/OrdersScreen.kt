@@ -19,9 +19,9 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.domain.model.UserRole
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.OrderStatus
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.OrderViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.AlertModal
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.EmptyPage
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.LoadingView
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.common.AlertModal
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.common.EmptyPage
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.common.LoadingView
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.orders.components.OrdersFilterChips
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.orders.components.UserOrdersList
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.orders.components.OrdersList

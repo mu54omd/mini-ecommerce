@@ -20,9 +20,9 @@ import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.UserResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.UserViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.AlertModal
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.DeleteModal
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.LoadingView
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.common.AlertModal
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.common.DeleteModal
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.common.LoadingView
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.users.components.AddEditUserModal
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.users.components.UserCard
 import frontend_gradle.composeapp.generated.resources.Res

@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.config.GeneratedConfig.BASE_URL
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.Product
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.model.UserRole
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.CustomAsyncImage
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.common.CustomAsyncImage
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.MiniECommerceTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
 

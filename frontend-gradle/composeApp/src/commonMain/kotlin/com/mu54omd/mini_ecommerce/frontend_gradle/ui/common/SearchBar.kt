@@ -1,4 +1,4 @@
-package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common
+package com.mu54omd.mini_ecommerce.frontend_gradle.ui.common
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.animateDpAsState
@@ -59,6 +59,7 @@ fun SearchBar(
         targetValue = if (isCompact) 40.dp else 200.dp
     )
     val lineBrush = AppThemeExtras.brushes.lineBrush
+    val backColor = MaterialTheme.colorScheme.background
 
     val searchBarFocusRequester = remember { FocusRequester() }
 
@@ -90,6 +91,10 @@ fun SearchBar(
                     .height(40.dp)
                     .drawBehind{
                         if(!isCompact) {
+                            drawRoundRect(
+                                color = backColor,
+                                cornerRadius = CornerRadius(x = 50.dp.toPx())
+                            )
                             drawRoundRect(
                                 brush = lineBrush,
                                 style = Stroke(width = 1.dp.toPx()),

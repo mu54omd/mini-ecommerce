@@ -1,4 +1,4 @@
-package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common
+package com.mu54omd.mini_ecommerce.frontend_gradle.ui.common
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
@@ -7,6 +7,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -56,7 +57,7 @@ fun MorphingHeart() {
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Canvas(modifier = Modifier.size(120.dp)) {
             val path = lerpPath(heartEmpty, heartFull, progress)

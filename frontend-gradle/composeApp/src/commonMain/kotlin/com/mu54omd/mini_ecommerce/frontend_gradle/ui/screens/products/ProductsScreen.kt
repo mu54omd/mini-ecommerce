@@ -26,8 +26,8 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.domain.model.UserRole
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.CartViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.ProductViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.AlertModal
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.common.DeleteModal
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.common.AlertModal
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.common.DeleteModal
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.products.components.AddEditProductModal
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.products.components.ProductList
 import frontend_gradle.composeapp.generated.resources.Res
