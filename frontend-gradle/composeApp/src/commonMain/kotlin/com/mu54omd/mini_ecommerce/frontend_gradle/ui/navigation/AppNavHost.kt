@@ -44,18 +44,20 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.OrderViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.ProductViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.UserViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.common.SearchBarState
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.navigation.components.FAB
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.navigation.components.NavigationBar
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.navigation.components.Screen
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.common.SearchBarState
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.navigation.components.TopBar
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.admin.AdminPanelScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.cart.CartScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.login.LoginScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.orders.OrdersScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.products.ProductsScreen
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.splash.SplashScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.users.UsersScreen
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.theme.ExtendedTheme
+import kotlinx.coroutines.delay
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -102,6 +104,15 @@ fun AppNavHost(
     val currentDestination =
         navController.currentBackStackEntryAsState().value?.destination?.route ?: startDestination
     val isLogin = currentDestination == Screen.Login.route
+
+    var isFirstLaunch by rememberSaveable { mutableStateOf(true) }
+
+    LaunchedEffect(Unit){
+        if(isFirstLaunch){
+            delay(2000)
+            isFirstLaunch = false
+        }
+    }
 
 
 
@@ -359,6 +370,14 @@ fun AppNavHost(
                         )
                 )
             }
+
+        }
+        AnimatedVisibility(
+            visible = isFirstLaunch,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            SplashScreen(isDarkTheme = isDarkTheme)
         }
     }
 }

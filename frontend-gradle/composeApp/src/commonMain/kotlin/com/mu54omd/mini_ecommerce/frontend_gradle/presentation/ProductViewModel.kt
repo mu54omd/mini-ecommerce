@@ -15,6 +15,8 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 @OptIn(FlowPreview::class)
 class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel() {
@@ -53,6 +55,8 @@ class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel
     private var isLastPage = false
     private var isPaginating = false
     private val pageSize = 20
+    private val paginationMutex = Mutex()
+
 
     private val loadedProducts = mutableListOf<Product>()
 
@@ -114,8 +118,10 @@ class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel
 
     fun refreshProducts(){
         viewModelScope.launch {
-            resetPagination()
-            loadNextPage()
+            paginationMutex.withLock {
+                resetPagination()
+                loadNextPage()
+            }
         }
     }
 
@@ -133,33 +139,38 @@ class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel
     }
 
     fun loadNextPage() {
-        if (isPaginating || isLastPage) return
         viewModelScope.launch {
-            isPaginating = true
+            paginationMutex.withLock {
+                if (isLastPage) return@withLock
+                isPaginating = true
 
-            val category = _selectedCategory.value
-            val result = if (category.isNullOrEmpty()) {
-                productUseCases.getProductsUseCase(currentPage, pageSize)
-            } else {
-                productUseCases.getProductsByCategoryUseCase(category, currentPage, pageSize)
-            }
-            when (result) {
-                is ApiResult.Success -> {
-                    val newProducts = result.data
-                    if (newProducts.isEmpty()) {
-                        isLastPage = true
-                    } else {
-                        loadedProducts.addAll(newProducts)
-                        currentPage++
-                        _productsState.update { UiState.Success(loadedProducts.toList()) }
+                val category = _selectedCategory.value
+                val result = if (category.isNullOrEmpty()) {
+                    productUseCases.getProductsUseCase(currentPage, pageSize)
+                } else {
+                    productUseCases.getProductsByCategoryUseCase(category, currentPage, pageSize)
+                }
+                when (result) {
+                    is ApiResult.Success -> {
+                        val newProducts = result.data
+                        if (newProducts.isEmpty()) {
+                            isLastPage = true
+                        } else {
+                            loadedProducts.addAll(newProducts)
+                            currentPage++
+                            _productsState.update { UiState.Success(loadedProducts.toList()) }
+                        }
+                        if (loadedProducts.isEmpty() && isLastPage) {
+                            _productsState.update { result.toUiState() }
+                        }
                     }
-                    if(loadedProducts.isEmpty() && isLastPage){
+
+                    else -> {
                         _productsState.update { result.toUiState() }
                     }
                 }
-                else -> { _productsState.update { result.toUiState() } }
+                isPaginating = false
             }
-            isPaginating = false
         }
     }
 

@@ -39,6 +39,7 @@ import io.github.vinceglb.filekit.dialogs.FileKitType
 import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
 import io.github.vinceglb.filekit.name
 import io.github.vinceglb.filekit.readBytes
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 
@@ -106,6 +107,7 @@ fun ProductsScreen(
 
     LaunchedEffect(lazyGridState) {
         snapshotFlow { lazyGridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
+            .distinctUntilChanged()
             .collect { lastVisible ->
                 val total = lazyGridState.layoutInfo.totalItemsCount
                 if (lastVisible != null && lastVisible >= total - 4) {
