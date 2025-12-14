@@ -164,7 +164,6 @@ class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel
                             _productsState.update { result.toUiState() }
                         }
                     }
-
                     else -> {
                         _productsState.update { result.toUiState() }
                     }

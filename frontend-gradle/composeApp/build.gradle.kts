@@ -129,6 +129,9 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "com.mu54omd.mini_ecommerce.frontend_gradle"
             packageVersion = "1.0.0"
+            linux {
+                iconFile.set(project.file("src/jvmMain/resources/drawable/icon_512x512.png"))
+            }
         }
     }
 }
