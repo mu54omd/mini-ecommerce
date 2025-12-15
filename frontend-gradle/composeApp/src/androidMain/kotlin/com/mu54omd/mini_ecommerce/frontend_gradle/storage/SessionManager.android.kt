@@ -48,7 +48,8 @@ actual class SessionManager (private val context: Context) {
                     else -> "GUEST"
                 }
             )
-            User(username = username, role = role)
+            val email = json["email"]?.jsonPrimitive?.content ?: "guest@email.com"
+            User(username = username, role = role, email = email)
         } catch (e: Exception) {
             println("Error parsing token: ${e.message}")
             User()

@@ -1,21 +1,12 @@
 package com.mu54omd.mini_ecommerce.frontend_gradle.ui.navigation
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -30,8 +21,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -45,6 +34,7 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.ProductViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.UserViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.common.SearchBarState
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.navigation.components.AppDrawer
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.navigation.components.FAB
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.navigation.components.NavigationBar
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.navigation.components.Screen
@@ -330,55 +320,17 @@ fun AppNavHost(
                 }
             )
         }
-        Box(modifier = Modifier.fillMaxSize()) {
-            AnimatedVisibility(
-                visible = isDrawerVisible,
-                enter = fadeIn(),
-                exit = fadeOut()
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.5f))
-                        .pointerInput(Unit) {
-                            detectTapGestures {
-                                isDrawerVisible = false
-                            }
-                        }
-                )
-            }
-
-            // Drawer
-            AnimatedVisibility(
-                visible = isDrawerVisible,
-                enter = slideInHorizontally(
-                    initialOffsetX = { -it },
-                    animationSpec = tween(400, 50)
-                ),
-                exit = slideOutHorizontally(
-                    targetOffsetX = { -it },
-                    animationSpec = tween(400, 50)
-                )
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .width(350.dp)
-                        .background(
-                            MaterialTheme.colorScheme.primaryContainer,
-                            RoundedCornerShape(topEnd = 30.dp, bottomEnd = 30.dp)
-                        )
-                )
-            }
-
-        }
-        AnimatedVisibility(
-            visible = isFirstLaunch,
-            enter = fadeIn(),
-            exit = fadeOut()
-        ) {
-            SplashScreen(isDarkTheme = isDarkTheme)
-        }
+        AppDrawer(
+            isDarkTheme = isDarkTheme,
+            isDrawerVisible = isDrawerVisible,
+            username = userState.username,
+            email = userState.email,
+            onDismiss = { isDrawerVisible = false }
+        )
+        SplashScreen(
+            isDarkTheme = isDarkTheme,
+            isSplashVisible = isFirstLaunch
+        )
     }
 }
 

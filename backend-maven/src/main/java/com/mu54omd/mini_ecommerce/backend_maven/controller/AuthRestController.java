@@ -4,6 +4,7 @@ import com.mu54omd.mini_ecommerce.backend_maven.dto.LoginRequest;
 import com.mu54omd.mini_ecommerce.backend_maven.dto.LoginResponse;
 import com.mu54omd.mini_ecommerce.backend_maven.dto.RegisterRequest;
 import com.mu54omd.mini_ecommerce.backend_maven.dto.RegisterResponse;
+import com.mu54omd.mini_ecommerce.backend_maven.service.CustomUserDetails;
 import com.mu54omd.mini_ecommerce.backend_maven.service.CustomUserDetailsService;
 import com.mu54omd.mini_ecommerce.backend_maven.security.JwtUtil;
 import com.mu54omd.mini_ecommerce.backend_maven.service.UserService;
@@ -39,8 +40,8 @@ public class AuthRestController {
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
-            final UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
-            final String token = jwtUtil.generateToken(userDetails.getUsername(), userDetails.getAuthorities().toString());
+            final CustomUserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
+            final String token = jwtUtil.generateToken(userDetails.getUsername(), userDetails.getAuthorities().toString(), userDetails.getEmail());
             return ResponseEntity.ok(new LoginResponse(token));
         }catch (BadCredentialsException e){
             throw new RuntimeException("Invalid username or password");

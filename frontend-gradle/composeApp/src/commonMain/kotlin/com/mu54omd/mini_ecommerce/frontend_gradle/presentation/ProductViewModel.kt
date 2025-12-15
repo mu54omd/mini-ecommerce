@@ -77,6 +77,8 @@ class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel
     fun resetAllStates(){
         resetProductsState()
         resetAddProductState()
+        resetLatestProductsBannerState()
+        resetCategoryState()
         resetEditProductState()
         resetDeleteProductState()
         resetUploadProductImageState()
@@ -88,6 +90,10 @@ class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel
 
     fun resetLatestProductsBannerState(){
         _latestProductsBannerState.update { UiState.Idle }
+    }
+
+    fun resetCategoryState(){
+        _categoriesState.update { UiState.Idle }
     }
 
     fun resetAddProductState(){
@@ -119,6 +125,7 @@ class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel
     fun refreshProducts(){
         viewModelScope.launch {
             paginationMutex.withLock {
+                getLatestProductsBanner()
                 resetPagination()
                 loadNextPage()
             }

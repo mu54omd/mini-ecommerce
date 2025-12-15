@@ -1,5 +1,8 @@
 package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.splash
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -18,15 +21,24 @@ import org.jetbrains.compose.resources.painterResource
 @Composable
 fun SplashScreen(
     isDarkTheme: Boolean,
+    isSplashVisible: Boolean,
 ){
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier.fillMaxSize().background(color = MaterialTheme.colorScheme.background)
-    ){
-        Image(
-            painter = painterResource(if(isDarkTheme) Res.drawable.app_icon_dark else Res.drawable.app_icon_light),
-            contentDescription = "Splash Screen App Logo",
-            modifier = Modifier.size(300.dp)
-        )
+    AnimatedVisibility(
+        visible = isSplashVisible,
+        enter = fadeIn(),
+        exit = fadeOut()
+    ) {
+
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.fillMaxSize()
+                .background(color = MaterialTheme.colorScheme.background)
+        ) {
+            Image(
+                painter = painterResource(if (isDarkTheme) Res.drawable.app_icon_dark else Res.drawable.app_icon_light),
+                contentDescription = "Splash Screen App Logo",
+                modifier = Modifier.size(300.dp)
+            )
+        }
     }
 }

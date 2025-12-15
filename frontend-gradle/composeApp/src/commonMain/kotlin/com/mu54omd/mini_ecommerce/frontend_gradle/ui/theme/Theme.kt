@@ -368,6 +368,7 @@ object ExtendedTheme {
 data class AppBrushes(
     val lineBrush: Brush,
     val cardBrush: Brush,
+    val drawerBrush: Brush
 )
 
 val unspecified_brush = AppBrushes(
@@ -375,6 +376,9 @@ val unspecified_brush = AppBrushes(
         colors = listOf(Color.Unspecified, Color.Unspecified)
     ),
     cardBrush = Brush.linearGradient(
+        colors = listOf(Color.Unspecified, Color.Unspecified)
+    ),
+    drawerBrush = Brush.linearGradient(
         colors = listOf(Color.Unspecified, Color.Unspecified)
     )
 )
@@ -426,6 +430,23 @@ fun MiniECommerceTheme(
                     ),
                 ),
                 blendMode = BlendMode.Saturation
+            ),
+            drawerBrush = Brush.composite(
+                dstBrush = Brush.linearGradient(
+                    colors = listOf(
+                        colorScheme.primaryContainer,
+                        extended.quinary.colorContainer,
+                        Color.Transparent,
+                    )
+                ),
+                srcBrush = Brush.linearGradient(
+                    colors = listOf(
+                        Color.Transparent,
+                        extended.quinary.colorContainer,
+                        colorScheme.primaryContainer,
+                    )
+                ),
+                blendMode = BlendMode.Color
             )
         )
     }

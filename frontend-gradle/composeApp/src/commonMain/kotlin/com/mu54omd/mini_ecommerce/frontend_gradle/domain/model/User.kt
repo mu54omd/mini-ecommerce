@@ -5,5 +5,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class User(
     val username: String = "guest",
-    val role: UserRole = UserRole.GUEST
+    val role: UserRole = UserRole.GUEST,
+    val email: String = "guest@email.com"
 )
