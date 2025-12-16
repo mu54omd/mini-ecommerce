@@ -1,6 +1,6 @@
 <p align="center">
-  <img src="light-logo.png#gh-light-mode-only" alt="Mini E-Commerce" width="500">
-  <img src="dark-logo.png#gh-dark-mode-only" alt="Mini E-Commerce" width="500">
+  <img src="image/logo/light-logo.png#gh-light-mode-only" alt="Mini E-Commerce" width="500">
+  <img src="image/logo/dark-logo.png#gh-dark-mode-only" alt="Mini E-Commerce" width="500">
 </p>
 
 # 🛒 Mini E-Commerce (Kotlin Multiplatform + Spring Boot)
