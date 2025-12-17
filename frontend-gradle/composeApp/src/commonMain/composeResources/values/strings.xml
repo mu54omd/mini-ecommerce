@@ -4,8 +4,9 @@
     <string name="delete_warning_alert">Are you sure?</string>
     <string name="delete_user_successful_alert">The user successfully deleted.</string>
     <string name="create_user_successful_alert">The user successfully created.</string>
-    <string name="edit_user_successful_alert">The user successfully edited.</string>
+    <string name="update_user_successful_alert">The user successfully updated.</string>
     <string name="add_product_successful_alert">New product successfully added.</string>
-    <string name="edit_product_successful_alert">The product successfully edited.</string>
+    <string name="update_product_successful_alert">The product successfully updated.</string>
     <string name="upload_image_successful_alert">The product image successfully uploaded.</string>
+    <string name="delete_product_successful_alert">The product successfully deleted.</string>
 </resources>

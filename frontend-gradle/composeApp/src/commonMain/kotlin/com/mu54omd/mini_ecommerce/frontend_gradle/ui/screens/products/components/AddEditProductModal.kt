@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
@@ -32,17 +33,22 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.Product
@@ -67,6 +73,17 @@ fun AddEditProductModal(
     var productDescription by rememberSaveable { mutableStateOf(product.description) }
     var productPrice by rememberSaveable { mutableStateOf(product.price.toString()) }
     var productStocks by rememberSaveable { mutableStateOf(product.stock.toString()) }
+
+    val isSaveEnabled by remember {
+        derivedStateOf {
+            productName.isNotBlank() && productCategory.isNotBlank() && productPrice.isNotBlank() && productDescription.isNotBlank() && productStocks.isNotBlank()
+        }
+    }
+    val productNameFocusRequester = remember { FocusRequester() }
+    val productCategoryFocusRequester = remember { FocusRequester() }
+    val productDescriptionFocusRequester = remember { FocusRequester() }
+    val productPriceFocusRequester = remember { FocusRequester() }
+    val productStocksFocusRequester = remember { FocusRequester() }
 
 
     val lineBrush = AppThemeExtras.brushes.lineBrush
@@ -126,10 +143,15 @@ fun AddEditProductModal(
                             )
                         },
                         singleLine = true,
-                        modifier = Modifier.width(160.dp),
+                        modifier = Modifier.width(160.dp).focusRequester(productNameFocusRequester),
                         shape = RoundedCornerShape(30),
-                        textStyle = TextStyle(brush = lineBrush)
-                    )
+                        textStyle = TextStyle(brush = lineBrush),
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                        keyboardActions = KeyboardActions(
+                            onNext = {
+                                productCategoryFocusRequester.requestFocus()
+                            }
+                        )                    )
                     OutlinedTextField(
                         value = productCategory,
                         onValueChange = { productCategory = it },
@@ -140,9 +162,15 @@ fun AddEditProductModal(
                             )
                         },
                         singleLine = true,
-                        modifier = Modifier.width(135.dp),
+                        modifier = Modifier.width(135.dp).focusRequester(productCategoryFocusRequester),
                         shape = RoundedCornerShape(30),
-                        textStyle = TextStyle(brush = lineBrush)
+                        textStyle = TextStyle(brush = lineBrush),
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                        keyboardActions = KeyboardActions(
+                            onNext = {
+                                productDescriptionFocusRequester.requestFocus()
+                            }
+                        )
                     )
                 }
                 Spacer(modifier = Modifier.height(4.dp))
@@ -155,11 +183,17 @@ fun AddEditProductModal(
                             style = MaterialTheme.typography.bodySmall
                         )
                     },
-                    modifier = Modifier.height(150.dp).width(300.dp),
+                    modifier = Modifier.height(150.dp).width(300.dp).focusRequester(productDescriptionFocusRequester),
                     shape = RoundedCornerShape(10),
                     maxLines = 5,
                     singleLine = false,
-                    textStyle = TextStyle(brush = lineBrush)
+                    textStyle = TextStyle(brush = lineBrush),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                    keyboardActions = KeyboardActions(
+                        onNext = {
+                            productPriceFocusRequester.requestFocus()
+                        }
+                    )
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Row(
@@ -174,7 +208,6 @@ fun AddEditProductModal(
                                 productPrice = newValue
                             }
                         },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         label = {
                             Text(
                                 text = "Price",
@@ -183,8 +216,14 @@ fun AddEditProductModal(
                         },
                         singleLine = true,
                         shape = RoundedCornerShape(30),
-                        modifier = Modifier.width(170.dp),
-                        textStyle = TextStyle(brush = lineBrush)
+                        modifier = Modifier.width(170.dp).focusRequester(productPriceFocusRequester),
+                        textStyle = TextStyle(brush = lineBrush),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
+                        keyboardActions = KeyboardActions(
+                            onNext = {
+                                productStocksFocusRequester.requestFocus()
+                            }
+                        )
                     )
                     OutlinedTextField(
                         value = productStocks,
@@ -193,7 +232,6 @@ fun AddEditProductModal(
                                 productStocks = newValue
                             }
                         },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         label = {
                             Text(
                                 text = "Stocks",
@@ -201,9 +239,23 @@ fun AddEditProductModal(
                             )
                         },
                         singleLine = true,
-                        modifier = Modifier.width(120.dp),
+                        modifier = Modifier.width(120.dp).focusRequester(productStocksFocusRequester),
                         shape = RoundedCornerShape(30),
-                        textStyle = TextStyle(brush = lineBrush)
+                        textStyle = TextStyle(brush = lineBrush),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
+                        keyboardActions = KeyboardActions(
+                            onDone = {
+                                if(isSaveEnabled){
+                                    onConfirmClick(
+                                        productName,
+                                        productCategory,
+                                        productDescription,
+                                        productPrice.toDouble(),
+                                        productStocks.toInt()
+                                    )
+                                }
+                            }
+                        )
                     )
                 }
                 Spacer(modifier = Modifier.height(12.dp))
@@ -262,7 +314,7 @@ fun AddEditProductModal(
                                 productStocks.toInt()
                             )
                         },
-                        enabled = productName.isNotBlank() && productCategory.isNotBlank() && productPrice.isNotBlank() && productDescription.isNotBlank() && productStocks.isNotBlank(),
+                        enabled = isSaveEnabled,
                         modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
 
                     ) {

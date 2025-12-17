@@ -28,8 +28,8 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.users.components.Us
 import frontend_gradle.composeapp.generated.resources.Res
 import frontend_gradle.composeapp.generated.resources.create_user_successful_alert
 import frontend_gradle.composeapp.generated.resources.delete_user_successful_alert
-import frontend_gradle.composeapp.generated.resources.edit_user_successful_alert
 import frontend_gradle.composeapp.generated.resources.error_alert
+import frontend_gradle.composeapp.generated.resources.update_user_successful_alert
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -175,7 +175,7 @@ fun UsersScreen(
                             AlertModal(
                                 message =
                                     if(editUserState is UiState.Success) {
-                                        stringResource( Res.string.edit_user_successful_alert)
+                                        stringResource( Res.string.update_user_successful_alert)
                                     }else {
                                         stringResource( Res.string.error_alert)
                                     },

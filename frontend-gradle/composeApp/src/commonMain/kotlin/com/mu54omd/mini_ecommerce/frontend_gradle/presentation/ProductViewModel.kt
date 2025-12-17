@@ -5,12 +5,18 @@ import androidx.lifecycle.viewModelScope
 import com.mu54omd.mini_ecommerce.frontend_gradle.api.ApiResult
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.Product
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.ProductUseCases
+import frontend_gradle.composeapp.generated.resources.Res
+import frontend_gradle.composeapp.generated.resources.add_product_successful_alert
+import frontend_gradle.composeapp.generated.resources.delete_product_successful_alert
+import frontend_gradle.composeapp.generated.resources.update_product_successful_alert
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.name
 import io.github.vinceglb.filekit.readBytes
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -19,6 +25,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import org.jetbrains.compose.resources.getString
 
 @OptIn(FlowPreview::class)
 class ProductViewModel(
@@ -27,6 +34,9 @@ class ProductViewModel(
 
     private val _state = MutableStateFlow(ProductsViewState())
     val state = _state.asStateFlow()
+
+    private val _effect = MutableSharedFlow<ProductUiEffect>()
+    val effect = _effect.asSharedFlow()
 
     private var currentPage = 0
     private val pageSize = 20
@@ -110,10 +120,16 @@ class ProductViewModel(
                         result.data.id!!, it.name, it.readBytes()
                     )
                 }
-                _state.update { it.copy(message = "Product added") }
-                reloadProducts()
+                refreshProductContext(
+                    refreshProducts = true,
+                    refreshCategories = true,
+                    refreshBanner = true
+                )
+                _effect.emit(ProductUiEffect.ShowMessage(getString(Res.string.add_product_successful_alert)))
+                _state.update { it.copy(selectedCategory = product.category) }
+
             } else if (result is ApiResult.Error) {
-                _state.update { it.copy(error = result.message) }
+                _effect.emit(ProductUiEffect.ShowError(result.message))
             }
         }
     }
@@ -129,10 +145,16 @@ class ProductViewModel(
                         product.id!!, it.name, it.readBytes()
                     )
                 }
-                _state.update { it.copy(message = "Product updated") }
-                reloadProducts()
+                _effect.emit(ProductUiEffect.ShowMessage(getString(Res.string.update_product_successful_alert)))
+                refreshProductContext(
+                    refreshCategories = true,
+                    refreshProducts = true,
+                    refreshBanner = true
+                )
+                _state.update { it.copy(selectedCategory = product.category) }
+
             } else if (result is ApiResult.Error) {
-                _state.update { it.copy(error = result.message) }
+                _effect.emit(ProductUiEffect.ShowError(result.message))
             }
         }
     }
@@ -140,31 +162,47 @@ class ProductViewModel(
     fun deactivateProduct(productId: Long) {
         viewModelScope.launch {
             _state.update { it.copy(isRefreshing = true) }
-
             val result = productUseCases.deactivateProductUseCase(productId)
             if (result is ApiResult.Success) {
-                _state.update { it.copy(message = "Product deactivated") }
-                reloadProducts()
+                _effect.emit(ProductUiEffect.ShowMessage(getString(Res.string.delete_product_successful_alert)))
+                refreshProductContext(
+                    refreshProducts = true,
+                    refreshBanner = true
+                )
+                _state.update { it.copy(selectedCategory = null) }
             } else if (result is ApiResult.Error) {
-                _state.update { it.copy(error = result.message) }
-            }
-        }
-    }
-
-    fun uploadProductImage(productId: Long, fileName: String, byteArray: ByteArray) {
-        viewModelScope.launch {
-            _state.update { it.copy(isRefreshing = true) }
-
-            val result = productUseCases.uploadProductImageUseCase(productId, fileName, byteArray)
-            if (result is ApiResult.Success) {
-                _state.update { it.copy(message = "Image uploaded successfully") }
-            } else if (result is ApiResult.Error) {
-                _state.update { it.copy(error = result.message) }
+                _effect.emit(ProductUiEffect.ShowError(result.message))
             }
         }
     }
 
     // ======================== Private Helpers ========================
+
+    private fun refreshProductContext(
+        refreshProducts: Boolean = true,
+        refreshCategories: Boolean = true,
+        refreshBanner: Boolean = true
+    ) {
+        viewModelScope.launch {
+            if (refreshCategories) loadCategories()
+            if (refreshBanner) loadBanner()
+            if (refreshProducts) reloadProducts()
+        }
+    }
+
+    private suspend fun loadCategories() {
+        val result = productUseCases.getCategoriesUseCase()
+        if (result is ApiResult.Success) {
+            _state.update { it.copy(categories = result.data) }
+        }
+    }
+
+    private suspend fun loadBanner() {
+        val result = productUseCases.getLatestProductsUseCase(0, 5)
+        if (result is ApiResult.Success) {
+            _state.update { it.copy(banner = result.data) }
+        }
+    }
 
     private fun reloadProducts() {
         currentPage = 0
@@ -222,12 +260,12 @@ class ProductViewModel(
                     is ApiResult.Error -> {
                         _state.update {
                             it.copy(
-                                error = result.message,
                                 isPaginating = false,
                                 isRefreshing = false,
                                 isInitialLoading = false,
                                 )
                         }
+                        _effect.emit(ProductUiEffect.ShowError(result.message))
                     }
                     else -> Unit
                 }
@@ -235,10 +273,6 @@ class ProductViewModel(
         }
     }
 
-    // ======================== Helpers ========================
-    fun clearMessage() {
-        _state.update { it.copy(message = null, error = null) }
-    }
 }
 
 
@@ -253,7 +287,9 @@ data class ProductsViewState(
     val isRefreshing: Boolean = false,
     val isPaginating: Boolean = false,
     val isLastPage: Boolean = false,
-
-    val error: String? = null,
-    val message: String? = null
 )
+
+sealed interface ProductUiEffect {
+    data class ShowMessage(val text: String?) : ProductUiEffect
+    data class ShowError(val text: String?) : ProductUiEffect
+}

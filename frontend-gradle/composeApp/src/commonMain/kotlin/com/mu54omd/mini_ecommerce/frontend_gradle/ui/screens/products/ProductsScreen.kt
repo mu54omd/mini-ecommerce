@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.Product
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.model.UserRole
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.CartViewModel
+import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.ProductUiEffect
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.ProductViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.common.AlertModal
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.common.DeleteModal
@@ -49,11 +50,13 @@ fun ProductsScreen(
     onAddProductModalChange: (Boolean) -> Unit,
 ) {
     val state by productViewModel.state.collectAsState()
+    val effect = productViewModel.effect
     val cartItems by cartViewModel.cartItems.collectAsState()
 
     var editProductModalState by remember { mutableStateOf(false) }
     var deleteProductModalState by remember { mutableStateOf(false) }
-    var showAlertModalState by remember { mutableStateOf(false) }
+
+    var alertMessage by remember { mutableStateOf<String?>(null) }
 
     var selectedProduct by remember { mutableStateOf(Product()) }
     var tempImageFile by remember { mutableStateOf<PlatformFile?>(null) }
@@ -98,6 +101,29 @@ fun ProductsScreen(
                     productViewModel.loadNextPage()
                 }
             }
+    }
+
+    // ======================== Alert ========================
+    LaunchedEffect(Unit) {
+        effect.collect { uiEffect ->
+            alertMessage = when (uiEffect) {
+                is ProductUiEffect.ShowMessage -> {
+                    uiEffect.text
+                }
+
+                is ProductUiEffect.ShowError -> {
+                    uiEffect.text
+                }
+            }
+        }
+    }
+    alertMessage?.let {
+        AlertModal(
+            message = it,
+            onConfirmClick = {
+                alertMessage = null
+            }
+        )
     }
 
     Column(
@@ -238,33 +264,6 @@ fun ProductsScreen(
                     selectedProductIdForDelete = -1
                 }
             )
-        }
-
-        // ======================== Alerts ========================
-        state.error?.let { errorMsg ->
-            if (!showAlertModalState) {
-                showAlertModalState = true
-                AlertModal(
-                    message = errorMsg,
-                    onConfirmClick = {
-                        showAlertModalState = false
-                        productViewModel.clearMessage()
-                    }
-                )
-            }
-        }
-
-        state.message?.let { msg ->
-            if (!showAlertModalState) {
-                showAlertModalState = true
-                AlertModal(
-                    message = msg,
-                    onConfirmClick = {
-                        showAlertModalState = false
-                        productViewModel.clearMessage()
-                    }
-                )
-            }
         }
     }
 }

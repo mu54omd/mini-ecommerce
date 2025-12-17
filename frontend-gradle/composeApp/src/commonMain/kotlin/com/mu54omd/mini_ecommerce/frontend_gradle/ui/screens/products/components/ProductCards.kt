@@ -42,6 +42,7 @@ fun ProductCards(
     categories: List<String>,
     cartItems: Map<Long, Int>,
     userRole: UserRole,
+    isWideScreen: Boolean = false,
     enableSharedTransition: Boolean = true,
     selectedCategory: String?,
     onSelectCategory: (String?) -> Unit,
@@ -54,11 +55,13 @@ fun ProductCards(
     animatedVisibilityScope: AnimatedVisibilityScope
 ) {
     Column {
-        ProductBanner(
-            bannerTitle = "Latest Products",
-            products = latestProductsBanner,
-            onProductClick = onProductClick
-        )
+        if(latestProductsBanner.isNotEmpty()) {
+            ProductBanner(
+                bannerTitle = "Latest Products",
+                products = latestProductsBanner,
+                onProductClick = onProductClick
+            )
+        }
 
         Spacer(modifier = Modifier.height(10.dp))
         CategoryCustomChips(
@@ -71,7 +74,7 @@ fun ProductCards(
             LazyVerticalGrid(
                 modifier = Modifier.padding(start = 16.dp, end = 16.dp),
                 columns = GridCells.Adaptive(150.dp),
-                contentPadding = PaddingValues(top = 30.dp, bottom = 50.dp),
+                contentPadding = PaddingValues(top = 30.dp, bottom = if(isWideScreen) 50.dp else 100.dp),
                 state = lazyGridState
             ) {
                 items(items = products, key = { product -> product.id!! }) { product ->

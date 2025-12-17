@@ -70,6 +70,7 @@ fun ProductList(
                         latestProductsBanner = latestProductsBanner,
                         products = products,
                         categories = categories,
+                        isWideScreen = isWideScreen,
                         selectedCategory = selectedCategory,
                         onSelectCategory = onSelectCategory,
                         cartItems = cartItems,
