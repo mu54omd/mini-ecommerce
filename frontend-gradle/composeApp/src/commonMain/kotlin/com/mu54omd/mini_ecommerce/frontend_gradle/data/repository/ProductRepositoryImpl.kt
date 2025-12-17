@@ -61,7 +61,7 @@ class ProductRepositoryImpl(private val api: ApiClient): ProductRepository {
         query?.let { params["q"] = it.encodeURLParameter() }
         category?.let { params["category"] = it.encodeURLParameter() }
         val query = params.entries.joinToString("&") { "${it.key}=${it.value}" }
-        val url = if (params.isEmpty()) "/products" else "/products/filter?$query&page=$page&size=$size"
+        val url = if (params.isEmpty()) "/products?page=$page&size=$size" else "/products/filter?$query&page=$page&size=$size"
         return api.get<PageResponse<Product>>(url)
             .map(
                 onSuccess = { it.content }

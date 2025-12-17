@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -26,7 +25,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.Product
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.model.UserRole
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
 
 
 enum class ProductListState {
@@ -41,17 +39,16 @@ fun ProductList(
     isWideScreen: Boolean = false,
     lazyGridState: LazyGridState = rememberLazyGridState(),
     userRole: UserRole,
-    latestProductsBannerState: State<UiState<List<Product>>>,
-    productsState: State<UiState<List<Product>>>,
-    categoriesState: State<UiState<List<String>>>,
-    selectedCategory: State<String?>,
+    latestProductsBanner: List<Product>,
+    products: List<Product>,
+    categories: List<String>,
+    selectedCategory: String?,
     onSelectCategory: (String?) -> Unit,
     cartItems: Map<Long, Int>,
     onEditClick: (Product) -> Unit,
     onRemoveClick: (Long) -> Unit,
     onIncreaseItem: (Long) -> Unit,
     onDecreaseItem: (Long) -> Unit,
-    onExit: (UiState<*>) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var productListState by remember(isWideScreen) {
@@ -70,10 +67,10 @@ fun ProductList(
                 ProductListState.Cards -> {
                     ProductCards(
                         lazyGridState = lazyGridState,
-                        latestProductsBannerState = latestProductsBannerState,
-                        productsState = productsState,
-                        categoriesState = categoriesState,
-                        selectedCategory = selectedCategory.value,
+                        latestProductsBanner = latestProductsBanner,
+                        products = products,
+                        categories = categories,
+                        selectedCategory = selectedCategory,
                         onSelectCategory = onSelectCategory,
                         cartItems = cartItems,
                         userRole = userRole,
@@ -87,7 +84,6 @@ fun ProductList(
                         onDecreaseItem = onDecreaseItem,
                         sharedTransitionScope = this@SharedTransitionLayout,
                         animatedVisibilityScope = this@AnimatedContent,
-                        onExit = onExit
                     )
                 }
 
@@ -112,19 +108,9 @@ fun ProductList(
 
                 ProductListState.CardsWithDetails -> {
                     var isDetailsBoxVisible by remember { mutableStateOf(false) }
-                    val filteredProductsState = remember(selectedProduct, productsState.value) {
+                    val filteredProductsState by remember(selectedProduct, products) {
                         derivedStateOf {
-                            val original = productsState.value
-                            if (isDetailsBoxVisible && selectedProduct != null) {
-                                when (original) {
-                                    is UiState.Success -> UiState.Success(
-                                        original.data.filter { it.id != selectedProduct!!.id }
-                                    )
-                                    else -> original
-                                }
-                            } else {
-                                original
-                            }
+                            products
                         }
                     }
 
@@ -137,10 +123,10 @@ fun ProductList(
                         ) {
                             ProductCards(
                                 lazyGridState = lazyGridState,
-                                latestProductsBannerState = latestProductsBannerState,
-                                productsState = filteredProductsState,
-                                categoriesState = categoriesState,
-                                selectedCategory = selectedCategory.value,
+                                latestProductsBanner = latestProductsBanner,
+                                products = filteredProductsState,
+                                categories = categories,
+                                selectedCategory = selectedCategory,
                                 onSelectCategory = onSelectCategory,
                                 cartItems = cartItems,
                                 userRole = userRole,
@@ -153,7 +139,6 @@ fun ProductList(
                                 onRemoveClick = onRemoveClick,
                                 onIncreaseItem = onIncreaseItem,
                                 onDecreaseItem = onDecreaseItem,
-                                onExit = onExit,
                                 sharedTransitionScope = this@SharedTransitionLayout,
                                 animatedVisibilityScope = this@AnimatedContent,
                             )

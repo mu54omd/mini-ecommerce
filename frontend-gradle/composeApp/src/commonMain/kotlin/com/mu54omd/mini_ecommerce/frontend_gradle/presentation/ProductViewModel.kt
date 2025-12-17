@@ -3,267 +3,257 @@ package com.mu54omd.mini_ecommerce.frontend_gradle.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mu54omd.mini_ecommerce.frontend_gradle.api.ApiResult
-import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.ImageUploadResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.Product
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.ProductUseCases
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.toUiState
+import io.github.vinceglb.filekit.PlatformFile
+import io.github.vinceglb.filekit.name
+import io.github.vinceglb.filekit.readBytes
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 @OptIn(FlowPreview::class)
-class ProductViewModel(private val productUseCases: ProductUseCases) : ViewModel() {
+class ProductViewModel(
+    private val productUseCases: ProductUseCases
+) : ViewModel() {
 
-    private val _productsState = MutableStateFlow<UiState<List<Product>>>(UiState.Idle)
-    val productsState = _productsState.asStateFlow()
+    private val _state = MutableStateFlow(ProductsViewState())
+    val state = _state.asStateFlow()
 
-    private val _categoriesState = MutableStateFlow<UiState<List<String>>>(UiState.Idle)
-    val categoriesState = _categoriesState.asStateFlow()
-
-    private val _selectedCategory = MutableStateFlow<String?>(null)
-    val selectedCategory = _selectedCategory.asStateFlow()
-
-    private val _latestProductsBannerState = MutableStateFlow<UiState<List<Product>>>(UiState.Idle)
-    val latestProductsBannerState = _latestProductsBannerState.asStateFlow()
-
-    private val _addProductState = MutableStateFlow<UiState<Product>>(UiState.Idle)
-    val addProductState = _addProductState.asStateFlow()
-
-    private val _deleteProductState = MutableStateFlow<UiState<Unit>>(UiState.Idle)
-    val deleteProductState = _deleteProductState.asStateFlow()
-
-    private val _deactivateProduct = MutableStateFlow<UiState<Unit>>(UiState.Idle)
-    val deactivateProduct = _deactivateProduct.asStateFlow()
-
-    private val _editProductState = MutableStateFlow<UiState<Product>>(UiState.Idle)
-    val editProductState = _editProductState.asStateFlow()
-
-    private val _uploadProductImageState = MutableStateFlow<UiState<ImageUploadResponse>>(UiState.Idle)
-    val uploadProductImageState = _uploadProductImageState.asStateFlow()
-
-    private val _searchQuery = MutableStateFlow<String?>(null)
-
-    // ============================================================
     private var currentPage = 0
-    private var isLastPage = false
-    private var isPaginating = false
     private val pageSize = 20
     private val paginationMutex = Mutex()
 
-
-    private val loadedProducts = mutableListOf<Product>()
+    private var fetchJob: Job? = null
 
     init {
-        getLatestProductsBanner()
-        getCategories()
+        loadInitialData()
+
+        // Debounce search query
         viewModelScope.launch {
-            _searchQuery
-                .debounce(300)
+            _state
+                .map { it.searchQuery to it.selectedCategory }
                 .distinctUntilChanged()
-                .collect { query ->
-                    filterProducts(query =  query, category = selectedCategory.value)
-                }
+                .debounce(300)
+                .collect { reloadProducts() }
         }
     }
 
-    // ============================================================
-    fun resetAllStates(){
-        resetProductsState()
-        resetAddProductState()
-        resetLatestProductsBannerState()
-        resetCategoryState()
-        resetEditProductState()
-        resetDeleteProductState()
-        resetUploadProductImageState()
-    }
-
-    fun resetProductsState(){
-        _productsState.update { UiState.Idle }
-    }
-
-    fun resetLatestProductsBannerState(){
-        _latestProductsBannerState.update { UiState.Idle }
-    }
-
-    fun resetCategoryState(){
-        _categoriesState.update { UiState.Idle }
-    }
-
-    fun resetAddProductState(){
-        _addProductState.update { UiState.Idle }
-    }
-
-    fun resetEditProductState(){
-        _editProductState.update { UiState.Idle }
-    }
-
-    fun resetDeleteProductState(){
-        _deleteProductState.update { UiState.Idle }
-    }
-
-    fun resetUploadProductImageState(){
-        _uploadProductImageState.update { UiState.Idle }
-    }
-
-    private fun resetPagination() {
-        currentPage = 0
-        isLastPage = false
-        isPaginating = false
-        loadedProducts.clear()
-        _productsState.value = UiState.Loading
-    }
-
-    // ============================================================
-
-    fun refreshProducts(){
+    // ======================== Initial Load ========================
+    private fun loadInitialData() {
         viewModelScope.launch {
-            paginationMutex.withLock {
-                getLatestProductsBanner()
-                resetPagination()
-                loadNextPage()
+            _state.update { it.copy(isRefreshing = true, isInitialLoading = true) }
+
+            val categoriesResult = productUseCases.getCategoriesUseCase()
+            val bannerResult = productUseCases.getLatestProductsUseCase(0, 5)
+
+            _state.update {
+                it.copy(
+                    categories = (categoriesResult as? ApiResult.Success)?.data ?: emptyList(),
+                    banner = (bannerResult as? ApiResult.Success)?.data ?: emptyList()
+                )
             }
+
+            reloadProducts()
         }
     }
 
-    fun getCategories() {
-        viewModelScope.launch {
-            _categoriesState.value = UiState.Loading
-            val result = productUseCases.getCategoriesUseCase()
-            _categoriesState.value = result.toUiState()
+    // ======================== Events ========================
+
+    fun onCategorySelected(category: String?) {
+        _state.update {
+            it.copy(
+                selectedCategory = category,
+                isLastPage = false
+            )
         }
     }
 
-    fun selectCategory(category: String?) {
-        _selectedCategory.value = category
-        refreshProducts()
+    fun onSearchQueryChanged(query: String?) {
+        _state.update {
+            it.copy(
+                searchQuery = query,
+                isLastPage = false
+            )
+        }
+    }
+
+    fun refresh() {
+        _state.update {
+            it.copy(isLastPage = false)
+        }
+        reloadProducts()
     }
 
     fun loadNextPage() {
-        viewModelScope.launch {
-            paginationMutex.withLock {
-                if (isLastPage) return@withLock
-                isPaginating = true
+        fetchNextPage()
+    }
 
-                val category = _selectedCategory.value
-                val result = if (category.isNullOrEmpty()) {
-                    productUseCases.getProductsUseCase(currentPage, pageSize)
-                } else {
-                    productUseCases.getProductsByCategoryUseCase(category, currentPage, pageSize)
+    // ======================== CRUD & Side-effects ========================
+
+    fun addProduct(product: Product, image: PlatformFile? = null) {
+        viewModelScope.launch {
+            _state.update { it.copy(isRefreshing = true) }
+
+            val result = productUseCases.addProductUseCase(product)
+            if (result is ApiResult.Success) {
+                image?.let {
+                    productUseCases.uploadProductImageUseCase(
+                        result.data.id!!, it.name, it.readBytes()
+                    )
                 }
+                _state.update { it.copy(message = "Product added") }
+                reloadProducts()
+            } else if (result is ApiResult.Error) {
+                _state.update { it.copy(error = result.message) }
+            }
+        }
+    }
+
+    fun editProduct(product: Product, image: PlatformFile? = null) {
+        viewModelScope.launch {
+            _state.update { it.copy(isRefreshing = true) }
+
+            val result = productUseCases.editProductUseCase(product)
+            if (result is ApiResult.Success) {
+                image?.let {
+                    productUseCases.uploadProductImageUseCase(
+                        product.id!!, it.name, it.readBytes()
+                    )
+                }
+                _state.update { it.copy(message = "Product updated") }
+                reloadProducts()
+            } else if (result is ApiResult.Error) {
+                _state.update { it.copy(error = result.message) }
+            }
+        }
+    }
+
+    fun deactivateProduct(productId: Long) {
+        viewModelScope.launch {
+            _state.update { it.copy(isRefreshing = true) }
+
+            val result = productUseCases.deactivateProductUseCase(productId)
+            if (result is ApiResult.Success) {
+                _state.update { it.copy(message = "Product deactivated") }
+                reloadProducts()
+            } else if (result is ApiResult.Error) {
+                _state.update { it.copy(error = result.message) }
+            }
+        }
+    }
+
+    fun uploadProductImage(productId: Long, fileName: String, byteArray: ByteArray) {
+        viewModelScope.launch {
+            _state.update { it.copy(isRefreshing = true) }
+
+            val result = productUseCases.uploadProductImageUseCase(productId, fileName, byteArray)
+            if (result is ApiResult.Success) {
+                _state.update { it.copy(message = "Image uploaded successfully") }
+            } else if (result is ApiResult.Error) {
+                _state.update { it.copy(error = result.message) }
+            }
+        }
+    }
+
+    // ======================== Private Helpers ========================
+
+    private fun reloadProducts() {
+        currentPage = 0
+        _state.update {
+            it.copy(
+                isRefreshing = true,
+                isLastPage = false
+            )
+        }
+        fetchNextPage(reset = true)
+    }
+
+    private fun fetchNextPage(reset: Boolean = false) {
+        if (_state.value.isPaginating || _state.value.isLastPage) return
+
+        fetchJob?.cancel()
+        fetchJob = viewModelScope.launch {
+            paginationMutex.withLock {
+                _state.update { it.copy(isPaginating = true) }
+
+                val s = _state.value
+                val result = when {
+                    !s.searchQuery.isNullOrBlank() -> {
+                        productUseCases.filterProductsUseCase(
+                            query = s.searchQuery,
+                            category = s.selectedCategory,
+                            page = currentPage,
+                            size = pageSize
+                        )
+                    }
+                    !s.selectedCategory.isNullOrBlank() ->
+                        productUseCases.getProductsByCategoryUseCase(
+                            s.selectedCategory,
+                            currentPage,
+                            pageSize
+                        )
+                    else ->
+                        productUseCases.getProductsUseCase(currentPage, pageSize)
+                }
+
                 when (result) {
                     is ApiResult.Success -> {
                         val newProducts = result.data
-                        if (newProducts.isEmpty()) {
-                            isLastPage = true
-                        } else {
-                            loadedProducts.addAll(newProducts)
-                            currentPage++
-                            _productsState.update { UiState.Success(loadedProducts.toList()) }
-                        }
-                        if (loadedProducts.isEmpty() && isLastPage) {
-                            _productsState.update { result.toUiState() }
+                        currentPage++
+                        _state.update {
+                            it.copy(
+                                products = if (reset) result.data else it.products + result.data,
+                                isPaginating = false,
+                                isRefreshing = false,
+                                isInitialLoading = false,
+                                isLastPage = newProducts.isEmpty()
+                            )
                         }
                     }
-                    else -> {
-                        _productsState.update { result.toUiState() }
+                    is ApiResult.Error -> {
+                        _state.update {
+                            it.copy(
+                                error = result.message,
+                                isPaginating = false,
+                                isRefreshing = false,
+                                isInitialLoading = false,
+                                )
+                        }
                     }
+                    else -> Unit
                 }
-                isPaginating = false
             }
         }
     }
 
-    fun getLatestProductsBanner() {
-        viewModelScope.launch {
-            _latestProductsBannerState.update { UiState.Loading }
-            val result = productUseCases.getLatestProductsUseCase(0, 5)
-            _latestProductsBannerState.update { result.toUiState() }
-        }
+    // ======================== Helpers ========================
+    fun clearMessage() {
+        _state.update { it.copy(message = null, error = null) }
     }
-
-    fun setSearchQuery(query: String?){
-        _searchQuery.update { query }
-    }
-    fun searchProducts(query: String?){
-        viewModelScope.launch {
-            if (query.isNullOrBlank()) {
-                refreshProducts()
-                return@launch
-            }
-            isLastPage = true
-            isPaginating = false
-            val result = productUseCases.searchProductsUseCase(query)
-            _productsState.value = result.toUiState()
-        }
-    }
-
-    fun filterProducts(query: String?, category: String?, page: Int = 0, size: Int = 20){
-        viewModelScope.launch {
-            if (query.isNullOrBlank()) {
-                refreshProducts()
-                return@launch
-            }
-            isLastPage = true
-            isPaginating = false
-            val result = productUseCases.filterProductsUseCase(query, category, page, size)
-            _productsState.value = result.toUiState()
-        }
-    }
-
-    fun addProduct(product: Product){
-        viewModelScope.launch {
-            _addProductState.update { UiState.Loading }
-            val result = productUseCases.addProductUseCase(product)
-            _addProductState.update { result.toUiState() }
-            if(result is ApiResult.Success){
-                refreshProducts()
-            }
-        }
-    }
-
-    fun editProduct(product: Product){
-        viewModelScope.launch {
-            _editProductState.update { UiState.Loading }
-            val result = productUseCases.editProductUseCase(product)
-            _editProductState.update { result.toUiState() }
-            if(result is ApiResult.Success){
-                refreshProducts()
-            }
-        }
-    }
-
-    fun uploadProductImage(productId: Long, fileName: String, byteArray: ByteArray){
-        viewModelScope.launch {
-            _uploadProductImageState.update { UiState.Loading }
-            val result = productUseCases.uploadProductImageUseCase(productId, fileName, byteArray)
-            _uploadProductImageState.update { result.toUiState() }
-        }
-    }
-
-
-//    fun deleteProduct(productId: Long){
-//        viewModelScope.launch {
-//            _deleteProductState.update { UiState.Loading }
-//            val result = productUseCases.deleteProductUseCase(productId)
-//            _deleteProductState.update { result.toUiState() }
-//            refreshProducts()
-//        }
-//    }
-
-    fun deactivateProduct(productId: Long){
-        viewModelScope.launch {
-            _deactivateProduct.update { UiState.Loading }
-            val result = productUseCases.deactivateProductUseCase(productId)
-            _deactivateProduct.update { result.toUiState() }
-            refreshProducts()
-        }
-    }
-
 }
+
+
+data class ProductsViewState(
+    val products: List<Product> = emptyList(),
+    val categories: List<String> = emptyList(),
+    val banner: List<Product> = emptyList(),
+
+    val selectedCategory: String? = null,
+    val searchQuery: String? = null,
+    val isInitialLoading: Boolean = false,
+    val isRefreshing: Boolean = false,
+    val isPaginating: Boolean = false,
+    val isLastPage: Boolean = false,
+
+    val error: String? = null,
+    val message: String? = null
+)

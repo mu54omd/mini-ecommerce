@@ -143,8 +143,8 @@ fun AppNavHost(
                             SearchBarState(
                                 isVisible = true,
                                 placeHolderText = "Search Products",
-                                onSearchQuery = { query -> productViewModel.setSearchQuery(query.ifBlank { null }) },
-                                onClearSearchQuery = { productViewModel.setSearchQuery(null) }
+                                onSearchQuery = { query -> productViewModel.onSearchQueryChanged(query.ifBlank { null }) },
+                                onClearSearchQuery = { productViewModel.onSearchQueryChanged(null) }
                             )
                         }
 
@@ -202,7 +202,6 @@ fun AppNavHost(
                         LoginScreen(
                             authViewModel = authViewModel,
                             onLoginSuccess = {
-                                productViewModel.resetAllStates()
                                 cartViewModel.resetAllStates()
                                 orderViewModel.resetAllStates()
                                 cartViewModel.getCart()
@@ -214,7 +213,6 @@ fun AppNavHost(
                                 }
                             },
                             onLoginAsGuest = {
-                                productViewModel.resetAllStates()
                                 authViewModel.resetAllStates()
                                 authViewModel.clearToken()
                                 navController.navigate(navigationDestination.first().route) {
@@ -259,10 +257,7 @@ fun AppNavHost(
                             userRole = userState.role,
                             addProductModalState = addProductModalState,
                             onAddProductModalChange = { state -> addProductModalState = state },
-                            onExit = { state ->
-                                authViewModel.logout(state)
-                                productViewModel.resetAllStates()
-                            }
+
                         )
                     }
                     composable(Screen.Cart.route) {
