@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.Product
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.model.UserRole
+import com.mu54omd.mini_ecommerce.frontend_gradle.ui.common.EmptyPage
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -43,6 +44,8 @@ fun ProductCards(
     cartItems: Map<Long, Int>,
     userRole: UserRole,
     isWideScreen: Boolean = false,
+    isInitialLoading: Boolean,
+    isRefreshing: Boolean,
     enableSharedTransition: Boolean = true,
     selectedCategory: String?,
     onSelectCategory: (String?) -> Unit,
@@ -70,77 +73,84 @@ fun ProductCards(
             onSelectCategory = { category -> onSelectCategory(category) },
         )
         Spacer(modifier = Modifier.height(10.dp))
-        Box(contentAlignment = Alignment.Center) {
-            LazyVerticalGrid(
-                modifier = Modifier.padding(start = 16.dp, end = 16.dp),
-                columns = GridCells.Adaptive(150.dp),
-                contentPadding = PaddingValues(top = 30.dp, bottom = if(isWideScreen) 50.dp else 100.dp),
-                state = lazyGridState
-            ) {
-                items(items = products, key = { product -> product.id!! }) { product ->
+        if(products.isEmpty() && !isInitialLoading && !isRefreshing) {
+            EmptyPage("Oops!", "No product found!")
+        } else {
+            Box(contentAlignment = Alignment.Center) {
+                LazyVerticalGrid(
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp),
+                    columns = GridCells.Adaptive(150.dp),
+                    contentPadding = PaddingValues(
+                        top = 30.dp,
+                        bottom = if (isWideScreen) 50.dp else 100.dp
+                    ),
+                    state = lazyGridState
+                ) {
+                    items(items = products, key = { product -> product.id!! }) { product ->
 
-                    val interaction = remember { MutableInteractionSource() }
-                    val isHovered by interaction.collectIsHoveredAsState()
-                    val isPressed by interaction.collectIsPressedAsState()
+                        val interaction = remember { MutableInteractionSource() }
+                        val isHovered by interaction.collectIsHoveredAsState()
+                        val isPressed by interaction.collectIsPressedAsState()
 
-                    val isActive = isHovered || isPressed
+                        val isActive = isHovered || isPressed
 
-                    val scale by animateFloatAsState(
-                        targetValue = if (isActive) 1.1f else 1f,
-                        animationSpec = tween(durationMillis = 150),
-                        label = ""
-                    )
-                    ProductCard(
-                        cardWidth = 150.dp,
-                        imageWidth = 120.dp,
-                        cardHeight = 250.dp,
-                        itemCount = cartItems[product.id] ?: 0,
-                        scale = scale,
-                        interactionSource = interaction,
-                        product = product,
-                        userRole = userRole,
-                        onProductClick = { onProductClick(product) },
-                        onIncreaseItem = { onIncreaseItem(product.id!!) },
-                        onDecreaseItem = { onDecreaseItem(product.id!!) },
-                        onEditClick = { onEditClick(product) },
-                        onRemoveClick = { onRemoveClick(product.id!!) },
-                        enableSharedTransition = enableSharedTransition,
-                        sharedTransitionScope = sharedTransitionScope,
-                        animatedVisibilityScope = animatedVisibilityScope
-                    )
+                        val scale by animateFloatAsState(
+                            targetValue = if (isActive) 1.1f else 1f,
+                            animationSpec = tween(durationMillis = 150),
+                            label = ""
+                        )
+                        ProductCard(
+                            cardWidth = 150.dp,
+                            imageWidth = 120.dp,
+                            cardHeight = 250.dp,
+                            itemCount = cartItems[product.id] ?: 0,
+                            scale = scale,
+                            interactionSource = interaction,
+                            product = product,
+                            userRole = userRole,
+                            onProductClick = { onProductClick(product) },
+                            onIncreaseItem = { onIncreaseItem(product.id!!) },
+                            onDecreaseItem = { onDecreaseItem(product.id!!) },
+                            onEditClick = { onEditClick(product) },
+                            onRemoveClick = { onRemoveClick(product.id!!) },
+                            enableSharedTransition = enableSharedTransition,
+                            sharedTransitionScope = sharedTransitionScope,
+                            animatedVisibilityScope = animatedVisibilityScope
+                        )
 
+                    }
                 }
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .fillMaxWidth()
+                        .height(50.dp)
+                        .background(
+                            brush = Brush.verticalGradient(
+                                listOf(
+                                    MaterialTheme.colorScheme.background,
+                                    MaterialTheme.colorScheme.background.copy(alpha = 0.5f),
+                                    Color.Transparent,
+                                )
+                            )
+                        )
+                )
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .height(50.dp)
+                        .background(
+                            brush = Brush.verticalGradient(
+                                listOf(
+                                    Color.Transparent,
+                                    MaterialTheme.colorScheme.background.copy(alpha = 0.5f),
+                                    MaterialTheme.colorScheme.background
+                                )
+                            )
+                        )
+                )
             }
-            Box(
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .fillMaxWidth()
-                    .height(50.dp)
-                    .background(
-                        brush = Brush.verticalGradient(
-                            listOf(
-                                MaterialTheme.colorScheme.background,
-                                MaterialTheme.colorScheme.background.copy(alpha = 0.5f),
-                                Color.Transparent,
-                            )
-                        )
-                    )
-            )
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .height(50.dp)
-                    .background(
-                        brush = Brush.verticalGradient(
-                            listOf(
-                                Color.Transparent,
-                                MaterialTheme.colorScheme.background.copy(alpha = 0.5f),
-                                MaterialTheme.colorScheme.background
-                            )
-                        )
-                    )
-            )
         }
     }
 }

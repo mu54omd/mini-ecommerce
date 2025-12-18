@@ -37,6 +37,8 @@ enum class ProductListState {
 @Composable
 fun ProductList(
     isWideScreen: Boolean = false,
+    isInitialLoading: Boolean,
+    isRefreshing: Boolean,
     lazyGridState: LazyGridState = rememberLazyGridState(),
     userRole: UserRole,
     latestProductsBanner: List<Product>,
@@ -71,6 +73,8 @@ fun ProductList(
                         products = products,
                         categories = categories,
                         isWideScreen = isWideScreen,
+                        isInitialLoading = isInitialLoading,
+                        isRefreshing = isRefreshing,
                         selectedCategory = selectedCategory,
                         onSelectCategory = onSelectCategory,
                         cartItems = cartItems,
@@ -127,6 +131,8 @@ fun ProductList(
                                 latestProductsBanner = latestProductsBanner,
                                 products = filteredProductsState,
                                 categories = categories,
+                                isInitialLoading = isInitialLoading,
+                                isRefreshing = isRefreshing,
                                 selectedCategory = selectedCategory,
                                 onSelectCategory = onSelectCategory,
                                 cartItems = cartItems,

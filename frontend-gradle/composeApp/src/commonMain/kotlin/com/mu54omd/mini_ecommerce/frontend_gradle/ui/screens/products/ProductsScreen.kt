@@ -1,8 +1,7 @@
 package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.products
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
@@ -28,7 +27,6 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.ProductUiEffect
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.ProductViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.common.AlertModal
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.common.DeleteModal
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.common.EmptyPage
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.common.LoadingView
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.products.components.AddEditProductModal
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.products.components.ProductList
@@ -126,46 +124,38 @@ fun ProductsScreen(
         )
     }
 
-    Column(
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally,
+    Box(
+        contentAlignment = Alignment.Center,
         modifier = Modifier.fillMaxSize().padding(top = 16.dp, bottom = 16.dp)
     ) {
         // ======================== Product List ========================
-        when {
-            state.isInitialLoading && state.products.isEmpty() -> {
+        ProductList(
+            isWideScreen = isWideScreen,
+            lazyGridState = lazyGridState,
+            isInitialLoading = state.isInitialLoading,
+            isRefreshing = state.isRefreshing,
+            userRole = userRole,
+            latestProductsBanner = state.banner,
+            products = state.products,
+            categories = state.categories,
+            selectedCategory = state.selectedCategory,
+            onSelectCategory = productViewModel::onCategorySelected,
+            cartItems = cartItems,
+            onIncreaseItem = { cartViewModel.add(it) },
+            onDecreaseItem = { cartViewModel.remove(it) },
+            onEditClick = { product ->
+                selectedProduct = product
+                editProductModalState = true
+            },
+            onRemoveClick = { productId ->
+                selectedProductIdForDelete = productId
+                deleteProductModalState = true
+            },
+            modifier = Modifier
+        )
+        if(state.isInitialLoading) {
                 LoadingView()
-            }
-
-            state.products.isEmpty() && !state.isRefreshing -> {
-                EmptyPage("Oops!", "No product found!")
-            }
-            else -> {
-                ProductList(
-                    isWideScreen = isWideScreen,
-                    lazyGridState = lazyGridState,
-                    userRole = userRole,
-                    latestProductsBanner = state.banner,
-                    products = state.products,
-                    categories = state.categories,
-                    selectedCategory = state.selectedCategory,
-                    onSelectCategory = productViewModel::onCategorySelected,
-                    cartItems = cartItems,
-                    onIncreaseItem = { cartViewModel.add(it) },
-                    onDecreaseItem = { cartViewModel.remove(it) },
-                    onEditClick = { product ->
-                        selectedProduct = product
-                        editProductModalState = true
-                    },
-                    onRemoveClick = { productId ->
-                        selectedProductIdForDelete = productId
-                        deleteProductModalState = true
-                    },
-                    modifier = Modifier.weight(0.9f)
-                )
-            }
         }
-
         // ======================== Add Product Modal ========================
         if (addProductModalState) {
             AddEditProductModal(
