@@ -1,6 +1,6 @@
 package com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.users
 
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -18,36 +18,27 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.UserResponse
+import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.UserUiEffect
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.UserViewModel
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.common.AlertModal
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.common.DeleteModal
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.common.LoadingView
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.users.components.AddEditUserModal
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.users.components.UserCard
-import frontend_gradle.composeapp.generated.resources.Res
-import frontend_gradle.composeapp.generated.resources.create_user_successful_alert
-import frontend_gradle.composeapp.generated.resources.delete_user_successful_alert
-import frontend_gradle.composeapp.generated.resources.error_alert
-import frontend_gradle.composeapp.generated.resources.update_user_successful_alert
-import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun UsersScreen(
     userViewModel: UserViewModel,
     addUserModalState: Boolean,
     onAddUserStateChange: (Boolean) -> Unit,
-    onExit: (UiState<*>) -> Unit
 ) {
 
-    val usersState = userViewModel.usersState.collectAsState().value
-    val createUserState = userViewModel.createUserState.collectAsState().value
-    val deleteUserState = userViewModel.deleteUserState.collectAsState().value
-    val editUserState = userViewModel.editUserState.collectAsState().value
+    val state by userViewModel.state.collectAsState()
+    val effect = userViewModel.effect
 
     var editUserModalState by remember { mutableStateOf(false) }
     var deleteUserModalState by remember { mutableStateOf(false) }
-    var alertModalState by remember { mutableStateOf(false) }
+    var alertMessage by remember { mutableStateOf<String?>(null) }
+
     var editUserRequest by remember { mutableStateOf(UserResponse()) }
     var selectedUserForDelete by remember { mutableLongStateOf(-1) }
 
@@ -57,141 +48,89 @@ fun UsersScreen(
         userViewModel.getAllUsers()
     }
 
-    when (usersState) {
-        is UiState.Idle -> {}
-        is UiState.Loading -> LoadingView()
-        is UiState.Success -> {
-            Column(Modifier.fillMaxSize().padding(16.dp)) {
-                LazyColumn(
-                    contentPadding = PaddingValues(bottom = 50.dp),
-                    ) {
-                    items(items = usersState.data, key = { user -> user.id }) { user ->
-                        val isExpanded = expandedUsers[user.id] ?: false
-                        UserCard(
-                            isExpanded = isExpanded,
-                            user = user,
-                            onCardClick = {
-                                expandedUsers = expandedUsers.toMutableMap().also{
-                                    val current = it[user.id] ?: false
-                                    it[user.id] = !current
-                                }
-                                          },
-                            onEditUserClick = {
-                                editUserRequest = user
-                                editUserModalState = true
-                            },
-                            onDeleteUserClick = {
-                                deleteUserModalState = true
-                                selectedUserForDelete = user.id
-                            }
-                        )
-                    }
-                }
-                if(editUserModalState) {
-                    AddEditUserModal(
-                        user = editUserRequest,
-                        onCancelClick = { editUserModalState = false },
-                        onConfirmClick = { user ->
-                            userViewModel.editUser(editUserRequest.id, user)
-                            editUserModalState = false
-                        }
-                    )
-                }
-                if(addUserModalState) {
-                    AddEditUserModal(
-                        user = UserResponse(),
-                        onCancelClick = { onAddUserStateChange(false) },
-                        onConfirmClick = { user ->
-                            userViewModel.createUser(user)
-                            onAddUserStateChange(false)
-                        }
-                    )
+    LaunchedEffect(Unit) {
+        effect.collect { uiEffect ->
+            alertMessage = when (uiEffect) {
+                is UserUiEffect.ShowMessage -> {
+                    uiEffect.text
                 }
 
-                if(deleteUserModalState){
-                    DeleteModal(
-                        id = selectedUserForDelete,
-                        onCancelClick = {
-                            deleteUserModalState = false
-                            selectedUserForDelete = -1
-                        },
-                        onConfirmClick = {
-                            deleteUserModalState = false
-                            userViewModel.deleteUser(selectedUserForDelete)
-                            selectedUserForDelete = -1
-                        }
-                    )
-                }
-                when(createUserState){
-                    is UiState.Idle -> {}
-                    is UiState.Loading -> {}
-                    else -> {
-                        alertModalState = true
-                        if(alertModalState) {
-                            AlertModal(
-                                message =
-                                    if(createUserState is UiState.Success) {
-                                        stringResource( Res.string.create_user_successful_alert)
-                                    }else {
-                                        stringResource( Res.string.error_alert)
-                                    },
-                                onConfirmClick = {
-                                    alertModalState = false
-                                    userViewModel.resetCreateUserState()
-                                    userViewModel.getAllUsers()
-                                },
-                            )
-                        }
-                    }
-                }
-                when(deleteUserState){
-                    is UiState.Idle -> {}
-                    is UiState.Loading -> {}
-                    else -> {
-                        alertModalState = true
-                        if(alertModalState) {
-                            AlertModal(
-                                message =
-                                    if(deleteUserState is UiState.Success) {
-                                        stringResource( Res.string.delete_user_successful_alert)
-                                    }else {
-                                        stringResource( Res.string.error_alert)
-                                    },
-                                onConfirmClick = {
-                                    alertModalState = false
-                                    userViewModel.resetDeleteUserState()
-                                    userViewModel.getAllUsers()
-                                },
-                            )
-                        }
-                    }
-                }
-                when(editUserState){
-                    is UiState.Idle -> {}
-                    is UiState.Loading -> {}
-                    else -> {
-                        alertModalState = true
-                        if(alertModalState) {
-                            AlertModal(
-                                message =
-                                    if(editUserState is UiState.Success) {
-                                        stringResource( Res.string.update_user_successful_alert)
-                                    }else {
-                                        stringResource( Res.string.error_alert)
-                                    },
-                                onConfirmClick = {
-                                    alertModalState = false
-                                    userViewModel.resetEditUserState()
-                                    userViewModel.getAllUsers()
-                                },
-                            )
-                        }
-                    }
+                is UserUiEffect.ShowError -> {
+                    uiEffect.text
                 }
             }
         }
-
-        else -> onExit(usersState)
     }
 
+    Box(Modifier.fillMaxSize().padding(16.dp)) {
+        LazyColumn(
+            contentPadding = PaddingValues(bottom = 50.dp),
+        ) {
+            items(items = state.users, key = { user -> user.id }) { user ->
+                val isExpanded = expandedUsers[user.id] ?: false
+                UserCard(
+                    isExpanded = isExpanded,
+                    user = user,
+                    onCardClick = {
+                        expandedUsers = expandedUsers.toMutableMap().also {
+                            val current = it[user.id] ?: false
+                            it[user.id] = !current
+                        }
+                    },
+                    onEditUserClick = {
+                        editUserRequest = user
+                        editUserModalState = true
+                    },
+                    onDeleteUserClick = {
+                        deleteUserModalState = true
+                        selectedUserForDelete = user.id
+                    }
+                )
+            }
+        }
+
+        if (editUserModalState) {
+            AddEditUserModal(
+                user = editUserRequest,
+                onCancelClick = { editUserModalState = false },
+                onConfirmClick = { user ->
+                    userViewModel.editUser(editUserRequest.id, user)
+                    editUserModalState = false
+                }
+            )
+        }
+        if (addUserModalState) {
+            AddEditUserModal(
+                user = UserResponse(),
+                onCancelClick = { onAddUserStateChange(false) },
+                onConfirmClick = { user ->
+                    userViewModel.createUser(user)
+                    onAddUserStateChange(false)
+                }
+            )
+        }
+
+        if (deleteUserModalState) {
+            DeleteModal(
+                id = selectedUserForDelete,
+                onCancelClick = {
+                    deleteUserModalState = false
+                    selectedUserForDelete = -1
+                },
+                onConfirmClick = {
+                    deleteUserModalState = false
+                    userViewModel.deleteUser(selectedUserForDelete)
+                    selectedUserForDelete = -1
+                }
+            )
+        }
+        alertMessage?.let {
+            AlertModal(
+                message = it,
+                onConfirmClick = {
+                    alertMessage = null
+                }
+            )
+        }
+    }
 }

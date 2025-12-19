@@ -229,10 +229,6 @@ fun AppNavHost(
                             userViewModel = userViewModel,
                             addUserModalState = addUserModalState,
                             onAddUserStateChange = { state -> addUserModalState = state },
-                            onExit = { state ->
-                                authViewModel.logout(state)
-                                userViewModel.resetAllStates()
-                            }
                         )
                     }
                     composable(Screen.Orders.route) {

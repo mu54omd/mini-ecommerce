@@ -115,14 +115,7 @@ fun ProductsScreen(
             }
         }
     }
-    alertMessage?.let {
-        AlertModal(
-            message = it,
-            onConfirmClick = {
-                alertMessage = null
-            }
-        )
-    }
+
 
     Box(
         contentAlignment = Alignment.Center,
@@ -252,6 +245,14 @@ fun ProductsScreen(
                     productViewModel.deactivateProduct(productId)
                     deleteProductModalState = false
                     selectedProductIdForDelete = -1
+                }
+            )
+        }
+        alertMessage?.let {
+            AlertModal(
+                message = it,
+                onConfirmClick = {
+                    alertMessage = null
                 }
             )
         }
