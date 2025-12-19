@@ -64,13 +64,11 @@ fun AppNavHost(
     val navController = rememberNavController()
     val tokenState = authViewModel.tokenState.collectAsState().value
     val userState = authViewModel.userState.collectAsState().value
-    val cartState = cartViewModel.cartState.collectAsState().value
+    val cartState = cartViewModel.state.collectAsState().value
 
     var isCartEmpty by remember { mutableStateOf(true) }
     LaunchedEffect(cartState) {
-        if (cartState is UiState.Success) {
-            isCartEmpty = cartState.data.items.isEmpty()
-        }
+            isCartEmpty = cartState.isEmpty
     }
 
     val navigationDestination = when (userState.role) {
@@ -202,9 +200,8 @@ fun AppNavHost(
                         LoginScreen(
                             authViewModel = authViewModel,
                             onLoginSuccess = {
-                                cartViewModel.resetAllStates()
                                 orderViewModel.resetAllStates()
-                                cartViewModel.getCart()
+                                cartViewModel.loadCart()
                                 navController.navigate(navigationDestination.first().route) {
                                     popUpTo(navController.graph.id) {
                                         inclusive = true
@@ -263,18 +260,6 @@ fun AppNavHost(
                     composable(Screen.Cart.route) {
                         CartScreen(
                             cartViewModel = cartViewModel,
-                            onExit = { state ->
-                                authViewModel.logout(state)
-                                cartViewModel.resetAllStates()
-                            },
-                            onConfirmClick = {
-                                cartViewModel.checkout()
-                                orderViewModel.getUserOrders()
-                                selectedDestination = 2
-                                navController.navigate(Screen.Orders.route) {
-                                    popUpTo(Screen.Products.route)
-                                }
-                            }
                         )
                     }
                 }

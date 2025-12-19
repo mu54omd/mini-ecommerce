@@ -49,7 +49,7 @@ fun ProductsScreen(
 ) {
     val state by productViewModel.state.collectAsState()
     val effect = productViewModel.effect
-    val cartItems by cartViewModel.cartItems.collectAsState()
+    val cartState by cartViewModel.state.collectAsState()
 
     var editProductModalState by remember { mutableStateOf(false) }
     var deleteProductModalState by remember { mutableStateOf(false) }
@@ -86,7 +86,7 @@ fun ProductsScreen(
     // ======================== Initial Load ========================
     LaunchedEffect(Unit) {
         productViewModel.refresh()
-        cartViewModel.getCart()
+        cartViewModel.loadCart()
     }
 
     // ======================== Pagination Trigger ========================
@@ -140,7 +140,7 @@ fun ProductsScreen(
             categories = state.categories,
             selectedCategory = state.selectedCategory,
             onSelectCategory = productViewModel::onCategorySelected,
-            cartItems = cartItems,
+            cartItems = cartState.itemsCount,
             onIncreaseItem = { cartViewModel.add(it) },
             onDecreaseItem = { cartViewModel.remove(it) },
             onEditClick = { product ->

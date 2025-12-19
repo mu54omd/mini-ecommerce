@@ -2,6 +2,7 @@ package com.mu54omd.mini_ecommerce.backend_maven.controller;
 
 import com.mu54omd.mini_ecommerce.backend_maven.dto.CartMapper;
 import com.mu54omd.mini_ecommerce.backend_maven.dto.CartResponse;
+import com.mu54omd.mini_ecommerce.backend_maven.dto.CheckoutResponse;
 import com.mu54omd.mini_ecommerce.backend_maven.entity.Cart;
 import com.mu54omd.mini_ecommerce.backend_maven.entity.Order;
 import com.mu54omd.mini_ecommerce.backend_maven.service.CartService;
@@ -48,8 +49,8 @@ public class CartRestController {
     }
 
     @PostMapping("/checkout")
-    public ResponseEntity<String> checkout(@AuthenticationPrincipal UserDetails user) {
+    public ResponseEntity<CheckoutResponse> checkout(@AuthenticationPrincipal UserDetails user) {
         Order order = cartService.checkout(user.getUsername());
-        return ResponseEntity.ok("Checkout successful! Order ID: " + order.getId());
+        return ResponseEntity.ok(new CheckoutResponse(order.getId(), "Checkout successful! Order ID: "));
     }
 }

@@ -46,96 +46,100 @@ fun CartList(
     onClearCartClick: () -> Unit,
     onCheckoutClick: () -> Unit,
 ) {
-
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
+    Column(
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        TextButton(
-            onClick = onCheckoutClick,
-            modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
         ) {
-            Icon(
-                imageVector = Icons.Default.ShoppingCartCheckout,
-                contentDescription = "Checkout"
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(text = "Checkout")
-        }
-        Spacer(Modifier.width(8.dp))
-        TextButton(
-            onClick = onClearCartClick,
-            modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+            TextButton(
+                onClick = onCheckoutClick,
+                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ShoppingCartCheckout,
+                    contentDescription = "Checkout"
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(text = "Checkout")
+            }
+            Spacer(Modifier.width(8.dp))
+            TextButton(
+                onClick = onClearCartClick,
+                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
 
-        ) {
-            Icon(imageVector = Icons.Default.Clear, contentDescription = "Clear Cart")
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(text = "Clear")
+            ) {
+                Icon(imageVector = Icons.Default.Clear, contentDescription = "Clear Cart")
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(text = "Clear")
+            }
         }
-    }
-    Box(
-        contentAlignment = Alignment.TopCenter
-    ) {
-        Column(
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .size(width = 400.dp, height = 600.dp)
-                .verticalScroll(rememberScrollState())
+        Box(
+            contentAlignment = Alignment.TopCenter
         ) {
-            cartItems.forEach { item ->
-                var isItemClicked by remember { mutableStateOf(false) }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(4.dp)
-                        .height(if (isItemClicked) 150.dp else 100.dp)
-                        .clip(shape = RoundedCornerShape(10))
-                        .background(
-                            color = ExtendedTheme.colorScheme.quinary.colorContainer,
-                        )
-                        .clickable {
-                            isItemClicked = !isItemClicked
-                        },
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    CustomAsyncImage(
-                        url = "$BASE_URL${item.product.imageUrl}",
-                        contentDescription = item.product.description,
-                        errorTint = MaterialTheme.colorScheme.surface,
-                        errorImageSize = 150.dp,
-                        modifier = Modifier.weight(0.3f)
-                    )
-                    Column(
-                        modifier = Modifier.padding(8.dp).weight(0.7f)
+            Column(
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .size(width = 400.dp, height = 600.dp)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                cartItems.forEach { item ->
+                    var isItemClicked by remember { mutableStateOf(false) }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(4.dp)
+                            .height(if (isItemClicked) 150.dp else 100.dp)
+                            .clip(shape = RoundedCornerShape(10))
+                            .background(
+                                color = ExtendedTheme.colorScheme.quinary.colorContainer,
+                            )
+                            .clickable {
+                                isItemClicked = !isItemClicked
+                            },
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(
-                                text = item.product.name,
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                            Text(
-                                text = "x${item.quantity}",
-                                style = MaterialTheme.typography.bodySmall,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                        Text(
-                            text = "${item.product.price}$",
-                            style = MaterialTheme.typography.bodyMedium
+                        CustomAsyncImage(
+                            url = "$BASE_URL${item.product.imageUrl}",
+                            contentDescription = item.product.description,
+                            errorTint = MaterialTheme.colorScheme.surface,
+                            errorImageSize = 150.dp,
+                            modifier = Modifier.weight(0.3f)
                         )
-                        if (isItemClicked) {
-                            HorizontalDivider()
+                        Column(
+                            modifier = Modifier.padding(8.dp).weight(0.7f)
+                        ) {
+                            Row(
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(
+                                    text = item.product.name,
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                                Text(
+                                    text = "x${item.quantity}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                             Text(
-                                item.product.description,
-                                style = MaterialTheme.typography.bodySmall
+                                text = "${item.product.price}$",
+                                style = MaterialTheme.typography.bodyMedium
                             )
+                            if (isItemClicked) {
+                                HorizontalDivider()
+                                Text(
+                                    item.product.description,
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
                         }
                     }
                 }

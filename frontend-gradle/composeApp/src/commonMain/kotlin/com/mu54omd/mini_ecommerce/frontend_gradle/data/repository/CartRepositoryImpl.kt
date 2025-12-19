@@ -4,6 +4,7 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.api.ApiClient
 import com.mu54omd.mini_ecommerce.frontend_gradle.api.ApiResult
 import com.mu54omd.mini_ecommerce.frontend_gradle.api.map
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.CartResponse
+import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.CheckoutResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.repository.CartRepository
 
 class CartRepositoryImpl(private val api: ApiClient): CartRepository {
@@ -28,8 +29,8 @@ class CartRepositoryImpl(private val api: ApiClient): CartRepository {
         api.delete("/cart/clear")
     }
 
-    override suspend fun checkout(): ApiResult<String> {
-        return api.post<String, String>("/cart/checkout", "")
-            .map(onSuccess = {it})
+    override suspend fun checkout(): ApiResult<CheckoutResponse> {
+        return api.post<String, CheckoutResponse>("/cart/checkout", "")
+            .map( onSuccess = { it } )
     }
 }

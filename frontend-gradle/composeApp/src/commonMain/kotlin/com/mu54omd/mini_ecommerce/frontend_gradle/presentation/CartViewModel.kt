@@ -2,85 +2,113 @@ package com.mu54omd.mini_ecommerce.frontend_gradle.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.CartResponse
+import com.mu54omd.mini_ecommerce.frontend_gradle.api.ApiResult
+import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.CartItemResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.CartUseCases
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.toUiState
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class CartViewModel(private val cartUseCases: CartUseCases) : ViewModel() {
 
-    private val _cartState = MutableStateFlow<UiState<CartResponse>>(UiState.Idle)
-    val cartState = _cartState.asStateFlow()
+    private val _state = MutableStateFlow(CartUiState())
+    val state = _state.asStateFlow()
 
-    private val _checkoutState = MutableStateFlow<UiState<String>>(UiState.Idle)
-    val checkoutState = _checkoutState.asStateFlow()
+    private val _effect = MutableSharedFlow<CartUiEffect>()
+    val effect = _effect.asSharedFlow()
 
-    private val _cartItems = MutableStateFlow<Map<Long, Int>>(emptyMap())
-    val cartItems = _cartItems.asStateFlow()
-
-    // ============================================================
-    fun resetAllStates(){
-        resetCartState()
-        resetCheckoutState()
-    }
-
-    fun resetCartState(){
-        _cartState.update { UiState.Idle }
-    }
-
-    fun resetCheckoutState(){
-        _checkoutState.update { UiState.Idle }
-    }
-
-    // ============================================================
-
-    fun getCart() {
+    // ===================== Initial Load =====================
+    fun loadCart() {
         viewModelScope.launch {
-            _cartState.update { UiState.Loading }
-            val result = cartUseCases.getCartUseCase()
-            _cartState.update { result.toUiState() }
+            _state.update { it.copy(isInitialLoading = true) }
 
-            if (cartState.value is UiState.Success) {
-                syncCartItems((cartState.value as UiState.Success<CartResponse>).data)
+            when (val result = cartUseCases.getCartUseCase()) {
+                is ApiResult.Success -> {
+                    val items = result.data.items
+                    val itemsCounts = items.associate { it.product.id to it.quantity }
+                    _state.update {
+                        it.copy(
+                            id = result.data.id,
+                            items = items,
+                            itemsCount = itemsCounts,
+                            isEmpty = items.isEmpty(),
+                            isInitialLoading = false,
+                            isRefreshing = false
+                        )
+                    }
+                }
+                is ApiResult.NetworkError -> {
+                    _state.update { it.copy(isInitialLoading = false) }
+                    _effect.emit(CartUiEffect.ShowError(result.exception.message))
+                }
+                else -> {
+                    _state.update { it.copy(isInitialLoading = false) }
+                    _effect.emit(CartUiEffect.ShowError((result as ApiResult.Error).message))
+                }
             }
         }
     }
 
-    private fun syncCartItems(response: CartResponse){
-        _cartItems.value = response.items.associate { it.product.id to it.quantity }
+    // ===================== Cart Actions =====================
+    fun add(productId: Long) = updateCart {
+        cartUseCases.addToCartUseCase(productId, 1)
     }
 
-    fun add(productId: Long, qty: Int = 1) {
-        viewModelScope.launch {
-            cartUseCases.addToCartUseCase(productId, qty)
-            getCart()
-        }
+    fun remove(productId: Long) = updateCart {
+        cartUseCases.removeFromCartUseCase(productId)
     }
-    fun remove(productId: Long) {
-        viewModelScope.launch {
-            cartUseCases.removeFromCartUseCase(productId)
-            getCart()
-        }
+
+    fun clear() = updateCart {
+        cartUseCases.clearCartUseCase()
     }
-    fun clear() {
+
+    private fun updateCart(action: suspend () -> Unit) {
         viewModelScope.launch {
-            cartUseCases.clearCartUseCase()
-            getCart()
+            _state.update { it.copy(isRefreshing = true) }
+            action()
+            loadCart()
         }
     }
 
+    // ===================== Checkout =====================
     fun checkout() {
         viewModelScope.launch {
-            _checkoutState.update { UiState.Loading }
-            val result = cartUseCases.checkoutUseCase()
-            _checkoutState.update { result.toUiState() }
-            if(_checkoutState.value is UiState.Success){
-                getCart()
+            _state.update { it.copy(isCheckingOut = true) }
+
+            when (val result = cartUseCases.checkoutUseCase()) {
+                is ApiResult.Success -> {
+                    _state.update { it.copy(isCheckingOut = false) }
+                    _effect.emit(CartUiEffect.CheckoutSuccess(id = result.data.id, message = result.data.response))
+                    loadCart()
+                }
+                is ApiResult.NetworkError -> {
+                    _state.update { it.copy(isCheckingOut = false) }
+                    _effect.emit(CartUiEffect.ShowError(result.exception.message))
+                }
+
+                else -> {
+                    _state.update { it.copy(isCheckingOut = false) }
+                    _effect.emit(CartUiEffect.ShowError((result as ApiResult.Error).message))
+                }
             }
         }
     }
+}
+
+data class CartUiState(
+    val id: Long = 0,
+    val items: List<CartItemResponse> = emptyList(),
+    val itemsCount: Map<Long, Int> = emptyMap(),
+    val isInitialLoading: Boolean = false,
+    val isRefreshing: Boolean = false,
+    val isCheckingOut: Boolean = false,
+    val isEmpty: Boolean = false
+)
+
+sealed interface CartUiEffect {
+    data class ShowError(val message: String?) : CartUiEffect
+    data class CheckoutSuccess(val id: Long, val message: String) : CartUiEffect
 }
