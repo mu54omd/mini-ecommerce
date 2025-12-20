@@ -148,10 +148,10 @@ fun AppNavHost(
 
                         Screen.Orders.route -> {
                             SearchBarState(
-                                isVisible = true,
+                                isVisible = userState.role == UserRole.ADMIN,
                                 placeHolderText = "Search Orders",
-                                onSearchQuery = { query -> orderViewModel.setSearchQuery(query = query) },
-                                onClearSearchQuery = { orderViewModel.setSearchQuery(query = null) }
+                                onSearchQuery = { query -> orderViewModel.onSearchQueryChanged(query = query) },
+                                onClearSearchQuery = { orderViewModel.onSearchQueryChanged(query = null) }
                             )
                         }
 
@@ -200,7 +200,6 @@ fun AppNavHost(
                         LoginScreen(
                             authViewModel = authViewModel,
                             onLoginSuccess = {
-                                orderViewModel.resetAllStates()
                                 cartViewModel.loadCart()
                                 navController.navigate(navigationDestination.first().route) {
                                     popUpTo(navController.graph.id) {
@@ -238,7 +237,6 @@ fun AppNavHost(
                             userRole = userState.role,
                             onExit = { state ->
                                 authViewModel.logout(state)
-                                orderViewModel.resetAllStates()
                             }
                         )
                     }

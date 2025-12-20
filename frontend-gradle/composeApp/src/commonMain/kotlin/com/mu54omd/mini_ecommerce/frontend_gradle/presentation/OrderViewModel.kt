@@ -5,118 +5,119 @@ import androidx.lifecycle.viewModelScope
 import com.mu54omd.mini_ecommerce.frontend_gradle.api.ApiResult
 import com.mu54omd.mini_ecommerce.frontend_gradle.api.map
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.OrderResponse
+import com.mu54omd.mini_ecommerce.frontend_gradle.domain.model.UserRole
+import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.AuthUseCases
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.OrderUseCases
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.toUiState
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @OptIn(FlowPreview::class)
-class OrderViewModel(private val orderUseCases: OrderUseCases): ViewModel() {
-    private val _userOrderState = MutableStateFlow<UiState<List<OrderResponse>>>(UiState.Idle)
-    val userOrdersState = _userOrderState.asStateFlow()
+class OrderViewModel(
+    private val authUseCases: AuthUseCases,
+    private val orderUseCases: OrderUseCases
+): ViewModel() {
 
-    private val _ordersState = MutableStateFlow<UiState<List<OrderResponse>>>(UiState.Idle)
-    val ordersState = _ordersState.asStateFlow()
+    private val _state = MutableStateFlow(OrderUiState())
+    val state = _state.asStateFlow()
 
-    private val _groupedOrders = MutableStateFlow<UiState<Map<String, List<OrderResponse>>>>(UiState.Idle)
-    val groupedOrders = _groupedOrders.asStateFlow()
+    private val _effect = MutableSharedFlow<OrderUiEffect>()
+    val effect = _effect.asSharedFlow()
 
-
-    private val _updateStatusSummary = MutableStateFlow<List<UpdateOrderStatusResult>>(emptyList())
-    val updateStatusSummary = _updateStatusSummary.asStateFlow()
-
-    private val _statusFilter = MutableStateFlow<String?>(null)
-    val statusFilter = _statusFilter.asStateFlow()
-
-    private val _searchQuery = MutableStateFlow<String?>(null)
 
     // ==============================================================================
 
     init {
         viewModelScope.launch {
-            _searchQuery
+            val user =  authUseCases.getUserInfoUseCase()
+            _state
+                .map { it.searchQuery to it.statusFilter }
                 .debounce(300)
                 .distinctUntilChanged()
-                .collect { query ->
-                    searchOrders(status = statusFilter.value, productName = query)
+                .collect {
+                   when(user.role){
+                       UserRole.ADMIN -> { getGroupedOrders() }
+                       else -> {}
+                   }
                 }
         }
     }
-
-    fun resetAllStates(){
-        resetUserOrderState()
-        resetOrdersState()
-        resetGroupedOrders()
-    }
-
-    fun resetUserOrderState(){
-        _userOrderState.update { UiState.Idle }
-    }
-    fun resetOrdersState(){
-        _ordersState.update { UiState.Idle }
-    }
-
-    fun resetGroupedOrders(){
-        _groupedOrders.update { UiState.Idle }
-    }
-    fun resetUpdateStatusSummary(){
-        _updateStatusSummary.update { emptyList() }
-    }
-
     // ==============================================================================
 
     fun getUserOrders() {
         viewModelScope.launch {
-            _userOrderState.update { UiState.Loading }
-            val result = orderUseCases.getUserOrderUseCase()
-            _userOrderState.update { result.toUiState()}
-        }
-    }
+            _state.update { it.copy(isRefreshing = true) }
+            val s = _state.value
+            val result = when {
+                !s.searchQuery.isNullOrBlank() || !s.statusFilter.isNullOrBlank() -> {
+                    orderUseCases.searchOrdersUseCase(
+                        status = s.statusFilter,
+                        productName = s.searchQuery
+                    )
+                }
+                else -> {
+                    orderUseCases.getUserOrderUseCase()
+                }
+            }
 
-    fun getAllOrders(){
-        viewModelScope.launch {
-            _ordersState.update { UiState.Idle }
-            val result = orderUseCases.getOrdersUseCase()
-            _ordersState.update { result.toUiState() }
+            when(result){
+                is ApiResult.Success -> {
+                    _state.update { it.copy( currentUserOrders = result.data, isRefreshing = false) }
+                }
+                else -> {
+                    _state.update { it.copy(isRefreshing = false) }
+                    _effect.emit(OrderUiEffect.ShowError((result as ApiResult.Error).message))
+                }
+            }
         }
     }
 
     fun getGroupedOrders(){
         viewModelScope.launch {
-            _groupedOrders.update { UiState.Loading }
-            val result = orderUseCases.getOrdersUseCase()
-                .map(
-                    onSuccess = { list -> list.groupBy { it.username } }
-                )
-            _groupedOrders.update { result.toUiState()}
+            _state.update { it.copy(isRefreshing = true) }
+            val s = _state.value
+            val result = when{
+                !s.searchQuery.isNullOrBlank() || !s.statusFilter.isNullOrBlank() -> {
+                    orderUseCases.searchOrdersUseCase(
+                        status = s.statusFilter,
+                        productName = s.searchQuery
+                    ).map(onSuccess = { list -> list.groupBy { it.username }})
+                }
+                else -> {
+                    orderUseCases.getOrdersUseCase()
+                        .map(onSuccess = { list -> list.groupBy { it.username } })
+                }
+            }
+
+            when(result){
+                is ApiResult.Success -> {
+                    _state.update { it.copy( allUsersOrders = result.data, isRefreshing = false) }
+                }
+                else -> {
+                    _state.update { it.copy(isRefreshing = false) }
+                    _effect.emit(OrderUiEffect.ShowError((result as ApiResult.Error).message))
+                }
+            }
         }
     }
 
-    fun searchOrders(status: String? = null, productName: String? = null){
-        viewModelScope.launch {
-            _groupedOrders.update { UiState.Loading }
-            val result = orderUseCases.searchOrdersUseCase(status, productName)
-                .map(
-                    onSuccess = { list -> list.groupBy { it.username }}
-                )
-            _groupedOrders.update { result.toUiState() }
-        }
+
+
+    fun onStatusFilterChanged(status: OrderStatus?){
+        _state.update { it.copy(isRefreshing = true, statusFilter = status?.name) }
     }
 
-    fun setStatusFilter(status: OrderStatus?){
-        _statusFilter.update { status?.name }
-    }
-
-    fun setSearchQuery(query: String?){
-        _searchQuery.update { query }
+    fun onSearchQueryChanged(query: String?){
+        _state.update { it.copy(isRefreshing = true, searchQuery = query) }
     }
 
     fun updateAllStatusesAndRefresh(changed: Map<Long, String>) {
@@ -124,12 +125,24 @@ class OrderViewModel(private val orderUseCases: OrderUseCases): ViewModel() {
             val results = mutableListOf<UpdateOrderStatusResult>()
             val jobs = changed.map { (orderId, newStatus) ->
                 async {
-                    val result = updateOrderStatusSuspended(orderId, newStatus)
-                    results.add(UpdateOrderStatusResult(orderId, result.toUiState()))
+                    when(val result = updateOrderStatusSuspended(orderId, newStatus)){
+                        is ApiResult.Success -> {
+                            results.add(UpdateOrderStatusResult(orderId, null))
+                        }
+                        else -> {
+                            results.add(UpdateOrderStatusResult(orderId, (result as ApiResult.Error).message))
+                        }
+                    }
                 }
             }
             jobs.awaitAll()
-            _updateStatusSummary.update { results }
+            _state.update { it.copy(updateStatusSummary = results) }
+            if(_state.value.updateStatusSummary.isNotEmpty()){
+                val succeedAttempt = _state.value.updateStatusSummary.count { it.error == null }
+                val failedAttempt = _state.value.updateStatusSummary.count { it.error != null }
+                _effect.emit(OrderUiEffect.ShowMessage("$succeedAttempt order(s): Updated - $failedAttempt order(s): Failed"))
+                _state.update { it.copy(updateStatusSummary = emptyList()) }
+            }
             getGroupedOrders()
         }
     }
@@ -142,9 +155,23 @@ class OrderViewModel(private val orderUseCases: OrderUseCases): ViewModel() {
     }
 }
 
+data class OrderUiState(
+    val currentUserOrders: List<OrderResponse> = emptyList(),
+    val allUsersOrders: Map<String, List<OrderResponse>> = emptyMap(),
+    val updateStatusSummary: List<UpdateOrderStatusResult> = emptyList(),
+    val statusFilter: String? = null,
+    val searchQuery: String? = null,
+    val isRefreshing: Boolean = false,
+)
+
+sealed interface OrderUiEffect {
+    data class ShowError(val message: String?): OrderUiEffect
+    data class ShowMessage(val message: String?): OrderUiEffect
+}
+
 data class UpdateOrderStatusResult(
     val orderId: Long,
-    val result: UiState<OrderResponse>,
+    val error: String?
 )
 
 enum class OrderStatus{

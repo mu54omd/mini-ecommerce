@@ -131,5 +131,5 @@ val appModule = module {
     viewModel { CartViewModel(get()) }
     viewModel { AuthViewModel(get()) }
     viewModel { UserViewModel(get()) }
-    viewModel { OrderViewModel(get()) }
+    viewModel { OrderViewModel(get(), get()) }
 }

@@ -280,7 +280,6 @@ data class ProductsViewState(
     val products: List<Product> = emptyList(),
     val categories: List<String> = emptyList(),
     val banner: List<Product> = emptyList(),
-
     val selectedCategory: String? = null,
     val searchQuery: String? = null,
     val isInitialLoading: Boolean = false,
