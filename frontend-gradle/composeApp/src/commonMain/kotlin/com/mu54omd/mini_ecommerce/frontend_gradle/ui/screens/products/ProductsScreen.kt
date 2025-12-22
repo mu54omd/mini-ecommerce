@@ -86,7 +86,9 @@ fun ProductsScreen(
     // ======================== Initial Load ========================
     LaunchedEffect(Unit) {
         productViewModel.refresh()
-        cartViewModel.loadCart()
+        if(userRole == UserRole.USER || userRole == UserRole.ADMIN) {
+            cartViewModel.loadCart()
+        }
     }
 
     // ======================== Pagination Trigger ========================

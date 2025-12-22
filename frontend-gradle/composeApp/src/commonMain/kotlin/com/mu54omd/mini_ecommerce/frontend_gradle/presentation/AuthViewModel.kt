@@ -2,102 +2,112 @@ package com.mu54omd.mini_ecommerce.frontend_gradle.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.HealthResponse
+import com.mu54omd.mini_ecommerce.frontend_gradle.api.ApiResult
 import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.LoginResponse
-import com.mu54omd.mini_ecommerce.frontend_gradle.data.models.RegisterResponse
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.model.User
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.usecase.AuthUseCases
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.toUiState
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class AuthViewModel(private val authUseCases: AuthUseCases): ViewModel() {
+    private val _state = MutableStateFlow(AuthUiState())
+    val state = _state.asStateFlow()
 
-    private val _tokenState: MutableStateFlow<UiState<LoginResponse>> = MutableStateFlow(UiState.Idle)
-    val tokenState: StateFlow<UiState<LoginResponse>> = _tokenState.asStateFlow()
+    private val _effect = MutableSharedFlow<AuthUiEffect>(
+        replay = 1,
+        extraBufferCapacity = 0
+    )
+    val effect = _effect.asSharedFlow()
 
-    private val _healthState: MutableStateFlow<UiState<HealthResponse>> = MutableStateFlow(UiState.Idle)
-    val healthState = _healthState.asStateFlow()
-
-    private val _userState: MutableStateFlow<User> = MutableStateFlow(User())
-    val userState: StateFlow<User> = _userState.asStateFlow()
-
-    private val _registerState: MutableStateFlow<UiState<RegisterResponse>> = MutableStateFlow(UiState.Idle)
-    val registerState = _registerState.asStateFlow()
 
     // ===========================================================================
 
     init {
-        validateStoredToken()
         setUserInfo()
-    }
-
-    // ===========================================================================
-
-    fun resetAllStates(){
-        resetHealthState()
-        resetTokenState()
-        resetUserState()
-        resetRegisterState()
-    }
-
-    fun resetHealthState(){
-        _healthState.update { UiState.Idle }
-    }
-    fun resetTokenState(){
-        _tokenState.update { UiState.Idle }
-    }
-
-    fun resetUserState(){
-        _userState.update { User() }
-    }
-
-    fun resetRegisterState(){
-        _registerState.update { UiState.Idle }
+        validateStoredToken()
     }
 
     // ===========================================================================
 
     fun checkHealth(){
         viewModelScope.launch {
-            _healthState.update { UiState.Loading }
-            val result = authUseCases.checkHealthUseCase()
-            _healthState.update { result.toUiState() }
+            _state.update { it.copy(isConnectionHealthy = false, isRefreshing = true) }
+            when(val result = authUseCases.checkHealthUseCase()){
+                is ApiResult.Success -> {
+                    _state.update { it.copy(isConnectionHealthy = true, isRefreshing = false) }
+                    _effect.emit(AuthUiEffect.NavigateToHomeAsGuest)
+                }
+                is ApiResult.NetworkError -> {
+                    _state.update { it.copy(isRefreshing = false) }
+                    _effect.emit(AuthUiEffect.ShowError(result.exception.message))
+                }
+                else -> {
+                    _state.update { it.copy(isRefreshing = false) }
+                    _effect.emit(AuthUiEffect.ShowError((result as ApiResult.Error).message))
+                }
+            }
         }
     }
 
     fun login(username: String, password: String){
         viewModelScope.launch {
-            _tokenState.update { UiState.Loading }
+            _state.update { it.copy(isRefreshing = true) }
             val result = authUseCases.loginUseCase(username, password)
-            _tokenState.update { result.toUiState() }
+            when(result){
+                is ApiResult.Success -> {
+                    _state.update { it.copy(isRefreshing = false, token = result.data) }
+                    _effect.emit(AuthUiEffect.NavigateToHome)
+                }
+                is ApiResult.NetworkError -> {
+                    _state.update { it.copy(isRefreshing = false, token = null) }
+                    _effect.emit(AuthUiEffect.ShowError(result.exception.message))
+                }
+                else -> {
+                    _state.update { it.copy(isRefreshing = false, token = null) }
+                    _effect.emit(AuthUiEffect.ShowError((result as ApiResult.Error).message))
+                }
+            }
             setUserInfo()
         }
     }
     fun register(username: String, password: String, email: String){
         viewModelScope.launch {
-            _registerState.update { UiState.Loading }
+            _state.update { it.copy(isRefreshing = true) }
             val result = authUseCases.registerUseCase(username, password, email)
-            _registerState.update { result.toUiState() }
+            when(result){
+                is ApiResult.Success -> {
+                    _state.update { it.copy(isRefreshing = false) }
+                    _effect.emit(AuthUiEffect.ShowMessage(result.data.message))
+                }
+                is ApiResult.NetworkError -> {
+                    _state.update { it.copy(isRefreshing = false) }
+                    _effect.emit(AuthUiEffect.ShowError(result.exception.message))
+                }
+                else -> {
+                    _state.update { it.copy(isRefreshing = false) }
+                    _effect.emit(AuthUiEffect.ShowError((result as ApiResult.Error).message))
+                }
+            }
         }
     }
-    fun logout(cause: UiState<*> = UiState.Idle){
-        if(cause is UiState.Error || cause is UiState.Idle || cause is UiState.Loading) {
-            _tokenState.update { cause as UiState<LoginResponse> }
-            viewModelScope.launch {
-                authUseCases.logoutUseCase()
-                setUserInfo()
-            }
+    fun logout(){
+        viewModelScope.launch {
+            _state.update { AuthUiState() }
+            authUseCases.logoutUseCase()
+            _effect.emit(AuthUiEffect.LogOut)
         }
     }
 
     fun validateStoredToken(){
         viewModelScope.launch {
-            authUseCases.validateTokenUseCase()?.let { token -> _tokenState.update { UiState.Success(LoginResponse(response = token)) } }
+            authUseCases.validateTokenUseCase()?.let { token ->
+                _state.update { it.copy(token = LoginResponse(response = token), isStoredTokenValid = true) }
+                _effect.emit(AuthUiEffect.NavigateToHome)
+            }
         }
     }
 
@@ -110,8 +120,25 @@ class AuthViewModel(private val authUseCases: AuthUseCases): ViewModel() {
     private fun setUserInfo(){
         viewModelScope.launch {
             val user = authUseCases.getUserInfoUseCase()
-           _userState.update { user }
+           _state.update { it.copy(currentUser = user) }
         }
     }
+
+}
+
+data class AuthUiState(
+    val token: LoginResponse? = null,
+    val currentUser: User = User(),
+    val isConnectionHealthy: Boolean = false,
+    val isStoredTokenValid: Boolean = false,
+    val isRefreshing: Boolean = false
+)
+
+sealed interface AuthUiEffect{
+    data class ShowError(val message: String?): AuthUiEffect
+    data class ShowMessage(val message: String?): AuthUiEffect
+    object NavigateToHome: AuthUiEffect
+    object NavigateToHomeAsGuest: AuthUiEffect
+    object LogOut : AuthUiEffect
 
 }

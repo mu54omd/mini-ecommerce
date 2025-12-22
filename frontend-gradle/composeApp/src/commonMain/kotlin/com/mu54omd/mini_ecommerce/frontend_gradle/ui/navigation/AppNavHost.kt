@@ -27,12 +27,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.mu54omd.mini_ecommerce.frontend_gradle.domain.model.UserRole
+import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.AuthUiEffect
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.AuthViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.CartViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.OrderViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.ProductViewModel
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.UserViewModel
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.common.SearchBarState
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.navigation.components.AppDrawer
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.navigation.components.FAB
@@ -62,8 +62,8 @@ fun AppNavHost(
     onToggleTheme: () -> Unit,
 ) {
     val navController = rememberNavController()
-    val tokenState = authViewModel.tokenState.collectAsState().value
-    val userState = authViewModel.userState.collectAsState().value
+    val authState by authViewModel.state.collectAsState()
+    val authEffect = authViewModel.effect
     val cartState = cartViewModel.state.collectAsState().value
 
     var isCartEmpty by remember { mutableStateOf(true) }
@@ -71,7 +71,7 @@ fun AppNavHost(
             isCartEmpty = cartState.isEmpty
     }
 
-    val navigationDestination = when (userState.role) {
+    val navigationDestination = when (authState.currentUser.role) {
         UserRole.ADMIN -> listOf(Screen.Products, Screen.Users, Screen.Orders, Screen.Admin)
         UserRole.USER -> listOf(
             Screen.Products,
@@ -82,7 +82,7 @@ fun AppNavHost(
         else -> listOf(Screen.Products)
     }
 
-    var selectedDestination by rememberSaveable(tokenState) {
+    var selectedDestination by rememberSaveable(authState.token) {
         mutableIntStateOf(
             navigationDestination.indices.first
         )
@@ -102,10 +102,42 @@ fun AppNavHost(
         }
     }
 
+    LaunchedEffect(Unit){
+        authEffect.collect { effect ->
+            when(effect){
+                is AuthUiEffect.NavigateToHome -> {
+                    cartViewModel.loadCart()
+                    navController.navigate(navigationDestination.first().route) {
+                        popUpTo(navController.graph.id) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
+                }
+                is AuthUiEffect.NavigateToHomeAsGuest -> {
+                    authViewModel.clearToken()
+                    navController.navigate(navigationDestination.first().route) {
+                        popUpTo(navController.graph.id) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
+                }
+                is AuthUiEffect.LogOut -> {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(navController.graph.id) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                }
+                else -> Unit
+            }
+        }
+    }
 
 
-    LaunchedEffect(tokenState) {
-        if (tokenState is UiState.Error) {
+
+    LaunchedEffect(authState.isStoredTokenValid) {
+        if (!authState.isStoredTokenValid) {
             if (currentDestination != Screen.Login.route) {
                 navController.navigate(Screen.Login.route) {
                     popUpTo(Screen.Login.route) { inclusive = true }
@@ -148,7 +180,7 @@ fun AppNavHost(
 
                         Screen.Orders.route -> {
                             SearchBarState(
-                                isVisible = userState.role == UserRole.ADMIN,
+                                isVisible = authState.currentUser.role == UserRole.ADMIN,
                                 placeHolderText = "Search Orders",
                                 onSearchQuery = { query -> orderViewModel.onSearchQueryChanged(query = query) },
                                 onClearSearchQuery = { orderViewModel.onSearchQueryChanged(query = null) }
@@ -199,25 +231,6 @@ fun AppNavHost(
                     composable(Screen.Login.route) {
                         LoginScreen(
                             authViewModel = authViewModel,
-                            onLoginSuccess = {
-                                cartViewModel.loadCart()
-                                navController.navigate(navigationDestination.first().route) {
-                                    popUpTo(navController.graph.id) {
-                                        inclusive = true
-                                    }
-                                    launchSingleTop = true
-                                }
-                            },
-                            onLoginAsGuest = {
-                                authViewModel.resetAllStates()
-                                authViewModel.clearToken()
-                                navController.navigate(navigationDestination.first().route) {
-                                    popUpTo(navController.graph.id) {
-                                        inclusive = true
-                                    }
-                                    launchSingleTop = true
-                                }
-                            }
                         )
                     }
                     composable(Screen.Admin.route) {
@@ -234,10 +247,8 @@ fun AppNavHost(
                         OrdersScreen(
                             isCompact = isCompactScreen,
                             orderViewModel = orderViewModel,
-                            userRole = userState.role,
-                            onExit = { state ->
-                                authViewModel.logout(state)
-                            }
+                            userRole = authState.currentUser.role,
+                            onExit = { }
                         )
                     }
                     composable(Screen.Products.route) {
@@ -245,7 +256,7 @@ fun AppNavHost(
                             isWideScreen = isWideScreen,
                             productViewModel = productViewModel,
                             cartViewModel = cartViewModel,
-                            userRole = userState.role,
+                            userRole = authState.currentUser.role,
                             addProductModalState = addProductModalState,
                             onAddProductModalChange = { state -> addProductModalState = state },
 
@@ -282,7 +293,7 @@ fun AppNavHost(
                 )
             }
             FAB(
-                userRole = userState.role,
+                userRole = authState.currentUser.role,
                 isWideScreen = isWideScreen,
                 currentDestination = currentDestination,
                 onFabClick = {
@@ -297,8 +308,8 @@ fun AppNavHost(
         AppDrawer(
             isDarkTheme = isDarkTheme,
             isDrawerVisible = isDrawerVisible,
-            username = userState.username,
-            email = userState.email,
+            username = authState.currentUser.username,
+            email = authState.currentUser.email,
             onDismiss = { isDrawerVisible = false }
         )
         SplashScreen(
