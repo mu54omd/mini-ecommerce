@@ -37,6 +37,16 @@ class UserViewModel(
                 is ApiResult.Success -> {
                     _state.update { it.copy(users = result.data, isRefreshing = false) }
                 }
+                is ApiResult.NetworkError -> {
+                    _state.update { it.copy(isRefreshing = false) }
+                    _effect.emit(UserUiEffect.ShowError(result.exception.message))
+
+                }
+
+                is ApiResult.Unauthorized, is ApiResult.Forbidden -> {
+                    _state.update { it.copy(isRefreshing = false) }
+                    _effect.emit(UserUiEffect.NavigateToLogin((result as ApiResult.Unauthorized).message))
+                }
                 else -> {
                     _state.update { it.copy(isRefreshing = false) }
                     _effect.emit(UserUiEffect.ShowError((result as ApiResult.Error).message))
@@ -54,6 +64,16 @@ class UserViewModel(
                     getAllUsers()
                     _effect.emit(UserUiEffect.ShowMessage(getString(Res.string.create_user_successful_alert)))
                 }
+                is ApiResult.NetworkError -> {
+                    _state.update { it.copy(isRefreshing = false) }
+                    _effect.emit(UserUiEffect.ShowError(result.exception.message))
+
+                }
+
+                is ApiResult.Unauthorized, is ApiResult.Forbidden -> {
+                    _state.update { it.copy(isRefreshing = false) }
+                    _effect.emit(UserUiEffect.NavigateToLogin((result as ApiResult.Unauthorized).message))
+                }
                 else -> {
                     _effect.emit(UserUiEffect.ShowError((result as ApiResult.Error).message))
                 }
@@ -68,6 +88,16 @@ class UserViewModel(
                 is ApiResult.Success -> {
                     getAllUsers()
                     _effect.emit(UserUiEffect.ShowMessage(getString(Res.string.delete_user_successful_alert)))
+                }
+                is ApiResult.NetworkError -> {
+                    _state.update { it.copy(isRefreshing = false) }
+                    _effect.emit(UserUiEffect.ShowError(result.exception.message))
+
+                }
+
+                is ApiResult.Unauthorized, is ApiResult.Forbidden -> {
+                    _state.update { it.copy(isRefreshing = false) }
+                    _effect.emit(UserUiEffect.NavigateToLogin((result as ApiResult.Unauthorized).message))
                 }
                 else -> {
                     _effect.emit(UserUiEffect.ShowError((result as ApiResult.Error).message))
@@ -84,6 +114,16 @@ class UserViewModel(
                     getAllUsers()
                     _effect.emit(UserUiEffect.ShowMessage(getString(Res.string.update_user_successful_alert)))
                 }
+                is ApiResult.NetworkError -> {
+                    _state.update { it.copy(isRefreshing = false) }
+                    _effect.emit(UserUiEffect.ShowError(result.exception.message))
+
+                }
+
+                is ApiResult.Unauthorized, is ApiResult.Forbidden -> {
+                    _state.update { it.copy(isRefreshing = false) }
+                    _effect.emit(UserUiEffect.NavigateToLogin((result as ApiResult.Unauthorized).message))
+                }
                 else -> {
                     _effect.emit(UserUiEffect.ShowError((result as ApiResult.Error).message))
                 }
@@ -99,6 +139,7 @@ data class UserUiState(
 )
 
 sealed interface UserUiEffect {
-    data class ShowMessage(val text: String?) : UserUiEffect
-    data class ShowError(val text: String?) : UserUiEffect
+    data class ShowMessage(val message: String?) : UserUiEffect
+    data class ShowError(val message: String?) : UserUiEffect
+    data class NavigateToLogin(val message: String?): UserUiEffect
 }

@@ -20,7 +20,6 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.domain.model.UserRole
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.OrderStatus
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.OrderUiEffect
 import com.mu54omd.mini_ecommerce.frontend_gradle.presentation.OrderViewModel
-import com.mu54omd.mini_ecommerce.frontend_gradle.ui.UiState
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.common.AlertModal
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.common.EmptyPage
 import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.orders.components.OrdersFilterChips
@@ -32,7 +31,7 @@ fun OrdersScreen(
     isCompact: Boolean = false,
     orderViewModel: OrderViewModel,
     userRole: UserRole,
-    onExit: (UiState<*>) -> Unit
+    onExit: (String?) -> Unit
 ) {
     val state by orderViewModel.state.collectAsState()
     val effect = orderViewModel.effect
@@ -52,14 +51,10 @@ fun OrdersScreen(
 
     LaunchedEffect(Unit) {
         effect.collect { effect ->
-            alertMessage = when (effect) {
-                is OrderUiEffect.ShowMessage -> {
-                    effect.message
-                }
-
-                is OrderUiEffect.ShowError -> {
-                    effect.message
-                }
+            when (effect) {
+                is OrderUiEffect.ShowMessage -> { alertMessage = effect.message }
+                is OrderUiEffect.ShowError -> { alertMessage = effect.message }
+                is OrderUiEffect.NavigateToLogin -> { onExit(effect.message) }
             }
         }
     }

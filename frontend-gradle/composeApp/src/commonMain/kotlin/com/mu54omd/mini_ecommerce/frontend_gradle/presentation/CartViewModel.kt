@@ -44,6 +44,10 @@ class CartViewModel(private val cartUseCases: CartUseCases) : ViewModel() {
                     _state.update { it.copy(isInitialLoading = false) }
                     _effect.emit(CartUiEffect.ShowError(result.exception.message))
                 }
+                is ApiResult.Unauthorized, is ApiResult.Forbidden -> {
+                    _state.update { it.copy(isInitialLoading = false) }
+                    _effect.emit(CartUiEffect.NavigateToLogin((result as ApiResult.Unauthorized).message ?: "Unauthorized or Forbidden action!"))
+                }
                 else -> {
                     _state.update { it.copy(isInitialLoading = false) }
                     _effect.emit(CartUiEffect.ShowError((result as ApiResult.Error).message))
@@ -88,7 +92,10 @@ class CartViewModel(private val cartUseCases: CartUseCases) : ViewModel() {
                     _state.update { it.copy(isCheckingOut = false) }
                     _effect.emit(CartUiEffect.ShowError(result.exception.message))
                 }
-
+                is ApiResult.Unauthorized, is ApiResult.Forbidden -> {
+                    _state.update { it.copy(isInitialLoading = false) }
+                    _effect.emit(CartUiEffect.NavigateToLogin((result as ApiResult.Unauthorized).message ?: "Unauthorized or Forbidden action!"))
+                }
                 else -> {
                     _state.update { it.copy(isCheckingOut = false) }
                     _effect.emit(CartUiEffect.ShowError((result as ApiResult.Error).message))
@@ -111,4 +118,5 @@ data class CartUiState(
 sealed interface CartUiEffect {
     data class ShowError(val message: String?) : CartUiEffect
     data class CheckoutSuccess(val id: Long, val message: String) : CartUiEffect
+    data class NavigateToLogin(val message: String?): CartUiEffect
 }

@@ -114,22 +114,34 @@ class ProductViewModel(
             _state.update { it.copy(isRefreshing = true) }
 
             val result = productUseCases.addProductUseCase(product)
-            if (result is ApiResult.Success) {
-                image?.let {
-                    productUseCases.uploadProductImageUseCase(
-                        result.data.id!!, it.name, it.readBytes()
+            when (result) {
+                is ApiResult.Success -> {
+                    image?.let {
+                        productUseCases.uploadProductImageUseCase(
+                            result.data.id!!, it.name, it.readBytes()
+                        )
+                    }
+                    refreshProductContext(
+                        refreshProducts = true,
+                        refreshCategories = true,
+                        refreshBanner = true
                     )
-                }
-                refreshProductContext(
-                    refreshProducts = true,
-                    refreshCategories = true,
-                    refreshBanner = true
-                )
-                _effect.emit(ProductUiEffect.ShowMessage(getString(Res.string.add_product_successful_alert)))
-                _state.update { it.copy(selectedCategory = product.category) }
+                    _effect.emit(ProductUiEffect.ShowMessage(getString(Res.string.add_product_successful_alert)))
+                    _state.update { it.copy(selectedCategory = product.category) }
 
-            } else if (result is ApiResult.Error) {
-                _effect.emit(ProductUiEffect.ShowError(result.message))
+                }
+
+                is ApiResult.NetworkError -> {
+                    _effect.emit(ProductUiEffect.ShowError(result.exception.message))
+                }
+
+                is ApiResult.Unauthorized, is ApiResult.Forbidden -> {
+                    _effect.emit(ProductUiEffect.NavigateToLogin((result as ApiResult.Unauthorized).message ?: "Unauthorized or Forbidden action!"))
+                }
+
+                else -> {
+                    _effect.emit(ProductUiEffect.ShowError((result as ApiResult.Error).message))
+                }
             }
         }
     }
@@ -137,24 +149,34 @@ class ProductViewModel(
     fun editProduct(product: Product, image: PlatformFile? = null) {
         viewModelScope.launch {
             _state.update { it.copy(isRefreshing = true) }
-
             val result = productUseCases.editProductUseCase(product)
-            if (result is ApiResult.Success) {
-                image?.let {
-                    productUseCases.uploadProductImageUseCase(
-                        product.id!!, it.name, it.readBytes()
+            when (result) {
+                is ApiResult.Success -> {
+                    image?.let {
+                        productUseCases.uploadProductImageUseCase(
+                            product.id!!, it.name, it.readBytes()
+                        )
+                    }
+                    _effect.emit(ProductUiEffect.ShowMessage(getString(Res.string.update_product_successful_alert)))
+                    refreshProductContext(
+                        refreshCategories = true,
+                        refreshProducts = true,
+                        refreshBanner = true
                     )
+                    _state.update { it.copy(selectedCategory = product.category) }
                 }
-                _effect.emit(ProductUiEffect.ShowMessage(getString(Res.string.update_product_successful_alert)))
-                refreshProductContext(
-                    refreshCategories = true,
-                    refreshProducts = true,
-                    refreshBanner = true
-                )
-                _state.update { it.copy(selectedCategory = product.category) }
 
-            } else if (result is ApiResult.Error) {
-                _effect.emit(ProductUiEffect.ShowError(result.message))
+                is ApiResult.NetworkError -> {
+                    _effect.emit(ProductUiEffect.ShowError(result.exception.message))
+                }
+
+                is ApiResult.Unauthorized, is ApiResult.Forbidden -> {
+                    _effect.emit(ProductUiEffect.NavigateToLogin((result as ApiResult.Unauthorized).message ?: "Unauthorized or Forbidden action!"))
+                }
+
+                else -> {
+                    _effect.emit(ProductUiEffect.ShowError((result as ApiResult.Error).message))
+                }
             }
         }
     }
@@ -163,15 +185,24 @@ class ProductViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isRefreshing = true) }
             val result = productUseCases.deactivateProductUseCase(productId)
-            if (result is ApiResult.Success) {
-                _effect.emit(ProductUiEffect.ShowMessage(getString(Res.string.delete_product_successful_alert)))
-                refreshProductContext(
-                    refreshProducts = true,
-                    refreshBanner = true
-                )
-                _state.update { it.copy(selectedCategory = null) }
-            } else if (result is ApiResult.Error) {
-                _effect.emit(ProductUiEffect.ShowError(result.message))
+            when(result) {
+                is ApiResult.Success -> {
+                    _effect.emit(ProductUiEffect.ShowMessage(getString(Res.string.delete_product_successful_alert)))
+                    refreshProductContext(
+                        refreshProducts = true,
+                        refreshBanner = true
+                    )
+                    _state.update { it.copy(selectedCategory = null) }
+                }
+                is ApiResult.NetworkError -> {
+                    _effect.emit(ProductUiEffect.ShowError(result.exception.message))
+                }
+                is ApiResult.Unauthorized, is ApiResult.Forbidden -> {
+                    _effect.emit(ProductUiEffect.NavigateToLogin((result as ApiResult.Unauthorized).message ?: "Unauthorized or Forbidden action!"))
+                }
+                else -> {
+                    _effect.emit(ProductUiEffect.ShowError((result as ApiResult.Error).message))
+                }
             }
         }
     }
@@ -233,12 +264,14 @@ class ProductViewModel(
                             size = pageSize
                         )
                     }
+
                     !s.selectedCategory.isNullOrBlank() ->
                         productUseCases.getProductsByCategoryUseCase(
                             s.selectedCategory,
                             currentPage,
                             pageSize
                         )
+
                     else ->
                         productUseCases.getProductsUseCase(currentPage, pageSize)
                 }
@@ -257,16 +290,18 @@ class ProductViewModel(
                             )
                         }
                     }
+
                     is ApiResult.Error -> {
                         _state.update {
                             it.copy(
                                 isPaginating = false,
                                 isRefreshing = false,
                                 isInitialLoading = false,
-                                )
+                            )
                         }
                         _effect.emit(ProductUiEffect.ShowError(result.message))
                     }
+
                     else -> Unit
                 }
             }
@@ -289,6 +324,7 @@ data class ProductsViewState(
 )
 
 sealed interface ProductUiEffect {
-    data class ShowMessage(val text: String?) : ProductUiEffect
-    data class ShowError(val text: String?) : ProductUiEffect
+    data class ShowMessage(val message: String?) : ProductUiEffect
+    data class ShowError(val message: String?) : ProductUiEffect
+    data class NavigateToLogin(val message: String?): ProductUiEffect
 }

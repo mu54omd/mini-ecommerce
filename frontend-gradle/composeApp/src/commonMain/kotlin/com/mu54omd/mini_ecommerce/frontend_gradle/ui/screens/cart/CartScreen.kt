@@ -25,6 +25,7 @@ import com.mu54omd.mini_ecommerce.frontend_gradle.ui.screens.cart.components.Che
 @Composable
 fun CartScreen(
     cartViewModel: CartViewModel,
+    onExit: (String?) -> Unit,
 ) {
 
     val state by cartViewModel.state.collectAsState()
@@ -37,9 +38,10 @@ fun CartScreen(
 
     LaunchedEffect(Unit) {
         cartViewModel.effect.collect { effect ->
-            alertMessage = when (effect) {
-                is CartUiEffect.ShowError -> effect.message
-                is CartUiEffect.CheckoutSuccess -> effect.message + effect.id
+            when (effect) {
+                is CartUiEffect.ShowError -> alertMessage = effect.message
+                is CartUiEffect.CheckoutSuccess -> alertMessage = effect.message + effect.id
+                is CartUiEffect.NavigateToLogin -> { onExit(effect.message) }
             }
         }
     }

@@ -11,6 +11,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -22,6 +23,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -62,6 +64,8 @@ fun AppNavHost(
     onToggleTheme: () -> Unit,
 ) {
     val navController = rememberNavController()
+    var isNavReady by remember { mutableStateOf(false) }
+
     val authState by authViewModel.state.collectAsState()
     val authEffect = authViewModel.effect
     val cartState = cartViewModel.state.collectAsState().value
@@ -102,13 +106,14 @@ fun AppNavHost(
         }
     }
 
-    LaunchedEffect(Unit){
+    LaunchedEffect(isNavReady){
+        if (!isNavReady) return@LaunchedEffect
         authEffect.collect { effect ->
             when(effect){
                 is AuthUiEffect.NavigateToHome -> {
                     cartViewModel.loadCart()
                     navController.navigate(navigationDestination.first().route) {
-                        popUpTo(navController.graph.id) {
+                        popUpTo(navigationDestination.first().route) {
                             inclusive = true
                         }
                         launchSingleTop = true
@@ -117,7 +122,7 @@ fun AppNavHost(
                 is AuthUiEffect.NavigateToHomeAsGuest -> {
                     authViewModel.clearToken()
                     navController.navigate(navigationDestination.first().route) {
-                        popUpTo(navController.graph.id) {
+                        popUpTo(navigationDestination.first().route) {
                             inclusive = true
                         }
                         launchSingleTop = true
@@ -125,7 +130,7 @@ fun AppNavHost(
                 }
                 is AuthUiEffect.LogOut -> {
                     navController.navigate(Screen.Login.route) {
-                        popUpTo(navController.graph.id) { inclusive = true }
+                        popUpTo(startDestination) { inclusive = true }
                         launchSingleTop = true
                     }
                 }
@@ -133,8 +138,6 @@ fun AppNavHost(
             }
         }
     }
-
-
 
     LaunchedEffect(authState.isStoredTokenValid) {
         if (!authState.isStoredTokenValid) {
@@ -193,7 +196,7 @@ fun AppNavHost(
                     onMainMenuDismiss = { isMainMenuHidden = true },
                     onToggleTheme = onToggleTheme,
                     onLogoutClick = {
-                        authViewModel.logout()
+                        authViewModel.logout(null)
                         navController.navigate(Screen.Login.route) {
                             popUpTo(navController.graph.id) {
                                 inclusive = true
@@ -241,6 +244,7 @@ fun AppNavHost(
                             userViewModel = userViewModel,
                             addUserModalState = addUserModalState,
                             onAddUserStateChange = { state -> addUserModalState = state },
+                            onExit = { error -> authViewModel.logout(error) }
                         )
                     }
                     composable(Screen.Orders.route) {
@@ -248,7 +252,7 @@ fun AppNavHost(
                             isCompact = isCompactScreen,
                             orderViewModel = orderViewModel,
                             userRole = authState.currentUser.role,
-                            onExit = { }
+                            onExit = { error -> authViewModel.logout(error) }
                         )
                     }
                     composable(Screen.Products.route) {
@@ -259,13 +263,23 @@ fun AppNavHost(
                             userRole = authState.currentUser.role,
                             addProductModalState = addProductModalState,
                             onAddProductModalChange = { state -> addProductModalState = state },
-
+                            onExit = { error -> authViewModel.logout(error) }
                         )
                     }
                     composable(Screen.Cart.route) {
                         CartScreen(
                             cartViewModel = cartViewModel,
+                            onExit = { error -> authViewModel.logout(error) }
                         )
+                    }
+                }
+                DisposableEffect(navController) {
+                    val listener = NavController.OnDestinationChangedListener { _, _, _ ->
+                        isNavReady = true
+                    }
+                    navController.addOnDestinationChangedListener(listener)
+                    onDispose {
+                        navController.removeOnDestinationChangedListener(listener)
                     }
                 }
                 NavigationBar(

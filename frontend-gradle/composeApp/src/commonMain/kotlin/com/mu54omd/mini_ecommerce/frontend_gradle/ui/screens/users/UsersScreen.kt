@@ -30,6 +30,7 @@ fun UsersScreen(
     userViewModel: UserViewModel,
     addUserModalState: Boolean,
     onAddUserStateChange: (Boolean) -> Unit,
+    onExit: (String?) -> Unit,
 ) {
 
     val state by userViewModel.state.collectAsState()
@@ -50,14 +51,10 @@ fun UsersScreen(
 
     LaunchedEffect(Unit) {
         effect.collect { uiEffect ->
-            alertMessage = when (uiEffect) {
-                is UserUiEffect.ShowMessage -> {
-                    uiEffect.text
-                }
-
-                is UserUiEffect.ShowError -> {
-                    uiEffect.text
-                }
+            when (uiEffect) {
+                is UserUiEffect.ShowMessage -> { alertMessage = uiEffect.message }
+                is UserUiEffect.ShowError -> { alertMessage = uiEffect.message }
+                is UserUiEffect.NavigateToLogin -> { onExit(uiEffect.message) }
             }
         }
     }

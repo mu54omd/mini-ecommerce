@@ -94,11 +94,15 @@ class AuthViewModel(private val authUseCases: AuthUseCases): ViewModel() {
             }
         }
     }
-    fun logout(){
+    fun logout(message: String?){
         viewModelScope.launch {
             _state.update { AuthUiState() }
             authUseCases.logoutUseCase()
             _effect.emit(AuthUiEffect.LogOut)
+            message?.let {
+                println(it)
+                _effect.emit(AuthUiEffect.ShowError(it))
+            }
         }
     }
 

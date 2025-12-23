@@ -73,6 +73,16 @@ class OrderViewModel(
                 is ApiResult.Success -> {
                     _state.update { it.copy( currentUserOrders = result.data, isRefreshing = false) }
                 }
+                is ApiResult.NetworkError -> {
+                    _state.update { it.copy(isRefreshing = false) }
+                    _effect.emit(OrderUiEffect.ShowError(result.exception.message))
+
+                }
+
+                is ApiResult.Unauthorized, is ApiResult.Forbidden -> {
+                    _state.update { it.copy(isRefreshing = false) }
+                    _effect.emit(OrderUiEffect.NavigateToLogin((result as ApiResult.Unauthorized).message))
+                }
                 else -> {
                     _state.update { it.copy(isRefreshing = false) }
                     _effect.emit(OrderUiEffect.ShowError((result as ApiResult.Error).message))
@@ -102,6 +112,17 @@ class OrderViewModel(
                 is ApiResult.Success -> {
                     _state.update { it.copy( allUsersOrders = result.data, isRefreshing = false) }
                 }
+                is ApiResult.NetworkError -> {
+                    _state.update { it.copy(isRefreshing = false) }
+                    _effect.emit(OrderUiEffect.ShowError(result.exception.message))
+
+                }
+
+                is ApiResult.Unauthorized, is ApiResult.Forbidden -> {
+                    _state.update { it.copy(isRefreshing = false) }
+                    _effect.emit(OrderUiEffect.NavigateToLogin((result as ApiResult.Unauthorized).message))
+                }
+
                 else -> {
                     _state.update { it.copy(isRefreshing = false) }
                     _effect.emit(OrderUiEffect.ShowError((result as ApiResult.Error).message))
@@ -167,6 +188,7 @@ data class OrderUiState(
 sealed interface OrderUiEffect {
     data class ShowError(val message: String?): OrderUiEffect
     data class ShowMessage(val message: String?): OrderUiEffect
+    data class NavigateToLogin(val message: String?): OrderUiEffect
 }
 
 data class UpdateOrderStatusResult(

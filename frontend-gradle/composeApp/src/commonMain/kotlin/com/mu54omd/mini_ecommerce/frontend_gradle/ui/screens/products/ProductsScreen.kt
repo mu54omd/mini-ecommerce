@@ -46,6 +46,7 @@ fun ProductsScreen(
     userRole: UserRole,
     addProductModalState: Boolean,
     onAddProductModalChange: (Boolean) -> Unit,
+    onExit: (String?) -> Unit
 ) {
     val state by productViewModel.state.collectAsState()
     val effect = productViewModel.effect
@@ -106,14 +107,10 @@ fun ProductsScreen(
     // ======================== Alert ========================
     LaunchedEffect(Unit) {
         effect.collect { uiEffect ->
-            alertMessage = when (uiEffect) {
-                is ProductUiEffect.ShowMessage -> {
-                    uiEffect.text
-                }
-
-                is ProductUiEffect.ShowError -> {
-                    uiEffect.text
-                }
+            when (uiEffect) {
+                is ProductUiEffect.ShowMessage -> { alertMessage = uiEffect.message }
+                is ProductUiEffect.ShowError -> { alertMessage = uiEffect.message }
+                is ProductUiEffect.NavigateToLogin -> { onExit(uiEffect.message) }
             }
         }
     }
